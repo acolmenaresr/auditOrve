@@ -4,11 +4,11 @@ module Audit
     DEFAULT_PAGE_SIZE = 10
     MAX_PAGE_SIZE = 100
 
-    DEFAULT_SORT = "dateZ"
+    DEFAULT_SORT = "datez"
     DEFAULT_DIRECTION = "desc"
 
     SORTABLE_COLUMNS = {
-      "dateZ" => '"dateZ"',
+      "datez" => '"datez"',
       "usuario" => '"usuario"',
       "tipoUsuario" => '"tipoUsuario"',
       "accion" => '"accion"',
@@ -88,7 +88,7 @@ module Audit
 
     def base_scope
       AuditLog.where(
-        '"dateZ" >= ? AND "dateZ" < ?',
+        '"datez" >= ? AND "datez" < ?',
         from.beginning_of_day,
         to.beginning_of_day
       )
