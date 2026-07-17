@@ -23,7 +23,103 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= yield %>
-  </body>
+<body>
+  <% if authenticated? %>
+    <header class="app-header">
+      <div class="app-header__brand">
+        <strong>AuditORVE</strong>
+      </div>
+
+      <nav class="app-header__navigation">
+        <%= link_to "Dashboard", dashboard_path %>
+        <%= link_to "Movimientos", audit_logs_path %>
+      </nav>
+
+      <div class="app-header__session">
+        <div class="app-header__user">
+          <strong>
+            <%= current_user.first_name.presence || current_user.usuario %>
+          </strong>
+
+          <small>
+            <%= current_user.usuario %>
+          </small>
+        </div>
+
+        <%= button_to(
+          "Cerrar sesión",
+          logout_path,
+          method: :delete,
+          class: "button button--secondary"
+        ) %>
+      </div>
+    </header>
+  <% end %>
+
+<% if notice.present? %>
+  <div class="flash flash--notice" data-auto-dismiss-flash>
+    <span><%= notice %></span>
+
+    <button
+      type="button"
+      class="flash__close"
+      aria-label="Cerrar mensaje"
+      data-flash-close
+    >
+      ×
+    </button>
+  </div>
+<% end %>
+
+<% if alert.present? %>
+  <div class="flash flash--alert" data-auto-dismiss-flash>
+    <span><%= alert %></span>
+
+    <button
+      type="button"
+      class="flash__close"
+      aria-label="Cerrar mensaje"
+      data-flash-close
+    >
+      ×
+    </button>
+  </div>
+<% end %>
+
+  <%= yield %>
+<script>
+  (() => {
+    const initializeFlashMessages = () => {
+      document
+        .querySelectorAll("[data-auto-dismiss-flash]")
+        .forEach((flash) => {
+          if (flash.dataset.initialized === "true") return
+
+          flash.dataset.initialized = "true"
+
+          const closeFlash = () => {
+            flash.classList.add("is-hiding")
+
+            window.setTimeout(() => {
+              flash.remove()
+            }, 250)
+          }
+
+          const closeButton = flash.querySelector("[data-flash-close]")
+
+          if (closeButton) {
+            closeButton.addEventListener("click", closeFlash)
+          }
+
+          window.setTimeout(closeFlash, 4000)
+        })
+    }
+
+    document.addEventListener("turbo:load", initializeFlashMessages)
+    document.addEventListener("DOMContentLoaded", initializeFlashMessages)
+
+    initializeFlashMessages()
+  })()
+</script>
+</body>
 </html>

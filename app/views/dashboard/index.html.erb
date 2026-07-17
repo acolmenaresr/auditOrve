@@ -1,0 +1,166 @@
+<div class="dashboard">
+ <!-- <header class="dashboard__header">
+    <div>
+      <p class="dashboard__eyebrow">AuditORVE</p>
+      <h1>Dashboard principal</h1>
+      <p class="dashboard__subtitle">
+        Resumen de actividad de Microsoft 365
+      </p>
+    </div>
+
+    <div class="dashboard__user">
+      <span>Entorno local</span>
+      <strong><%= current_user.first_name %></strong>
+    </div>
+  </header> -->
+
+  <section class="filter-panel">
+    <%= form_with url: dashboard_path,
+                  method: :get,
+                  local: true,
+                  class: "filter-form" do |form| %>
+
+      <div class="filter-field">
+        <%= form.label :period, "Periodo" %>
+
+        <%= form.select :period,
+          options_for_select(
+            [
+              ["Hoy", "today"],
+              ["Ayer", "yesterday"],
+              ["Últimos 7 días", "last_7_days"],
+              ["Últimos 30 días", "last_30_days"],
+              ["Semana actual", "this_week"],
+              ["Semana anterior", "last_week"],
+              ["Mes actual", "this_month"],
+              ["Mes anterior", "last_month"],
+              ["Año actual", "this_year"],
+              ["Rango personalizado", "custom"]
+            ],
+            @date_range.filter
+          )
+        %>
+      </div>
+
+      <div class="filter-field">
+        <%= form.label :top, "Resultados" %>
+
+        <%= form.select :top,
+          options_for_select(
+            [
+              ["Top 10", 10],
+              ["Top 15", 15],
+              ["Top 20", 20]
+            ],
+            @top_limit
+          )
+        %>
+      </div>
+
+      <div class="filter-field">
+        <%= form.label :from, "Desde" %>
+        <%= form.date_field :from, value: params[:from] %>
+      </div>
+
+      <div class="filter-field">
+        <%= form.label :to, "Hasta" %>
+        <%= form.date_field :to, value: params[:to] %>
+      </div>
+
+      <div class="filter-actions">
+        <%= form.submit "Aplicar filtros",
+                        class: "button button--primary" %>
+
+        <%= link_to "Limpiar",
+                    dashboard_path,
+                    class: "button button--secondary" %>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="dashboard__range">
+    Mostrando información del
+    <strong><%= l(@date_range.from, format: :long) %></strong>
+    al
+    <strong><%= l(@date_range.to - 1.day, format: :long) %></strong>
+  </section>
+
+  <section class="metric-grid">
+    <article class="metric-card">
+      <span class="metric-card__label">Usuarios</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(@metrics[:total_users]) %>
+      </strong>
+      <small aria-hidden="true">&nbsp;</small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">Movimientos</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(@metrics[:total_events]) %>
+      </strong>
+      <small aria-hidden="true">&nbsp;</small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">Movimientos anónimos</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(@metrics[:anonymous_events]) %>
+      </strong>
+
+      <small>
+        <%= percentage(
+          @metrics[:anonymous_events],
+          @metrics[:total_events]
+        ) %>
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">Archivos</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(@metrics[:total_files]) %>
+      </strong>
+      <small aria-hidden="true">&nbsp;</small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">Archivos anónimos</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(@metrics[:anonymous_files]) %>
+      </strong>
+
+      <small>
+        <%= percentage(
+          @metrics[:anonymous_files],
+          @metrics[:total_files]
+        ) %>
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">Aplicaciones</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(@metrics[:total_applications]) %>
+      </strong>
+      <small aria-hidden="true">&nbsp;</small>
+    </article>
+  </section>
+
+  <section class="ranking-grid">
+    <%= render "ranking",
+      title: "Top usuarios",
+      column_title: "Usuario",
+      rows: @top_users %>
+
+    <%= render "ranking",
+      title: "Top acciones",
+      column_title: "Acción",
+      rows: @top_actions %>
+
+    <%= render "ranking",
+      title: "Top aplicaciones",
+      column_title: "Aplicación",
+      rows: @top_applications %>
+  </section>
+</div>

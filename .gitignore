@@ -33,3 +33,7 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+
+# Respaldos locales de bases de datos
+*.dump
+/config/database.yml.backup

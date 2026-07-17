@@ -52,7 +52,19 @@ COPY . .
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+# Precompile assets with non-secret placeholder database settings.
+# Rails only needs to parse database.yml during this build step.
+RUN DB_HOST=127.0.0.1 \
+    DB_PORT=5432 \
+    DB_USERNAME=postgres \
+    DB_PASSWORD=build_only \
+    PRIMARY_DATABASE_NAME=audit_orve_production \
+    CACHE_DATABASE_NAME=audit_orve_production_cache \
+    QUEUE_DATABASE_NAME=audit_orve_production_queue \
+    CABLE_DATABASE_NAME=audit_orve_production_cable \
+    AUDIT_DATABASE_NAME=auditpr-2026 \
+    SECRET_KEY_BASE_DUMMY=1 \
+    ./bin/rails assets:precompile
 
 
 
