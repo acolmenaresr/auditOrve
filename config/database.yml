@@ -18,12 +18,19 @@ development:
 test:
   primary:
     <<: *default
-    database: audit_orve_test
+    host: <%= ENV["DB_HOST"] %>
+    port: <%= ENV.fetch("DB_PORT", 5432) %>
+    username: <%= ENV.fetch("DB_USERNAME", "dev_master") %>
+    password: <%= ENV["DB_PASSWORD"] %>
+    database: <%= ENV.fetch("TEST_DATABASE_NAME", "audit_orve_test") %>
 
   audit:
     <<: *default
+    host: <%= ENV["DB_HOST"] %>
+    port: <%= ENV.fetch("DB_PORT", 5432) %>
+    username: <%= ENV.fetch("DB_USERNAME", "dev_master") %>
+    password: <%= ENV["DB_PASSWORD"] %>
     database: <%= ENV.fetch("AUDIT_TEST_DATABASE", "auditdb_local") %>
-    username: dev_master
     database_tasks: false
     schema_dump: false
 
