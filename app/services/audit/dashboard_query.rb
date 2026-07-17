@@ -1,7 +1,7 @@
 module Audit
   class DashboardQuery
     DEFAULT_LIMIT = 10
-    ALLOWED_LIMITS = [10, 15, 20].freeze
+    ALLOWED_LIMITS = [ 10, 15, 20 ].freeze
 
     attr_reader :from, :to, :limit
 

@@ -1,5 +1,5 @@
 module DashboardHelper
-    def percentage(value,total)
+    def percentage(value, total)
         return "0.0%" if total.to_i.zero?
 
         result = value.to_f / total.to_f*100

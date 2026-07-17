@@ -53,14 +53,14 @@ module Audit
 
     def records
       @records ||= filtered_scope
-        .order(order_expression)
+        .order(*order_expression)
         .limit(page_size)
         .offset(offset)
     end
 
     def users
       @users ||= users_scope
-        .where.not(usuario: [nil, ""])
+        .where.not(usuario: [ nil, "" ])
         .distinct
         .order(:usuario)
         .pluck(:usuario)
@@ -68,7 +68,7 @@ module Audit
 
     def actions
       @actions ||= actions_scope
-        .where.not(accion: [nil, ""])
+        .where.not(accion: [ nil, "" ])
         .distinct
         .order(:accion)
         .pluck(:accion)
@@ -113,13 +113,23 @@ module Audit
       scope
     end
 
-    def order_expression
-      column = SORTABLE_COLUMNS.fetch(sort)
+def order_expression
+  table = AuditLog.arel_table
+  column_name = SORTABLE_COLUMNS.fetch(sort).to_sym
+  column = table[column_name]
 
-      Arel.sql(
-        "#{column} #{direction.upcase} NULLS LAST, id DESC"
-      )
+  primary_order =
+    if direction.to_s.downcase == "asc"
+      column.asc.nulls_last
+    else
+      column.desc.nulls_last
     end
+
+  [
+    primary_order,
+    table[:id].desc
+  ]
+end
 
     def offset
       (page - 1) * page_size
@@ -138,7 +148,7 @@ module Audit
       parsed = value.to_i
       parsed = DEFAULT_PAGE_SIZE unless parsed.positive?
 
-      [parsed, MAX_PAGE_SIZE].min
+      [ parsed, MAX_PAGE_SIZE ].min
     end
 
     def normalize_sort(value)

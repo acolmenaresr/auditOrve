@@ -3,9 +3,9 @@ class AuditUser < AuditRecord
   self.primary_key = "id"
 
   def full_name
-    [firstname, lastname].compact_blank.join(" ")
+    [ firstname, lastname ].compact_blank.join(" ")
   end
   def first_name
-    [firstname].compact_blank.join("")
+    [ firstname ].compact_blank.join("")
   end
 end

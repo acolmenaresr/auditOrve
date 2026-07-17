@@ -46,32 +46,32 @@ module Audit
 
       case filter
       when "today"
-        [today, today + 1.day]
+        [ today, today + 1.day ]
       when "yesterday"
-        [today - 1.day, today]
+        [ today - 1.day, today ]
       when "last_7_days"
-        [today - 6.days, today + 1.day]
+        [ today - 6.days, today + 1.day ]
       when "last_30_days"
-        [today - 29.days, today + 1.day]
+        [ today - 29.days, today + 1.day ]
       when "this_week"
         start_date = today.beginning_of_week(:monday)
-        [start_date, start_date + 1.week]
+        [ start_date, start_date + 1.week ]
       when "last_week"
         end_date = today.beginning_of_week(:monday)
-        [end_date - 1.week, end_date]
+        [ end_date - 1.week, end_date ]
       when "this_month"
         start_date = today.beginning_of_month
-        [start_date, start_date.next_month]
+        [ start_date, start_date.next_month ]
       when "last_month"
         end_date = today.beginning_of_month
-        [end_date.prev_month, end_date]
+        [ end_date.prev_month, end_date ]
       when "this_year"
         start_date = today.beginning_of_year
-        [start_date, start_date.next_year]
+        [ start_date, start_date.next_year ]
       when "custom"
         custom_range(today)
       else
-        [today - 6.days, today + 1.day]
+        [ today - 6.days, today + 1.day ]
       end
     end
 
@@ -81,7 +81,7 @@ module Audit
 
       end_date = start_date if end_date < start_date
 
-      [start_date, end_date + 1.day]
+      [ start_date, end_date + 1.day ]
     end
   end
 end
