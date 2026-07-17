@@ -30,10 +30,10 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    host: <%= ENV.fetch("DB_HOST") %>
+    host: <%= ENV["DB_HOST"] %>
     port: <%= ENV.fetch("DB_PORT", 5432) %>
-    username: <%= ENV.fetch("DB_USERNAME") %>
-    password: <%= ENV.fetch("DB_PASSWORD") %>
+    username: <%= ENV["DB_USERNAME"] %>
+    password: <%= ENV["DB_PASSWORD"] %>
     database: <%= ENV.fetch("PRIMARY_DATABASE_NAME", "audit_orve_production") %>
 
   cache:
@@ -53,10 +53,10 @@ production:
 
   audit:
     <<: *default
-    host: <%= ENV.fetch("DB_HOST") %>
+    host: <%= ENV["DB_HOST"] %>
     port: <%= ENV.fetch("DB_PORT", 5432) %>
-    username: <%= ENV.fetch("DB_USERNAME") %>
-    password: <%= ENV.fetch("DB_PASSWORD") %>
+    username: <%= ENV["DB_USERNAME"] %>
+    password: <%= ENV["DB_PASSWORD"] %>
     database: <%= ENV.fetch("AUDIT_DATABASE_NAME", "auditpr-2026") %>
     database_tasks: false
     schema_dump: false
