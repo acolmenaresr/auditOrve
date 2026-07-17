@@ -1,0 +1,468 @@
+<section class="audit-page">
+ <!-- <header class="audit-page__header">
+    <div>
+      <p class="audit-page__eyebrow">AuditORVE</p>
+
+      <h1>Movimientos de usuarios</h1>
+
+      <p class="audit-page__description">
+        Consulta los eventos registrados en OneDrive y SharePoint.
+      </p>
+    </div>
+  </header> -->
+
+  <section class="audit-filters">
+    <%= form_with(
+      url: audit_logs_path,
+      method: :get,
+      local: true,
+      class: "audit-filters__form"
+    ) do |form| %>
+
+      <div class="audit-filter-field">
+        <%= form.label :date_filter, "Periodo" %>
+
+        <%= form.select(
+          :date_filter,
+          options_for_select(
+            [
+              ["Hoy", "today"],
+              ["Ayer", "yesterday"],
+              ["Últimos 7 días", "last_7_days"],
+              ["Últimos 30 días", "last_30_days"],
+              ["Esta semana", "this_week"],
+              ["Semana pasada", "last_week"],
+              ["Este mes", "this_month"],
+              ["Mes pasado", "last_month"],
+              ["Este año", "this_year"],
+              ["Personalizado", "custom"]
+            ],
+            @date_range.filter
+          ),
+          {},
+          {
+            id: "audit-date-filter"
+          }
+        ) %>
+      </div>
+
+      <div
+        class="
+          audit-filter-field
+          audit-custom-date
+          <%= "is-hidden" unless @date_range.filter == "custom" %>
+        "
+        data-audit-custom-date
+      >
+        <%= form.label :from, "Desde" %>
+
+        <%= form.date_field(
+          :from,
+          value: params[:from],
+          id: "audit-date-from"
+        ) %>
+      </div>
+
+      <div
+        class="
+          audit-filter-field
+          audit-custom-date
+          <%= "is-hidden" unless @date_range.filter == "custom" %>
+        "
+        data-audit-custom-date
+      >
+        <%= form.label :to, "Hasta" %>
+
+        <%= form.date_field(
+          :to,
+          value: params[:to],
+          id: "audit-date-to"
+        ) %>
+      </div>
+
+      <div class="audit-filter-field">
+        <%= form.label :user, "Usuario" %>
+
+        <%= form.select(
+          :user,
+          options_for_select(
+            [["Todos los usuarios", ""]] +
+              @users.map { |user| [user, user] },
+            params[:user]
+          )
+        ) %>
+      </div>
+
+      <div class="audit-filter-field">
+        <%= form.label :audit_action, "Acción" %>
+
+        <%= form.select(
+          :audit_action,
+          options_for_select(
+            [["Todas las acciones", ""]] +
+              @actions.map do |audit_action|
+                [audit_action, audit_action]
+              end,
+            params[:audit_action]
+          )
+        ) %>
+      </div>
+
+      <div class="audit-filter-field audit-filter-field--small">
+        <%= form.label :per_page, "Registros" %>
+
+        <%= form.select(
+          :per_page,
+          options_for_select(
+            [
+              ["10", 10],
+              ["25", 25],
+              ["50", 50],
+              ["100", 100]
+            ],
+            @per_page
+          )
+        ) %>
+      </div>
+
+      <div class="audit-filters__actions">
+        <%= form.submit(
+          "Buscar",
+          class: "button button--primary"
+        ) %>
+
+        <%= link_to(
+          "Limpiar",
+          audit_logs_path,
+          class: "button button--secondary"
+        ) %>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="audit-summary">
+    <div>
+      <strong>
+        <%= number_with_delimiter(@total_count) %>
+      </strong>
+
+      <span>movimientos encontrados</span>
+    </div>
+
+    <p>
+      Mostrando información del
+
+      <strong>
+        <%= l(@date_range.from, format: :long) %>
+      </strong>
+
+      al
+
+      <strong>
+        <%= l(@date_range.to - 1.day, format: :long) %>
+      </strong>
+    </p>
+  </section>
+
+  <section class="audit-table-card">
+    <div class="audit-table-wrapper">
+      <table class="audit-table">
+        <thead>
+  <tr>
+    <th>
+      <%= sortable_audit_header("Fecha", "dateZ") %>
+    </th>
+
+    <th>
+      <%= sortable_audit_header("Usuario", "usuario") %>
+    </th>
+
+    <th>
+      <%= sortable_audit_header(
+        "Tipo de usuario",
+        "tipoUsuario"
+      ) %>
+    </th>
+
+    <th>
+      <%= sortable_audit_header("Acción", "accion") %>
+    </th>
+
+    <th>
+      <%= sortable_audit_header(
+        "Operación 365",
+        "operacion365"
+      ) %>
+    </th>
+
+    <th>
+      <%= sortable_audit_header(
+        "Aplicación",
+        "aplicacion"
+      ) %>
+    </th>
+
+    <th>
+      <%= sortable_audit_header(
+        "Tipo de elemento",
+        "tipoItem"
+      ) %>
+    </th>
+
+    <th>
+      <%= sortable_audit_header("Archivo", "archivo") %>
+    </th>
+
+    <th>
+      <%= sortable_audit_header("Ruta", "ruta") %>
+    </th>
+
+    <th>
+      <%= sortable_audit_header("Sitio", "sitio") %>
+    </th>
+  </tr>
+</thead>
+
+        <tbody>
+          <% if @records.any? %>
+            <% @records.each do |record| %>
+              <tr>
+                <td class="audit-table__date">
+                  <% if record.dateZ.present? %>
+                    <%= record.dateZ
+                      .in_time_zone("America/Mexico_City")
+                      .strftime("%d/%m/%Y %H:%M") %>
+                  <% elsif record.fechaEv.present? %>
+                    <%= record.fechaEv.strftime("%d/%m/%Y") %>
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
+
+                <td>
+                  <div class="audit-user-cell">
+                    <span class="audit-user-cell__avatar">
+                      <%= record["usuario"]
+                        .to_s
+                        .first
+                        &.upcase || "?" %>
+                    </span>
+
+                    <span title="<%= record["usuario"] %>">
+                      <%= record["usuario"].presence || "Sin usuario" %>
+                    </span>
+                  </div>
+                </td>
+
+                <td>
+                  <% user_type =
+                    record["tipoUsuario"].presence ||
+                    "Sin clasificar" %>
+
+                  <span
+                    class="
+                      audit-badge
+                      audit-badge--<%= user_type
+                        .to_s
+                        .parameterize %>
+                    "
+                  >
+                    <%= user_type %>
+                  </span>
+                </td>
+
+                <td>
+                  <strong>
+                    <%= record["accion"].presence || "—" %>
+                  </strong>
+                </td>
+
+                <td>
+                  <%= record["operacion365"].presence || "—" %>
+                </td>
+
+                <td>
+                  <%= record["aplicacion"].presence || "—" %>
+                </td>
+
+                <td>
+                  <%= record["tipoItem"].presence || "—" %>
+                </td>
+
+                <td class="audit-table__file">
+                  <span title="<%= record["archivo"] %>">
+                    <%= record["archivo"].presence || "—" %>
+                  </span>
+                </td>
+
+                <td class="audit-table__long-text">
+                  <span title="<%= record["ruta"] %>">
+                    <%= record["ruta"].presence || "—" %>
+                  </span>
+                </td>
+
+                <td class="audit-table__long-text">
+                  <span title="<%= record["sitio"] %>">
+                    <%= record["sitio"].presence || "—" %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td
+                colspan="10"
+                class="audit-table__empty"
+              >
+                <div>
+                  <strong>
+                    No se encontraron movimientos
+                  </strong>
+
+                  <span>
+                    Modifica los filtros para ampliar la búsqueda.
+                  </span>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if @total_pages > 1 %>
+      <footer class="audit-pagination">
+        <div class="audit-pagination__summary">
+          Página
+
+          <strong>
+            <%= @page %>
+          </strong>
+
+          de
+
+          <strong>
+            <%= @total_pages %>
+          </strong>
+        </div>
+
+        <nav
+          class="audit-pagination__controls"
+          aria-label="Paginación de movimientos"
+        >
+          <% preserved_params =
+            request.query_parameters.except("page") %>
+
+          <% if @page > 1 %>
+            <%= link_to(
+              "← Anterior",
+              audit_logs_path(
+                preserved_params.merge(
+                  page: @page - 1
+                )
+              ),
+              class: "audit-pagination__button"
+            ) %>
+          <% else %>
+            <span
+              class="
+                audit-pagination__button
+                is-disabled
+              "
+            >
+              ← Anterior
+            </span>
+          <% end %>
+
+          <span class="audit-pagination__current">
+            <%= @page %>
+          </span>
+
+          <% if @page < @total_pages %>
+            <%= link_to(
+              "Siguiente →",
+              audit_logs_path(
+                preserved_params.merge(
+                  page: @page + 1
+                )
+              ),
+              class: "audit-pagination__button"
+            ) %>
+          <% else %>
+            <span
+              class="
+                audit-pagination__button
+                is-disabled
+              "
+            >
+              Siguiente →
+            </span>
+          <% end %>
+        </nav>
+      </footer>
+    <% end %>
+  </section>
+</section>
+
+<script>
+  (() => {
+    const initializeAuditDateFilters = () => {
+      const periodSelect = document.getElementById("audit-date-filter")
+      const customDateFields = document.querySelectorAll(
+        "[data-audit-custom-date]"
+      )
+
+      if (!periodSelect || customDateFields.length === 0) {
+        return
+      }
+
+      const toggleCustomDates = () => {
+        const isCustom = periodSelect.value === "custom"
+
+        customDateFields.forEach((field) => {
+          field.classList.toggle("is-hidden", !isCustom)
+
+          const input = field.querySelector("input")
+
+          if (!input) {
+            return
+          }
+
+          input.disabled = !isCustom
+
+          if (!isCustom) {
+            input.value = ""
+          }
+        })
+      }
+
+      if (periodSelect.auditToggleHandler) {
+        periodSelect.removeEventListener(
+          "change",
+          periodSelect.auditToggleHandler
+        )
+      }
+
+      periodSelect.auditToggleHandler = toggleCustomDates
+
+      periodSelect.addEventListener(
+        "change",
+        periodSelect.auditToggleHandler
+      )
+
+      toggleCustomDates()
+    }
+
+    document.addEventListener(
+      "turbo:load",
+      initializeAuditDateFilters
+    )
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeAuditDateFilters
+    )
+
+    initializeAuditDateFilters()
+  })()
+</script>

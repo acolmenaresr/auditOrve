@@ -1,0 +1,38 @@
+<article class="ranking-card">
+  <header class="ranking-card__header">
+    <h2><%= title %></h2>
+  </header>
+
+  <div class="ranking-card__table-wrapper">
+    <table class="ranking-table">
+      <thead>
+        <tr>
+          <th><%= column_title %></th>
+          <th>Eventos</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% rows.each do |row| %>
+          <tr>
+            <td title="<%= row[:label] %>">
+              <%= row[:label] %>
+            </td>
+
+            <td>
+              <%= number_with_delimiter(row[:events]) %>
+            </td>
+          </tr>
+        <% end %>
+
+        <% if rows.empty? %>
+          <tr>
+            <td colspan="2" class="ranking-table__empty">
+              No se encontraron datos para el periodo.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</article>
