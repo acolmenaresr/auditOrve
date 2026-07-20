@@ -170,7 +170,7 @@
         <thead>
   <tr>
     <th>
-      <%= sortable_audit_header("Fecha", "datez") %>
+      <%= sortable_audit_header("Fecha", "dateZ") %>
     </th>
 
     <th>
@@ -228,8 +228,8 @@
             <% @records.each do |record| %>
               <tr>
                 <td class="audit-table__date">
-                  <% if record.datez.present? %>
-                    <%= record.datez
+                  <% if record.dateZ.present? %>
+                    <%= record.dateZ
                       .in_time_zone("America/Mexico_City")
                       .strftime("%d/%m/%Y %H:%M") %>
                   <% elsif record.fechaEv.present? %>
