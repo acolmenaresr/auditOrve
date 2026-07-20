@@ -4,20 +4,20 @@ module Audit
     DEFAULT_PAGE_SIZE = 10
     MAX_PAGE_SIZE = 100
 
-    DEFAULT_SORT = "datez"
+    DEFAULT_SORT = "dateZ"
     DEFAULT_DIRECTION = "desc"
 
     SORTABLE_COLUMNS = {
-      "datez" => '"datez"',
-      "usuario" => '"usuario"',
-      "tipoUsuario" => '"tipoUsuario"',
-      "accion" => '"accion"',
-      "operacion365" => '"operacion365"',
-      "aplicacion" => '"aplicacion"',
-      "tipoItem" => '"tipoItem"',
-      "archivo" => '"archivo"',
-      "ruta" => '"ruta"',
-      "sitio" => '"sitio"'
+      "dateZ" => "dateZ",
+      "usuario" => "usuario",
+      "tipoUsuario" => "tipoUsuario",
+      "accion" => "accion",
+      "operacion365" => "operacion365",
+      "aplicacion" => "aplicacion",
+      "tipoItem" => "tipoItem",
+      "archivo" => "archivo",
+      "ruta" => "ruta",
+      "sitio" => "sitio"
     }.freeze
 
     DIRECTIONS = %w[asc desc].freeze
@@ -60,7 +60,7 @@ module Audit
 
     def users
       @users ||= users_scope
-        .where.not(usuario: [ nil, "" ])
+        .where.not(usuario: [nil, ""])
         .distinct
         .order(:usuario)
         .pluck(:usuario)
@@ -68,7 +68,7 @@ module Audit
 
     def actions
       @actions ||= actions_scope
-        .where.not(accion: [ nil, "" ])
+        .where.not(accion: [nil, ""])
         .distinct
         .order(:accion)
         .pluck(:accion)
@@ -87,10 +87,12 @@ module Audit
     private
 
     def base_scope
+      date_column = AuditLog.arel_table["dateZ"]
+
       AuditLog.where(
-        '"datez" >= ? AND "datez" < ?',
-        from.beginning_of_day,
-        to.beginning_of_day
+        date_column
+          .gteq(from.beginning_of_day)
+          .and(date_column.lt(to.beginning_of_day))
       )
     end
 
@@ -113,23 +115,23 @@ module Audit
       scope
     end
 
-def order_expression
-  table = AuditLog.arel_table
-  column_name = SORTABLE_COLUMNS.fetch(sort).to_sym
-  column = table[column_name]
+    def order_expression
+      table = AuditLog.arel_table
+      column_name = SORTABLE_COLUMNS.fetch(sort)
+      column = table[column_name]
 
-  primary_order =
-    if direction.to_s.downcase == "asc"
-      column.asc.nulls_last
-    else
-      column.desc.nulls_last
+      primary_order =
+        if direction == "asc"
+          column.asc.nulls_last
+        else
+          column.desc.nulls_last
+        end
+
+      [
+        primary_order,
+        table[:id].desc
+      ]
     end
-
-  [
-    primary_order,
-    table[:id].desc
-  ]
-end
 
     def offset
       (page - 1) * page_size
@@ -148,19 +150,19 @@ end
       parsed = value.to_i
       parsed = DEFAULT_PAGE_SIZE unless parsed.positive?
 
-      [ parsed, MAX_PAGE_SIZE ].min
+      [parsed, MAX_PAGE_SIZE].min
     end
 
     def normalize_sort(value)
-      value = value.to_s
+      normalized_value = value.to_s
 
-      SORTABLE_COLUMNS.key?(value) ? value : DEFAULT_SORT
+      SORTABLE_COLUMNS.key?(normalized_value) ? normalized_value : DEFAULT_SORT
     end
 
     def normalize_direction(value)
-      value = value.to_s.downcase
+      normalized_value = value.to_s.downcase
 
-      DIRECTIONS.include?(value) ? value : DEFAULT_DIRECTION
+      DIRECTIONS.include?(normalized_value) ? normalized_value : DEFAULT_DIRECTION
     end
   end
 end
