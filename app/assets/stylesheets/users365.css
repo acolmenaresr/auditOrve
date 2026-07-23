@@ -1,0 +1,691 @@
+/* =========================================================
+   FILTROS DEL CATÁLOGO DE USUARIOS 365
+   ========================================================= */
+
+.users365-filters {
+  width: 100%;
+  padding: 22px;
+  overflow: visible;
+  border: 1px solid #dce3ee;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgb(15 23 42 / 4%);
+}
+
+/* =========================================================
+   DISTRIBUCIÓN PRINCIPAL
+   ========================================================= */
+
+.users365-filters__form {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: nowrap;
+}
+
+.users365-filter-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Usuario */
+
+.users365-filter-field--user {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
+/* Departamento */
+
+.users365-filter-field--department {
+  flex: 1.2 1 260px;
+  min-width: 220px;
+}
+
+/* Puesto de trabajo */
+
+.users365-filter-field--job {
+  flex: 1.2 1 260px;
+  min-width: 220px;
+}
+
+/* Jefe directo */
+
+.users365-filter-field--manager {
+  flex: 1.35 1 300px;
+  min-width: 250px;
+}
+
+/* Licencias */
+
+.users365-filter-field--licenses {
+  width: 145px;
+  min-width: 145px;
+  flex: 0 1 145px;
+}
+
+/* Estado */
+
+.users365-filter-field--status {
+  width: 175px;
+  min-width: 175px;
+  flex: 0 1 175px;
+}
+
+/* Registros */
+
+.users365-filter-field--records {
+  width: 96px;
+  min-width: 96px;
+  flex: 0 0 96px;
+}
+
+/* =========================================================
+   ETIQUETAS
+   ========================================================= */
+
+.users365-filter-field label {
+  color: #53627a;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* =========================================================
+   INPUTS Y SELECT NATIVO
+   ========================================================= */
+
+.users365-filter-control {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+
+  border: 1px solid #d8e0ec;
+  border-radius: 12px;
+
+  background: #ffffff;
+  color: #172033;
+
+  font: inherit;
+  font-size: 1rem;
+
+  outline: none;
+
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.users365-filter-control:focus {
+  border-color: #2454e6;
+  box-shadow: none;
+}
+
+.users365-filter-control::placeholder {
+  color: #8a96a8;
+}
+
+/*
+ * Selectores nativos:
+ * Licencias, Estado y Registros.
+ */
+
+.users365-filter-field--licenses .users365-filter-control,
+.users365-filter-field--status .users365-filter-control,
+.users365-filter-field--records .users365-filter-control {
+  padding-right: 30px;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* =========================================================
+   ACCIONES
+   ========================================================= */
+
+.users365-filters__actions {
+  min-width: max-content;
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.users365-filter-button {
+  min-width: 88px;
+  min-height: 52px;
+  padding: 0 17px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   TOM SELECT: CONTENEDOR
+   ========================================================= */
+
+.users365-filter-field .ts-wrapper,
+.users365-filter-field .ts-wrapper.single {
+  width: 100%;
+  min-width: 0;
+
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+
+/*
+ * Tom Select oculta el select original.
+ * Evita que el control original genere espacio o bordes.
+ */
+
+.users365-filter-field
+  select.js-searchable-select.tomselected {
+  position: absolute !important;
+
+  width: 1px !important;
+  height: 1px !important;
+
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* =========================================================
+   TOM SELECT: CONTROL PRINCIPAL
+   ========================================================= */
+
+.users365-filter-field .ts-control {
+  width: 100%;
+  min-height: 52px;
+  padding: 13px 38px 13px 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  border: 1px solid #d8e0ec !important;
+  border-radius: 12px;
+  outline: 0 !important;
+
+  background: #ffffff;
+  color: #172033;
+
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.35;
+
+  box-shadow: none !important;
+  cursor: text;
+
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.users365-filter-field .ts-wrapper.focus .ts-control {
+  border-color: #2454e6 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.users365-filter-field .ts-wrapper.disabled .ts-control {
+  background: #f5f7fb;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* =========================================================
+   VALOR SELECCIONADO
+   ========================================================= */
+
+.users365-filter-field .ts-control .item {
+  display: inline-block !important;
+  max-width: calc(100% - 6px);
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  overflow: hidden;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  background: transparent !important;
+  color: #172033 !important;
+  box-shadow: none !important;
+
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1.35;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Mantiene visible la selección aunque el control conserve
+ * el foco después de elegir una opción.
+ */
+
+.users365-filter-field
+  .ts-wrapper.single.input-active.has-items
+  .ts-control
+  .item {
+  display: inline-block !important;
+}
+
+/* =========================================================
+   CAMPO DE BÚSQUEDA INTERNO
+   ========================================================= */
+
+.users365-filter-field .ts-control > input {
+  position: static !important;
+
+  flex: 1 1 auto;
+
+  width: auto !important;
+  min-width: 30px !important;
+  max-width: 100%;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+
+  background: transparent !important;
+  color: #172033;
+
+  font: inherit;
+  font-size: 1rem;
+
+  opacity: 1 !important;
+  visibility: visible !important;
+  box-shadow: none !important;
+}
+
+.users365-filter-field .ts-control > input::placeholder {
+  color: #8a96a8;
+  opacity: 1;
+}
+
+/*
+ * Cuando no se está escribiendo, evita que el input vacío
+ * ocupe espacio junto a la selección.
+ */
+
+.users365-filter-field
+  .ts-wrapper.has-items:not(.input-active)
+  .ts-control
+  > input {
+  flex: 0 0 0;
+
+  width: 0 !important;
+  min-width: 0 !important;
+}
+
+/* =========================================================
+   FLECHA DEL SELECTOR
+   ========================================================= */
+
+.users365-filter-field
+  .ts-wrapper.single
+  .ts-control::after {
+  right: 14px;
+  margin-top: -2px;
+  border-color: #526078 transparent transparent;
+}
+
+.users365-filter-field
+  .ts-wrapper.single.dropdown-active
+  .ts-control::after {
+  margin-top: 2px;
+  border-color: transparent transparent #526078;
+}
+
+/* =========================================================
+   DESPLEGABLE TOM SELECT
+   ========================================================= */
+
+.users365-filter-field .ts-dropdown {
+  z-index: 1000;
+
+  margin-top: 6px;
+  overflow: hidden;
+
+  border: 1px solid #d8e0ec;
+  border-radius: 12px;
+
+  background: #ffffff;
+  box-shadow: 0 14px 34px rgb(15 23 42 / 13%);
+}
+
+.users365-filter-field .ts-dropdown-content {
+  max-height: 280px;
+  padding: 6px;
+}
+
+.users365-filter-field .ts-dropdown .option {
+  padding: 10px 12px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #172033;
+
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.users365-filter-field .ts-dropdown .option:hover,
+.users365-filter-field .ts-dropdown .option.active {
+  background: #eef3ff;
+  color: #172033;
+}
+
+.users365-filter-field .ts-dropdown .option.selected {
+  background: #e3ebff;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.users365-filter-field .ts-dropdown .no-results {
+  padding: 14px;
+  color: #69758a;
+  text-align: center;
+}
+
+/* =========================================================
+   PANTALLAS MEDIANAS
+   ========================================================= */
+
+@media (max-width: 1500px) {
+  .users365-filters__form {
+    flex-wrap: wrap;
+  }
+
+  .users365-filter-field--user,
+  .users365-filter-field--department,
+  .users365-filter-field--job,
+  .users365-filter-field--manager {
+    flex: 1 1 calc(25% - 14px);
+    min-width: 230px;
+  }
+
+  .users365-filter-field--licenses {
+    width: 155px;
+    min-width: 155px;
+    flex: 0 1 155px;
+  }
+
+  .users365-filter-field--status {
+    width: 185px;
+    min-width: 185px;
+    flex: 0 1 185px;
+  }
+
+  .users365-filter-field--records {
+    width: 100px;
+    min-width: 100px;
+    flex: 0 0 100px;
+  }
+
+  .users365-filters__actions {
+    margin-left: auto;
+  }
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .users365-filter-field--user,
+  .users365-filter-field--department,
+  .users365-filter-field--job,
+  .users365-filter-field--manager,
+  .users365-filter-field--licenses,
+  .users365-filter-field--status {
+    width: auto;
+    min-width: 260px;
+    flex: 1 1 calc(50% - 14px);
+  }
+
+  .users365-filter-field--records {
+    width: 110px;
+    min-width: 110px;
+    flex: 0 0 110px;
+  }
+}
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
+
+@media (max-width: 720px) {
+  .users365-filters {
+    padding: 18px;
+    border-radius: 16px;
+  }
+
+  .users365-filters__form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .users365-filter-field--user,
+  .users365-filter-field--department,
+  .users365-filter-field--job,
+  .users365-filter-field--manager,
+  .users365-filter-field--licenses,
+  .users365-filter-field--status,
+  .users365-filter-field--records {
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  .users365-filters__actions {
+    width: 100%;
+    margin-left: 0;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .users365-filter-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 440px) {
+  .users365-filters__actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================
+   TOOLTIP DE LICENCIAS
+   ========================================================= */
+
+.audit-table__licenses {
+  white-space: nowrap;
+}
+
+.license-tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 5px 8px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #24324a;
+
+  cursor: help;
+  outline: none;
+
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.license-tooltip-trigger:hover,
+.license-tooltip-trigger:focus-visible {
+  background: #eef3ff;
+  color: #1d4ed8;
+}
+
+.license-tooltip-trigger--empty {
+  color: #7a8799;
+}
+
+.license-tooltip-trigger__count {
+  font-weight: 600;
+}
+
+.license-tooltip-trigger__icon {
+  color: #718096;
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+/* El tooltip se agrega directamente al body */
+
+.license-tooltip-popover {
+  position: fixed;
+  z-index: 10000;
+
+  width: max-content;
+  min-width: 240px;
+  max-width: 340px;
+
+  padding: 14px;
+
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+
+  background: #ffffff;
+  color: #172033;
+
+  box-shadow:
+    0 18px 45px rgb(15 23 42 / 18%);
+
+  font-size: 0.875rem;
+  line-height: 1.4;
+
+  pointer-events: none;
+}
+
+.license-tooltip-popover[hidden] {
+  display: none;
+}
+
+.license-tooltip-popover::after {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+
+  width: 12px;
+  height: 12px;
+
+  border-right: 1px solid #dbe3ef;
+  border-bottom: 1px solid #dbe3ef;
+
+  background: #ffffff;
+
+  content: "";
+  transform:
+    translateX(-50%)
+    rotate(45deg);
+}
+
+.license-tooltip-popover--below::after {
+  top: -6px;
+  bottom: auto;
+
+  border-top: 1px solid #dbe3ef;
+  border-left: 1px solid #dbe3ef;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.license-tooltip-popover__header {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  border-bottom: 1px solid #edf1f7;
+}
+
+.license-tooltip-popover__header strong {
+  color: #172033;
+  font-size: 0.9rem;
+}
+
+.license-tooltip-popover__header span {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: #e9efff;
+  color: #2454e6;
+
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.license-tooltip-popover__list {
+  max-height: 220px;
+  margin: 0;
+  padding: 0;
+
+  overflow-y: auto;
+  list-style: none;
+}
+
+.license-tooltip-popover__list li {
+  padding: 6px 0;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.license-tooltip-popover__bullet {
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+
+  flex: 0 0 7px;
+
+  border-radius: 50%;
+  background: #2454e6;
+}
+
+.license-tooltip-popover__empty {
+  margin: 0;
+  color: #69758a;
+}
