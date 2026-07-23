@@ -1,0 +1,474 @@
+<section class="audit-page">
+  <header class="audit-page__header">
+    <div>
+      <p class="audit-page__eyebrow">
+        Microsoft 365
+      </p>
+
+      <h1>Catálogo de usuarios</h1>
+
+      <p class="audit-page__description">
+        Consulta usuarios, departamentos, puestos y responsables directos.
+      </p>
+    </div>
+  </header>
+
+<section class="users365-filters">
+  <% empty_filter_value =
+    Users365::CatalogQuery::EMPTY_FILTER_VALUE %>
+
+  <%= form_with(
+    url: users365_path,
+    method: :get,
+    local: true,
+    id: "users365-filters-form",
+    class: "users365-filters__form"
+  ) do |form| %>
+
+    <div class="users365-filter-field users365-filter-field--user">
+      <%= form.label :search, "Usuario" %>
+
+      <%= form.search_field(
+        :search,
+        value: params[:search],
+        placeholder: "Nombre o correo",
+        class: "users365-filter-control",
+        autocomplete: "off"
+      ) %>
+    </div>
+
+    <div class="users365-filter-field users365-filter-field--department">
+      <%= form.label :department, "Departamento" %>
+
+      <%= form.select(
+        :department,
+        options_for_select(
+          [
+            ["Todos los departamentos", ""],
+            ["Sin departamento", empty_filter_value]
+          ] +
+            @departments.map { |department|
+              [department, department]
+            },
+          params[:department]
+        ),
+        {},
+        {
+          class: "users365-filter-control js-searchable-select",
+          autocomplete: "off",
+          data: {
+            placeholder: "Buscar departamento"
+          }
+        }
+      ) %>
+    </div>
+
+    <div class="users365-filter-field users365-filter-field--job">
+      <%= form.label :job_title, "Puesto de trabajo" %>
+
+      <%= form.select(
+        :job_title,
+        options_for_select(
+          [
+            ["Todos los puestos", ""],
+            ["Sin puesto", empty_filter_value]
+          ] +
+            @job_titles.map { |job_title|
+              [job_title, job_title]
+            },
+          params[:job_title]
+        ),
+        {},
+        {
+          class: "users365-filter-control js-searchable-select",
+          autocomplete: "off",
+          data: {
+            placeholder: "Buscar puesto de trabajo"
+          }
+        }
+      ) %>
+    </div>
+
+    <div class="users365-filter-field users365-filter-field--manager">
+      <%= form.label :manager_upn, "Jefe directo" %>
+
+      <%= form.select(
+        :manager_upn,
+        options_for_select(
+          [
+            ["Todos los jefes directos", ""],
+            ["Sin jefe directo", empty_filter_value]
+          ] +
+            @managers.map { |manager|
+              [
+                manager[:name],
+                manager[:upn]
+              ]
+            },
+          params[:manager_upn]
+        ),
+        {},
+        {
+          class: "users365-filter-control js-searchable-select",
+          autocomplete: "off",
+          data: {
+            placeholder: "Buscar jefe directo"
+          }
+        }
+      ) %>
+    </div>
+
+    <div class="users365-filter-field users365-filter-field--records">
+      <%= form.label :per_page, "Registros" %>
+
+      <%= form.select(
+        :per_page,
+        options_for_select(
+          [
+            ["10", 10],
+            ["25", 25],
+            ["50", 50],
+            ["100", 100]
+          ],
+          @per_page
+        ),
+        {},
+        {
+          class: "users365-filter-control"
+        }
+      ) %>
+    </div>
+
+    <div class="users365-filter-field users365-filter-field--licenses">
+      <%= form.label :license_status, "Licencias" %>
+
+      <%= form.select(
+        :license_status,
+        options_for_select(
+          [
+            ["Todas", ""],
+            ["Con licencia", "with_license"],
+            ["Sin licencia", "without_license"]
+          ],
+          params[:license_status]
+        ),
+        {},
+        {
+          class: "users365-filter-control"
+        }
+      ) %>
+    </div>
+
+    <div class="users365-filter-field users365-filter-field--status">
+      <%= form.label :status, "Estado" %>
+
+      <%= form.select(
+        :status,
+        options_for_select(
+          [
+            ["Todos", ""],
+            ["Activo", "active"],
+            ["Inactivo +90 días", "inactive"],
+            ["Sin actividad", "without_activity"],
+            ["Deshabilitado", "disabled"]
+          ],
+          params[:status]
+        ),
+        {},
+        {
+          class: "users365-filter-control"
+        }
+      ) %>
+    </div>
+  <% end %>
+</section>
+
+<div class="users365-filters-external-actions">
+  <%= button_tag(
+    "Buscar",
+    type: "submit",
+    form: "users365-filters-form",
+    class: "button button--primary users365-filter-button"
+  ) %>
+
+  <%= link_to(
+    "Limpiar",
+    users365_path,
+    class: "button button--secondary users365-filter-button"
+  ) %>
+</div>
+
+  <section class="audit-summary">
+    <div>
+      <strong>
+        <%= number_with_delimiter(@total_count) %>
+      </strong>
+
+      <span>usuarios encontrados</span>
+    </div>
+
+    <p>
+      Mostrando del
+
+      <strong>
+        <%= number_with_delimiter(@first_record) %>
+      </strong>
+
+      al
+
+      <strong>
+        <%= number_with_delimiter(@last_record) %>
+      </strong>
+    </p>
+  </section>
+
+  <section class="audit-table-card">
+    <div class="audit-table-wrapper">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Departamento</th>
+            <th>Puesto de trabajo</th>
+            <th>Jefe directo</th>
+            <th>Licencias</th>
+            <th>Última actividad</th>
+            <th>Aplicación</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% if @records.any? %>
+            <% @records.each do |user| %>
+              <tr>
+                <td>
+                  <div class="audit-user-cell">
+                    <span class="audit-user-cell__avatar">
+                      <%= (
+                        user.display_name.presence ||
+                        user.user_principal_name.presence ||
+                        "?"
+                      ).first.upcase %>
+                    </span>
+
+                    <span>
+                      <strong>
+                        <%= user.display_name.presence || "Sin nombre" %>
+                      </strong>
+
+                      <br>
+
+                      <small title="<%= user.user_principal_name %>">
+                        <%= user.user_principal_name %>
+                      </small>
+                    </span>
+                  </div>
+                </td>
+
+                <td>
+                  <%= user.department.presence || "Sin departamento" %>
+                </td>
+
+                <td>
+                  <%= user.job_title.presence || "Sin puesto" %>
+                </td>
+
+                <td>
+                  <%= user.manager_name.presence || "Sin jefe directo" %>
+                </td>
+
+                <td class="audit-table__licenses">
+  <% commercial_license_names =
+    user.commercial_license_names %>
+
+  <span
+    class="
+      license-tooltip-trigger
+      <%= "license-tooltip-trigger--empty" if commercial_license_names.empty? %>
+    "
+    tabindex="0"
+    data-controller="license-tooltip"
+    data-action="
+      mouseenter->license-tooltip#show
+      mouseleave->license-tooltip#hide
+      focus->license-tooltip#show
+      blur->license-tooltip#hide
+    "
+  >
+    <span class="license-tooltip-trigger__count">
+      <%= pluralize(user.license_count, "licencia") %>
+    </span>
+
+    <span
+      class="license-tooltip-trigger__icon"
+      aria-hidden="true"
+    >
+      ⓘ
+    </span>
+
+    <template data-license-tooltip-target="template">
+      <div class="license-tooltip-popover__header">
+        <strong>Licencias asignadas</strong>
+
+        <span>
+          <%= user.license_count %>
+        </span>
+      </div>
+
+      <% if commercial_license_names.any? %>
+        <ul class="license-tooltip-popover__list">
+          <% commercial_license_names.each do |license_name| %>
+            <li>
+              <span
+                class="license-tooltip-popover__bullet"
+                aria-hidden="true"
+              ></span>
+
+              <span>
+                <%= license_name %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="license-tooltip-popover__empty">
+          Este usuario no tiene licencias asignadas.
+        </p>
+      <% end %>
+    </template>
+  </span>
+</td>
+
+                <td class="audit-table__date">
+                  <% if user.last_activity_date.present? %>
+                    <%= user.last_activity_date.strftime("%d/%m/%Y") %>
+                  <% else %>
+                    Sin actividad
+                  <% end %>
+                </td>
+
+                <td>
+                  <%= user.last_activity_app.presence || "—" %>
+                </td>
+
+                <td>
+                  <% case user.activity_status %>
+                  <% when :disabled %>
+                    <span class="audit-badge">
+                      Deshabilitado
+                    </span>
+
+                  <% when :without_activity %>
+                    <span class="audit-badge">
+                      Sin actividad
+                    </span>
+
+                  <% when :inactive %>
+                    <span class="audit-badge audit-badge--externo">
+                      Inactivo +90 días
+                    </span>
+
+                  <% else %>
+                    <span class="audit-badge audit-badge--interno">
+                      Activo
+                    </span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td
+                colspan="8"
+                class="audit-table__empty"
+              >
+                <div>
+                  <strong>
+                    No se encontraron usuarios
+                  </strong>
+
+                  <span>
+                    Modifica los filtros para ampliar la búsqueda.
+                  </span>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if @total_pages > 1 %>
+      <footer class="audit-pagination">
+        <div class="audit-pagination__summary">
+          Página
+
+          <strong>
+            <%= @page %>
+          </strong>
+
+          de
+
+          <strong>
+            <%= @total_pages %>
+          </strong>
+        </div>
+
+        <nav
+          class="audit-pagination__controls"
+          aria-label="Paginación del catálogo de usuarios"
+        >
+          <% preserved_params =
+            request.query_parameters.except("page") %>
+
+          <% if @page > 1 %>
+            <%= link_to(
+              "← Anterior",
+              users365_path(
+                preserved_params.merge(
+                  page: @page - 1
+                )
+              ),
+              class: "audit-pagination__button"
+            ) %>
+          <% else %>
+            <span
+              class="
+                audit-pagination__button
+                is-disabled
+              "
+            >
+              ← Anterior
+            </span>
+          <% end %>
+
+          <span class="audit-pagination__current">
+            <%= @page %>
+          </span>
+
+          <% if @page < @total_pages %>
+            <%= link_to(
+              "Siguiente →",
+              users365_path(
+                preserved_params.merge(
+                  page: @page + 1
+                )
+              ),
+              class: "audit-pagination__button"
+            ) %>
+          <% else %>
+            <span
+              class="
+                audit-pagination__button
+                is-disabled
+              "
+            >
+              Siguiente →
+            </span>
+          <% end %>
+        </nav>
+      </footer>
+    <% end %>
+  </section>
+</section>
