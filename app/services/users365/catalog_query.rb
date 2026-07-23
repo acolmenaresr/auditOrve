@@ -386,7 +386,7 @@ module Users365
       parsed = value.to_i
       parsed = DEFAULT_PAGE_SIZE unless parsed.positive?
 
-      [parsed, MAX_PAGE_SIZE].min
+      [ parsed, MAX_PAGE_SIZE ].min
     end
 
     def normalize_sort(value)
