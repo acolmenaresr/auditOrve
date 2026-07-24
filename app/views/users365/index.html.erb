@@ -13,190 +13,190 @@
     </div>
   </header>
 
-<section class="users365-filters">
-  <% empty_filter_value =
-    Users365::CatalogQuery::EMPTY_FILTER_VALUE %>
+  <section class="users365-filters">
+    <% empty_filter_value =
+      Users365::CatalogQuery::EMPTY_FILTER_VALUE %>
 
-  <%= form_with(
-    url: users365_path,
-    method: :get,
-    local: true,
-    id: "users365-filters-form",
-    class: "users365-filters__form"
-  ) do |form| %>
+    <%= form_with(
+      url: users365_path,
+      method: :get,
+      local: true,
+      id: "users365-filters-form",
+      class: "users365-filters__form"
+    ) do |form| %>
 
-    <div class="users365-filter-field users365-filter-field--user">
-      <%= form.label :search, "Usuario" %>
+      <div class="users365-filter-field users365-filter-field--user">
+        <%= form.label :search, "Usuario" %>
 
-      <%= form.search_field(
-        :search,
-        value: params[:search],
-        placeholder: "Nombre o correo",
-        class: "users365-filter-control",
-        autocomplete: "off"
-      ) %>
-    </div>
+        <%= form.search_field(
+          :search,
+          value: params[:search],
+          placeholder: "Nombre o correo",
+          class: "users365-filter-control",
+          autocomplete: "off"
+        ) %>
+      </div>
 
-    <div class="users365-filter-field users365-filter-field--department">
-      <%= form.label :department, "Departamento" %>
+      <div class="users365-filter-field users365-filter-field--department">
+        <%= form.label :department, "Departamento" %>
 
-      <%= form.select(
-        :department,
-        options_for_select(
-          [
-            ["Todos los departamentos", ""],
-            ["Sin departamento", empty_filter_value]
-          ] +
-            @departments.map { |department|
-              [department, department]
-            },
-          params[:department]
-        ),
-        {},
-        {
-          class: "users365-filter-control js-searchable-select",
-          autocomplete: "off",
-          data: {
-            placeholder: "Buscar departamento"
+        <%= form.select(
+          :department,
+          options_for_select(
+            [
+              ["Todos los departamentos", ""],
+              ["Sin departamento", empty_filter_value]
+            ] +
+              @departments.map { |department|
+                [department, department]
+              },
+            params[:department]
+          ),
+          {},
+          {
+            class: "users365-filter-control js-searchable-select",
+            autocomplete: "off",
+            data: {
+              placeholder: "Buscar departamento"
+            }
           }
-        }
-      ) %>
-    </div>
+        ) %>
+      </div>
 
-    <div class="users365-filter-field users365-filter-field--job">
-      <%= form.label :job_title, "Puesto de trabajo" %>
+      <div class="users365-filter-field users365-filter-field--job">
+        <%= form.label :job_title, "Puesto de trabajo" %>
 
-      <%= form.select(
-        :job_title,
-        options_for_select(
-          [
-            ["Todos los puestos", ""],
-            ["Sin puesto", empty_filter_value]
-          ] +
-            @job_titles.map { |job_title|
-              [job_title, job_title]
-            },
-          params[:job_title]
-        ),
-        {},
-        {
-          class: "users365-filter-control js-searchable-select",
-          autocomplete: "off",
-          data: {
-            placeholder: "Buscar puesto de trabajo"
+        <%= form.select(
+          :job_title,
+          options_for_select(
+            [
+              ["Todos los puestos", ""],
+              ["Sin puesto", empty_filter_value]
+            ] +
+              @job_titles.map { |job_title|
+                [job_title, job_title]
+              },
+            params[:job_title]
+          ),
+          {},
+          {
+            class: "users365-filter-control js-searchable-select",
+            autocomplete: "off",
+            data: {
+              placeholder: "Buscar puesto de trabajo"
+            }
           }
-        }
-      ) %>
-    </div>
+        ) %>
+      </div>
 
-    <div class="users365-filter-field users365-filter-field--manager">
-      <%= form.label :manager_upn, "Jefe directo" %>
+      <div class="users365-filter-field users365-filter-field--manager">
+        <%= form.label :manager_upn, "Jefe directo" %>
 
-      <%= form.select(
-        :manager_upn,
-        options_for_select(
-          [
-            ["Todos los jefes directos", ""],
-            ["Sin jefe directo", empty_filter_value]
-          ] +
-            @managers.map { |manager|
-              [
-                manager[:name],
-                manager[:upn]
-              ]
-            },
-          params[:manager_upn]
-        ),
-        {},
-        {
-          class: "users365-filter-control js-searchable-select",
-          autocomplete: "off",
-          data: {
-            placeholder: "Buscar jefe directo"
+        <%= form.select(
+          :manager_upn,
+          options_for_select(
+            [
+              ["Todos los jefes directos", ""],
+              ["Sin jefe directo", empty_filter_value]
+            ] +
+              @managers.map { |manager|
+                [
+                  manager[:name],
+                  manager[:upn]
+                ]
+              },
+            params[:manager_upn]
+          ),
+          {},
+          {
+            class: "users365-filter-control js-searchable-select",
+            autocomplete: "off",
+            data: {
+              placeholder: "Buscar jefe directo"
+            }
           }
-        }
-      ) %>
-    </div>
+        ) %>
+      </div>
 
-    <div class="users365-filter-field users365-filter-field--records">
-      <%= form.label :per_page, "Registros" %>
+      <div class="users365-filter-field users365-filter-field--records">
+        <%= form.label :per_page, "Registros" %>
 
-      <%= form.select(
-        :per_page,
-        options_for_select(
-          [
-            ["10", 10],
-            ["25", 25],
-            ["50", 50],
-            ["100", 100]
-          ],
-          @per_page
-        ),
-        {},
-        {
-          class: "users365-filter-control"
-        }
-      ) %>
-    </div>
+        <%= form.select(
+          :per_page,
+          options_for_select(
+            [
+              ["10", 10],
+              ["25", 25],
+              ["50", 50],
+              ["100", 100]
+            ],
+            @per_page
+          ),
+          {},
+          {
+            class: "users365-filter-control"
+          }
+        ) %>
+      </div>
 
-    <div class="users365-filter-field users365-filter-field--licenses">
-      <%= form.label :license_status, "Licencias" %>
+      <div class="users365-filter-field users365-filter-field--licenses">
+        <%= form.label :license_status, "Licencias" %>
 
-      <%= form.select(
-        :license_status,
-        options_for_select(
-          [
-            ["Todas", ""],
-            ["Con licencia", "with_license"],
-            ["Sin licencia", "without_license"]
-          ],
-          params[:license_status]
-        ),
-        {},
-        {
-          class: "users365-filter-control"
-        }
-      ) %>
-    </div>
+        <%= form.select(
+          :license_status,
+          options_for_select(
+            [
+              ["Todas", ""],
+              ["Con licencia", "with_license"],
+              ["Sin licencia", "without_license"]
+            ],
+            params[:license_status]
+          ),
+          {},
+          {
+            class: "users365-filter-control"
+          }
+        ) %>
+      </div>
 
-    <div class="users365-filter-field users365-filter-field--status">
-      <%= form.label :status, "Estado" %>
+      <div class="users365-filter-field users365-filter-field--status">
+        <%= form.label :status, "Estado" %>
 
-      <%= form.select(
-        :status,
-        options_for_select(
-          [
-            ["Todos", ""],
-            ["Activo", "active"],
-            ["Inactivo +90 días", "inactive"],
-            ["Sin actividad", "without_activity"],
-            ["Deshabilitado", "disabled"]
-          ],
-          params[:status]
-        ),
-        {},
-        {
-          class: "users365-filter-control"
-        }
-      ) %>
-    </div>
-  <% end %>
-</section>
+        <%= form.select(
+          :status,
+          options_for_select(
+            [
+              ["Todos", ""],
+              ["Activo", "active"],
+              ["Inactivo +90 días", "inactive"],
+              ["Sin actividad", "without_activity"],
+              ["Deshabilitado", "disabled"]
+            ],
+            params[:status]
+          ),
+          {},
+          {
+            class: "users365-filter-control"
+          }
+        ) %>
+      </div>
+    <% end %>
+  </section>
 
-<div class="users365-filters-external-actions">
-  <%= button_tag(
-    "Buscar",
-    type: "submit",
-    form: "users365-filters-form",
-    class: "button button--primary users365-filter-button"
-  ) %>
+  <div class="users365-filters-external-actions">
+    <%= button_tag(
+      "Buscar",
+      type: "submit",
+      form: "users365-filters-form",
+      class: "button button--primary users365-filter-button"
+    ) %>
 
-  <%= link_to(
-    "Limpiar",
-    users365_path,
-    class: "button button--secondary users365-filter-button"
-  ) %>
-</div>
+    <%= link_to(
+      "Limpiar",
+      users365_path,
+      class: "button button--secondary users365-filter-button"
+    ) %>
+  </div>
 
   <section class="audit-summary">
     <div>
@@ -232,6 +232,11 @@
             <th>Puesto de trabajo</th>
             <th>Jefe directo</th>
             <th>Licencias</th>
+
+            <th class="audit-table__office-license">
+              Office
+            </th>
+
             <th>Última actividad</th>
             <th>Aplicación</th>
             <th>Estado</th>
@@ -279,66 +284,78 @@
                 </td>
 
                 <td class="audit-table__licenses">
-  <% commercial_license_names =
-    user.commercial_license_names %>
+                  <% commercial_license_names =
+                    user.commercial_license_names %>
 
-  <span
-    class="
-      license-tooltip-trigger
-      <%= "license-tooltip-trigger--empty" if commercial_license_names.empty? %>
-    "
-    tabindex="0"
-    data-controller="license-tooltip"
-    data-action="
-      mouseenter->license-tooltip#show
-      mouseleave->license-tooltip#hide
-      focus->license-tooltip#show
-      blur->license-tooltip#hide
-    "
-  >
-    <span class="license-tooltip-trigger__count">
-      <%= pluralize(user.license_count, "licencia") %>
-    </span>
+                  <span
+                    class="
+                      license-tooltip-trigger
+                      <%= "license-tooltip-trigger--empty" if commercial_license_names.empty? %>
+                    "
+                    tabindex="0"
+                    data-controller="license-tooltip"
+                    data-action="
+                      mouseenter->license-tooltip#show
+                      mouseleave->license-tooltip#hide
+                      focus->license-tooltip#show
+                      blur->license-tooltip#hide
+                    "
+                  >
+                    <span class="license-tooltip-trigger__count">
+                      <%= pluralize(user.license_count, "licencia") %>
+                    </span>
 
-    <span
-      class="license-tooltip-trigger__icon"
-      aria-hidden="true"
-    >
-      ⓘ
-    </span>
+                    <span
+                      class="license-tooltip-trigger__icon"
+                      aria-hidden="true"
+                    >
+                      ⓘ
+                    </span>
 
-    <template data-license-tooltip-target="template">
-      <div class="license-tooltip-popover__header">
-        <strong>Licencias asignadas</strong>
+                    <template data-license-tooltip-target="template">
+                      <div class="license-tooltip-popover__header">
+                        <strong>Licencias asignadas</strong>
 
-        <span>
-          <%= user.license_count %>
-        </span>
-      </div>
+                        <span>
+                          <%= user.license_count %>
+                        </span>
+                      </div>
 
-      <% if commercial_license_names.any? %>
-        <ul class="license-tooltip-popover__list">
-          <% commercial_license_names.each do |license_name| %>
-            <li>
-              <span
-                class="license-tooltip-popover__bullet"
-                aria-hidden="true"
-              ></span>
+                      <% if commercial_license_names.any? %>
+                        <ul class="license-tooltip-popover__list">
+                          <% commercial_license_names.each do |license_name| %>
+                            <li>
+                              <span
+                                class="license-tooltip-popover__bullet"
+                                aria-hidden="true"
+                              ></span>
 
-              <span>
-                <%= license_name %>
-              </span>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="license-tooltip-popover__empty">
-          Este usuario no tiene licencias asignadas.
-        </p>
-      <% end %>
-    </template>
-  </span>
-</td>
+                              <span>
+                                <%= license_name %>
+                              </span>
+                            </li>
+                          <% end %>
+                        </ul>
+                      <% else %>
+                        <p class="license-tooltip-popover__empty">
+                          Este usuario no tiene licencias asignadas.
+                        </p>
+                      <% end %>
+                    </template>
+                  </span>
+                </td>
+
+                <td class="audit-table__office-license">
+                  <% if user.office_license? %>
+                    <span class="audit-badge audit-badge--interno">
+                      Sí
+                    </span>
+                  <% else %>
+                    <span class="audit-badge">
+                      No
+                    </span>
+                  <% end %>
+                </td>
 
                 <td class="audit-table__date">
                   <% if user.last_activity_date.present? %>
@@ -380,7 +397,7 @@
           <% else %>
             <tr>
               <td
-                colspan="8"
+                colspan="9"
                 class="audit-table__empty"
               >
                 <div>
