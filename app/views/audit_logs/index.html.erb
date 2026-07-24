@@ -1,7 +1,10 @@
 <section class="audit-page">
- <!-- <header class="audit-page__header">
+  <!--
+  <header class="audit-page__header">
     <div>
-      <p class="audit-page__eyebrow">AuditORVE</p>
+      <p class="audit-page__eyebrow">
+        AuditORVE
+      </p>
 
       <h1>Movimientos de usuarios</h1>
 
@@ -9,7 +12,8 @@
         Consulta los eventos registrados en OneDrive y SharePoint.
       </p>
     </div>
-  </header> -->
+  </header>
+  -->
 
   <section class="audit-filters">
     <%= form_with(
@@ -80,7 +84,7 @@
         ) %>
       </div>
 
-      <div class="audit-filter-field">
+      <div class="audit-filter-field users365-filter-field">
         <%= form.label :user, "Usuario" %>
 
         <%= form.select(
@@ -89,11 +93,19 @@
             [["Todos los usuarios", ""]] +
               @users.map { |user| [user, user] },
             params[:user]
-          )
+          ),
+          {},
+          {
+            class: "js-searchable-select",
+            autocomplete: "off",
+            data: {
+              placeholder: "Buscar usuario"
+            }
+          }
         ) %>
       </div>
 
-      <div class="audit-filter-field">
+      <div class="audit-filter-field users365-filter-field">
         <%= form.label :audit_action, "Acción" %>
 
         <%= form.select(
@@ -104,7 +116,15 @@
                 [audit_action, audit_action]
               end,
             params[:audit_action]
-          )
+          ),
+          {},
+          {
+            class: "js-searchable-select",
+            autocomplete: "off",
+            data: {
+              placeholder: "Buscar acción"
+            }
+          }
         ) %>
       </div>
 
@@ -168,60 +188,78 @@
     <div class="audit-table-wrapper">
       <table class="audit-table">
         <thead>
-  <tr>
-    <th>
-      <%= sortable_audit_header("Fecha", "dateZ") %>
-    </th>
+          <tr>
+            <th>
+              <%= sortable_audit_header(
+                "Fecha",
+                "dateZ"
+              ) %>
+            </th>
 
-    <th>
-      <%= sortable_audit_header("Usuario", "usuario") %>
-    </th>
+            <th>
+              <%= sortable_audit_header(
+                "Usuario",
+                "usuario"
+              ) %>
+            </th>
 
-    <th>
-      <%= sortable_audit_header(
-        "Tipo de usuario",
-        "tipoUsuario"
-      ) %>
-    </th>
+            <th>
+              <%= sortable_audit_header(
+                "Tipo de usuario",
+                "tipoUsuario"
+              ) %>
+            </th>
 
-    <th>
-      <%= sortable_audit_header("Acción", "accion") %>
-    </th>
+            <th>
+              <%= sortable_audit_header(
+                "Acción",
+                "accion"
+              ) %>
+            </th>
 
-    <th>
-      <%= sortable_audit_header(
-        "Operación 365",
-        "operacion365"
-      ) %>
-    </th>
+            <th>
+              <%= sortable_audit_header(
+                "Operación 365",
+                "operacion365"
+              ) %>
+            </th>
 
-    <th>
-      <%= sortable_audit_header(
-        "Aplicación",
-        "aplicacion"
-      ) %>
-    </th>
+            <th>
+              <%= sortable_audit_header(
+                "Aplicación",
+                "aplicacion"
+              ) %>
+            </th>
 
-    <th>
-      <%= sortable_audit_header(
-        "Tipo de elemento",
-        "tipoItem"
-      ) %>
-    </th>
+            <th>
+              <%= sortable_audit_header(
+                "Tipo de elemento",
+                "tipoItem"
+              ) %>
+            </th>
 
-    <th>
-      <%= sortable_audit_header("Archivo", "archivo") %>
-    </th>
+            <th>
+              <%= sortable_audit_header(
+                "Archivo",
+                "archivo"
+              ) %>
+            </th>
 
-    <th>
-      <%= sortable_audit_header("Ruta", "ruta") %>
-    </th>
+            <th>
+              <%= sortable_audit_header(
+                "Ruta",
+                "ruta"
+              ) %>
+            </th>
 
-    <th>
-      <%= sortable_audit_header("Sitio", "sitio") %>
-    </th>
-  </tr>
-</thead>
+            <th>
+              <%= sortable_audit_header(
+                "Sitio",
+                "sitio"
+              ) %>
+            </th>
+          </tr>
+        </thead>
 
         <tbody>
           <% if @records.any? %>
@@ -407,22 +445,33 @@
 <script>
   (() => {
     const initializeAuditDateFilters = () => {
-      const periodSelect = document.getElementById("audit-date-filter")
-      const customDateFields = document.querySelectorAll(
-        "[data-audit-custom-date]"
-      )
+      const periodSelect =
+        document.getElementById("audit-date-filter")
 
-      if (!periodSelect || customDateFields.length === 0) {
+      const customDateFields =
+        document.querySelectorAll(
+          "[data-audit-custom-date]"
+        )
+
+      if (
+        !periodSelect ||
+        customDateFields.length === 0
+      ) {
         return
       }
 
       const toggleCustomDates = () => {
-        const isCustom = periodSelect.value === "custom"
+        const isCustom =
+          periodSelect.value === "custom"
 
         customDateFields.forEach((field) => {
-          field.classList.toggle("is-hidden", !isCustom)
+          field.classList.toggle(
+            "is-hidden",
+            !isCustom
+          )
 
-          const input = field.querySelector("input")
+          const input =
+            field.querySelector("input")
 
           if (!input) {
             return
@@ -443,7 +492,8 @@
         )
       }
 
-      periodSelect.auditToggleHandler = toggleCustomDates
+      periodSelect.auditToggleHandler =
+        toggleCustomDates
 
       periodSelect.addEventListener(
         "change",
