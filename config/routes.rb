@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   get "dashboard", to: "dashboard#index", as: :dashboard
   get "auditoria", to: "audit_logs#index", as: :audit_logs
   get "usuarios-365", to: "users365#index", as: :users365
+  get "usuarios-365/:id", to: "users365#show", as: :user365
 
   # Estado de la aplicación
   get "up" => "rails/health#show", as: :rails_health_check

@@ -248,27 +248,35 @@
             <% @records.each do |user| %>
               <tr>
                 <td>
-                  <div class="audit-user-cell">
-                    <span class="audit-user-cell__avatar">
-                      <%= (
-                        user.display_name.presence ||
-                        user.user_principal_name.presence ||
-                        "?"
-                      ).first.upcase %>
-                    </span>
+                  <%= link_to(
+  user365_path(user),
+  class: "audit-user-cell audit-user-cell--link",
+  aria: {
+    label: "Ver dashboard de #{
+      user.display_name.presence ||
+      user.user_principal_name.presence ||
+      "usuario"
+    }"
+  }
+) do %>
+  <span class="audit-user-cell__avatar">
+    <%= (
+      user.display_name.presence ||
+      user.user_principal_name.presence ||
+      "?"
+    ).first.upcase %>
+  </span>
 
-                    <span>
-                      <strong>
-                        <%= user.display_name.presence || "Sin nombre" %>
-                      </strong>
+  <span class="audit-user-cell__content">
+    <strong>
+      <%= user.display_name.presence || "Sin nombre" %>
+    </strong>
 
-                      <br>
-
-                      <small title="<%= user.user_principal_name %>">
-                        <%= user.user_principal_name %>
-                      </small>
-                    </span>
-                  </div>
+    <small title="<%= user.user_principal_name %>">
+      <%= user.user_principal_name.presence || "Sin correo" %>
+    </small>
+  </span>
+<% end %>
                 </td>
 
                 <td>
