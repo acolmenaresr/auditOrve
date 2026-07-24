@@ -98,58 +98,65 @@ module Users365
     end
 
     def departments
+      department =
+        trimmed_column(:department)
+
+      department_present =
+        nullable_trimmed_column(:department).not_eq(nil)
+
       @departments ||= Microsoft365User
-        .where(
-          "NULLIF(BTRIM(department), '') IS NOT NULL"
-        )
+        .where(department_present)
         .distinct
-        .order(
-          Arel.sql("BTRIM(department) ASC")
-        )
-        .pluck(
-          Arel.sql("BTRIM(department)")
-        )
+        .order(department.asc)
+        .pluck(department)
     end
 
     def job_titles
+      job_title =
+        trimmed_column(:job_title)
+
+      job_title_present =
+        nullable_trimmed_column(:job_title).not_eq(nil)
+
       @job_titles ||= Microsoft365User
-        .where(
-          "NULLIF(BTRIM(job_title), '') IS NOT NULL"
-        )
+        .where(job_title_present)
         .distinct
-        .order(
-          Arel.sql("BTRIM(job_title) ASC")
-        )
-        .pluck(
-          Arel.sql("BTRIM(job_title)")
-        )
+        .order(job_title.asc)
+        .pluck(job_title)
     end
 
     def managers
+      manager_name =
+        trimmed_column(:manager_name)
+
+      manager_upn =
+        lower_trimmed_column(:manager_upn)
+
+      manager_name_present =
+        nullable_trimmed_column(:manager_name).not_eq(nil)
+
+      manager_upn_present =
+        nullable_trimmed_column(:manager_upn).not_eq(nil)
+
       @managers ||= Microsoft365User
         .where(
-          <<~SQL.squish
-            NULLIF(BTRIM(manager_upn), '') IS NOT NULL
-            AND NULLIF(BTRIM(manager_name), '') IS NOT NULL
-          SQL
+          manager_name_present.and(
+            manager_upn_present
+          )
         )
         .distinct
         .order(
-          Arel.sql(
-            <<~SQL.squish
-              BTRIM(manager_name) ASC,
-              LOWER(BTRIM(manager_upn)) ASC
-            SQL
-          )
+          manager_name.asc,
+          manager_upn.asc
         )
         .pluck(
-          Arel.sql("BTRIM(manager_name)"),
-          Arel.sql("LOWER(BTRIM(manager_upn))")
+          manager_name,
+          manager_upn
         )
-        .map do |manager_name, manager_upn|
+        .map do |name, upn|
           {
-            name: manager_name,
-            upn: manager_upn
+            name:,
+            upn:
           }
         end
     end
@@ -202,17 +209,19 @@ module Users365
     def apply_nullable_text_filter(scope, column, value)
       return scope if value.blank?
 
-      quoted_column =
-        Microsoft365User.connection.quote_column_name(column)
+      trimmed =
+        trimmed_column(column)
+
+      nullable_trimmed =
+        nullable_trimmed_column(column)
 
       if value == EMPTY_FILTER_VALUE
         scope.where(
-          "NULLIF(BTRIM(#{quoted_column}), '') IS NULL"
+          nullable_trimmed.eq(nil)
         )
       else
         scope.where(
-          "BTRIM(#{quoted_column}) = ?",
-          value
+          trimmed.eq(value)
         )
       end
     end
@@ -221,16 +230,22 @@ module Users365
       return scope if manager_upn.blank?
 
       if manager_upn == EMPTY_FILTER_VALUE
+        manager_upn_empty =
+          nullable_trimmed_column(:manager_upn).eq(nil)
+
+        manager_name_empty =
+          nullable_trimmed_column(:manager_name).eq(nil)
+
         scope.where(
-          <<~SQL.squish
-            NULLIF(BTRIM(manager_upn), '') IS NULL
-            OR NULLIF(BTRIM(manager_name), '') IS NULL
-          SQL
+          manager_upn_empty.or(
+            manager_name_empty
+          )
         )
       else
         scope.where(
-          "LOWER(BTRIM(manager_upn)) = ?",
-          manager_upn
+          lower_trimmed_column(:manager_upn).eq(
+            manager_upn
+          )
         )
       end
     end
@@ -239,12 +254,12 @@ module Users365
       case license_status
       when "with_license"
         scope.where(
-          "(#{license_count_sql}) >= 1"
+          license_count_expression.gteq(1)
         )
 
       when "without_license"
         scope.where(
-          "(#{license_count_sql}) = 0"
+          license_count_expression.eq(0)
         )
 
       else
@@ -253,7 +268,8 @@ module Users365
     end
 
     def apply_status_filter(scope)
-      cutoff_date = INACTIVE_DAYS.days.ago.to_date
+      cutoff_date =
+        INACTIVE_DAYS.days.ago.to_date
 
       case status
       when "disabled"
@@ -263,13 +279,21 @@ module Users365
 
       when "without_activity"
         scope
-          .where("account_enabled IS TRUE")
-          .where(last_activity_date: nil)
+          .where(
+            "account_enabled IS TRUE"
+          )
+          .where(
+            last_activity_date: nil
+          )
 
       when "inactive"
         scope
-          .where("account_enabled IS TRUE")
-          .where.not(last_activity_date: nil)
+          .where(
+            "account_enabled IS TRUE"
+          )
+          .where.not(
+            last_activity_date: nil
+          )
           .where(
             "last_activity_date < ?",
             cutoff_date
@@ -277,7 +301,9 @@ module Users365
 
       when "active"
         scope
-          .where("account_enabled IS TRUE")
+          .where(
+            "account_enabled IS TRUE"
+          )
           .where(
             "last_activity_date >= ?",
             cutoff_date
@@ -288,42 +314,45 @@ module Users365
       end
     end
 
-    # Convierte la columna licenses a JSONB para soportar:
-    # - jsonb
-    # - json
-    # - arreglo nativo de PostgreSQL
+    # Calcula el número de licencias directamente en PostgreSQL
+    # sin concatenar ni interpolar SQL.
     #
-    # Devuelve 0 cuando el valor es NULL o no es un arreglo.
-    def license_count_sql
-      @license_count_sql ||= begin
-        connection = Microsoft365User.connection
+    # Admite que licenses sea JSON, JSONB o un arreglo convertido
+    # mediante la función to_jsonb.
+    def license_count_expression
+      licenses =
+        Microsoft365User.arel_table[:licenses]
 
-        quoted_table =
-          connection.quote_table_name(
-            Microsoft365User.table_name
-          )
+      licenses_as_json =
+        Arel::Nodes::NamedFunction.new(
+          "to_jsonb",
+          [ licenses ]
+        )
 
-        quoted_column =
-          connection.quote_column_name("licenses")
+      licenses_json_type =
+        Arel::Nodes::NamedFunction.new(
+          "jsonb_typeof",
+          [ licenses_as_json ]
+        )
 
-        full_column = "#{quoted_table}.#{quoted_column}"
+      licenses_array_length =
+        Arel::Nodes::NamedFunction.new(
+          "jsonb_array_length",
+          [ licenses_as_json ]
+        )
 
-        <<~SQL.squish
-          CASE
-            WHEN #{full_column} IS NULL
-              THEN 0
-
-            WHEN jsonb_typeof(
-              to_jsonb(#{full_column})
-            ) = 'array'
-              THEN jsonb_array_length(
-                to_jsonb(#{full_column})
-              )
-
-            ELSE 0
-          END
-        SQL
-      end
+      Arel::Nodes::Case.new
+        .when(
+          licenses.eq(nil)
+        )
+        .then(0)
+        .when(
+          licenses_json_type.eq("array")
+        )
+        .then(
+          licenses_array_length
+        )
+        .else(0)
     end
 
     def order_expression
@@ -331,18 +360,16 @@ module Users365
       column_name = SORTABLE_COLUMNS.fetch(sort)
       column = table[column_name]
 
-      # Prioridad:
-      # 0 = usuario con una o más licencias
-      # 1 = usuario sin licencia
-      license_priority = Arel.sql(
-        <<~SQL.squish
-          CASE
-            WHEN (#{license_count_sql}) >= 1
-              THEN 0
-            ELSE 1
-          END ASC
-        SQL
-      )
+      # 0: usuarios con una o más licencias.
+      # 1: usuarios sin licencia.
+      license_priority =
+        Arel::Nodes::Case.new
+          .when(
+            license_count_expression.gteq(1)
+          )
+          .then(0)
+          .else(1)
+          .asc
 
       primary_order =
         if direction == "asc"
@@ -358,6 +385,34 @@ module Users365
       ]
     end
 
+    def trimmed_column(column)
+      Arel::Nodes::NamedFunction.new(
+        "BTRIM",
+        [
+          Microsoft365User.arel_table[column]
+        ]
+      )
+    end
+
+    def nullable_trimmed_column(column)
+      Arel::Nodes::NamedFunction.new(
+        "NULLIF",
+        [
+          trimmed_column(column),
+          Arel::Nodes.build_quoted("")
+        ]
+      )
+    end
+
+    def lower_trimmed_column(column)
+      Arel::Nodes::NamedFunction.new(
+        "LOWER",
+        [
+          trimmed_column(column)
+        ]
+      )
+    end
+
     def offset
       (page - 1) * page_size
     end
@@ -366,7 +421,10 @@ module Users365
       value.to_s.strip.presence
     end
 
-    def normalize_allowed_filter(value, allowed_values)
+    def normalize_allowed_filter(
+      value,
+      allowed_values
+    )
       normalized = normalize_filter(value)
 
       return if normalized.blank?
@@ -384,7 +442,10 @@ module Users365
 
     def normalize_page_size(value)
       parsed = value.to_i
-      parsed = DEFAULT_PAGE_SIZE unless parsed.positive?
+
+      unless parsed.positive?
+        parsed = DEFAULT_PAGE_SIZE
+      end
 
       [ parsed, MAX_PAGE_SIZE ].min
     end
