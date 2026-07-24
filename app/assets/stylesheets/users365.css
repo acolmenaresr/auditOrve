@@ -698,3 +698,633 @@
   text-align: center;
   white-space: nowrap;
 }
+
+/* =========================================================
+   ENLACE DEL USUARIO EN EL CATÁLOGO
+   ========================================================= */
+
+.audit-user-cell--link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.audit-user-cell--link:hover strong {
+  color: #2454e6;
+  text-decoration: underline;
+}
+
+.audit-user-cell__content {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.audit-user-cell__content strong,
+.audit-user-cell__content small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audit-user-cell__content small {
+  color: #69758a;
+}
+
+/* =========================================================
+   DASHBOARD INDIVIDUAL
+   ========================================================= */
+
+.users365-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.users365-dashboard__navigation {
+  display: flex;
+  align-items: center;
+}
+
+.users365-dashboard__back-link {
+  display: inline-flex;
+  align-items: center;
+
+  color: #2454e6;
+
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.users365-dashboard__back-link:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   TARJETA PRINCIPAL
+   ========================================================= */
+
+.users365-profile {
+  overflow: hidden;
+
+  border: 1px solid #dce3ee;
+  border-radius: 20px;
+
+  background: #ffffff;
+  box-shadow: 0 14px 36px rgb(15 23 42 / 6%);
+}
+
+.users365-profile__header {
+  padding: 28px 30px;
+
+  border-bottom: 1px solid #e5eaf2;
+}
+
+.users365-profile__identity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.users365-profile__avatar {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #e8eef9;
+  color: #294a7a;
+
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.users365-profile__heading {
+  min-width: 0;
+}
+
+.users365-profile__eyebrow,
+.users365-activity__eyebrow {
+  margin: 0 0 6px;
+
+  color: #2454e6;
+
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.users365-profile__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.users365-profile__title-row h1 {
+  margin: 0;
+
+  color: #101828;
+
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.users365-profile__email {
+  margin: 7px 0 0;
+
+  color: #69758a;
+
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   CAMPOS DEL PERFIL
+   ========================================================= */
+
+.users365-profile__details {
+  padding: 26px 30px;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px 30px;
+}
+
+.users365-profile__field {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.users365-profile__field-label {
+  color: #69758a;
+
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.users365-profile__field strong {
+  color: #172033;
+
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.users365-profile__field small {
+  color: #69758a;
+
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   LICENCIAS
+   ========================================================= */
+
+.users365-profile__licenses {
+  padding: 24px 30px 28px;
+
+  border-top: 1px solid #e5eaf2;
+
+  background: #fafbfc;
+}
+
+.users365-profile__section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.users365-profile__section-heading h2 {
+  margin: 0;
+
+  color: #172033;
+
+  font-size: 1rem;
+}
+
+.users365-profile__section-heading p {
+  margin: 5px 0 0;
+
+  color: #69758a;
+
+  font-size: 0.9rem;
+}
+
+.users365-profile__license-count {
+  min-width: 34px;
+  height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #e8eef9;
+  color: #2454e6;
+
+  font-weight: 800;
+}
+
+.users365-profile__license-list {
+  margin-top: 18px;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.users365-profile__license {
+  padding: 8px 12px;
+
+  border: 1px solid #d7e1fb;
+  border-radius: 999px;
+
+  background: #eef3ff;
+  color: #2454e6;
+
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.users365-profile__empty {
+  margin: 16px 0 0;
+
+  color: #69758a;
+}
+
+/* =========================================================
+   ACTIVIDAD INDIVIDUAL DEL USUARIO
+   ========================================================= */
+
+.users365-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.users365-activity__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.users365-activity__header h2 {
+  margin: 0;
+
+  color: #172033;
+
+  font-size: 1.35rem;
+}
+
+.users365-activity__header p:not(
+  .users365-activity__eyebrow
+) {
+  margin: 7px 0 0;
+
+  color: #69758a;
+}
+
+.users365-activity__eyebrow {
+  margin: 0 0 6px;
+
+  color: #2454e6;
+
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.users365-activity__period {
+  flex: 0 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+
+  text-align: right;
+}
+
+.users365-activity__period span {
+  color: #69758a;
+
+  font-size: 0.8rem;
+}
+
+.users365-activity__period strong {
+  color: #172033;
+
+  font-size: 0.9rem;
+}
+
+/* =========================================================
+   MÉTRICAS DE ACTIVIDAD
+   ========================================================= */
+
+.users365-activity-metrics {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.users365-activity-metric {
+  min-width: 0;
+  min-height: 138px;
+  padding: 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid #dce3ee;
+  border-radius: 14px;
+
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgb(15 23 42 / 5%);
+}
+
+.users365-activity-metric > span {
+  color: #69758a;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.users365-activity-metric > strong {
+  margin: auto 0;
+
+  overflow: hidden;
+
+  color: #172033;
+
+  font-size: 1.25rem;
+  line-height: 1.25;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.users365-activity-metric:first-child > strong,
+.users365-activity-metric:nth-child(4) > strong {
+  font-size: 1.8rem;
+}
+
+.users365-activity-metric > small {
+  color: #69758a;
+
+  font-size: 0.78rem;
+}
+
+.users365-activity-metric__date {
+  white-space: normal !important;
+}
+
+/* =========================================================
+   FILTROS DE ACTIVIDAD
+   ========================================================= */
+
+.users365-activity__filters {
+  width: 100%;
+  padding: 22px;
+  overflow: visible;
+
+  border: 1px solid #dce3ee;
+  border-radius: 18px;
+
+  background: #ffffff;
+  box-shadow: 0 10px 30px rgb(15 23 42 / 4%);
+}
+
+.users365-activity__filter-form {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1fr)
+    minmax(150px, 1fr)
+    minmax(150px, 1fr)
+    110px
+    auto;
+  align-items: end;
+  gap: 14px;
+}
+
+.users365-activity__filter-form .audit-filter-field {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.users365-activity__filter-form .audit-filter-field label {
+  color: #53627a;
+
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.users365-activity__filter-form select,
+.users365-activity__filter-form input[type="date"] {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+
+  border: 1px solid #d8e0ec;
+  border-radius: 12px;
+
+  background: #ffffff;
+  color: #172033;
+
+  font: inherit;
+  outline: none;
+}
+
+.users365-activity__filter-form select:focus,
+.users365-activity__filter-form input[type="date"]:focus {
+  border-color: #2454e6;
+}
+
+.users365-activity__filter-form .audit-filters__actions {
+  min-width: max-content;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.users365-activity .audit-custom-date.is-hidden {
+  display: none;
+}
+
+/* =========================================================
+   TABLA DE ACTIVIDAD
+   ========================================================= */
+
+.users365-activity__table {
+  min-width: 1180px;
+}
+
+.users365-activity .audit-table-wrapper {
+  overflow-x: auto;
+}
+
+.users365-activity .audit-sort-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  color: inherit;
+
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.users365-activity .audit-sort-link:hover,
+.users365-activity .audit-sort-link.is-active {
+  color: #2454e6;
+}
+
+.users365-activity .audit-sort-link__icon {
+  color: #718096;
+
+  font-size: 0.72rem;
+}
+
+.users365-activity .audit-table__date {
+  min-width: 150px;
+
+  white-space: nowrap;
+}
+
+.users365-activity .audit-table__file {
+  max-width: 240px;
+}
+
+.users365-activity .audit-table__long-text {
+  max-width: 300px;
+}
+
+.users365-activity .audit-table__file span,
+.users365-activity .audit-table__long-text span {
+  display: block;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .users365-activity-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .users365-activity__filter-form {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .users365-profile__details {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .users365-activity-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .users365-activity__filter-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .users365-activity__filter-form .audit-filters__actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .users365-profile__header,
+  .users365-profile__details,
+  .users365-profile__licenses {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .users365-profile__identity {
+    align-items: flex-start;
+  }
+
+  .users365-profile__avatar {
+    width: 56px;
+    height: 56px;
+    flex-basis: 56px;
+  }
+
+  .users365-profile__title-row h1 {
+    font-size: 1.4rem;
+  }
+
+  .users365-profile__details {
+    grid-template-columns: 1fr;
+  }
+
+  .users365-activity__header {
+    flex-direction: column;
+  }
+
+  .users365-activity__period {
+    align-items: flex-start;
+
+    text-align: left;
+  }
+
+  .users365-activity-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .users365-activity__filters {
+    padding: 18px;
+  }
+
+  .users365-activity__filter-form {
+    grid-template-columns: 1fr;
+  }
+
+  .users365-activity__filter-form .audit-filters__actions {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .users365-activity__filter-form
+    .audit-filters__actions
+    .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 440px) {
+  .users365-activity__filter-form .audit-filters__actions {
+    grid-template-columns: 1fr;
+  }
+}

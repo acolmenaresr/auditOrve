@@ -1,0 +1,736 @@
+<% user_name =
+  @user.display_name.presence ||
+  @user.user_principal_name.presence ||
+  "Usuario"
+%>
+
+<% content_for(
+  :title,
+  "#{user_name} | AuditORVE"
+) %>
+
+<section class="audit-page users365-dashboard">
+  <section class="users365-profile">
+    <header class="users365-profile__header">
+      <div class="users365-profile__identity">
+        <span
+          class="users365-profile__avatar"
+          aria-hidden="true"
+        >
+          <%= user_name.first.upcase %>
+        </span>
+
+        <div class="users365-profile__heading">
+          <p class="users365-profile__eyebrow">
+            Perfil Microsoft 365
+          </p>
+
+          <div class="users365-profile__title-row">
+            <h1>
+              <%= user_name %>
+            </h1>
+
+            <% case @user.activity_status %>
+            <% when :disabled %>
+              <span class="audit-badge">
+                Deshabilitado
+              </span>
+
+            <% when :without_activity %>
+              <span class="audit-badge">
+                Sin actividad
+              </span>
+
+            <% when :inactive %>
+              <span class="audit-badge audit-badge--externo">
+                Inactivo +90 días
+              </span>
+
+            <% else %>
+              <span class="audit-badge audit-badge--interno">
+                Activo
+              </span>
+            <% end %>
+          </div>
+
+          <p class="users365-profile__email">
+            <%= @user.user_principal_name.presence ||
+              "Sin correo registrado" %>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div class="users365-profile__details">
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Departamento
+        </span>
+
+        <strong>
+          <%= @user.department.presence ||
+            "Sin departamento" %>
+        </strong>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Puesto de trabajo
+        </span>
+
+        <strong>
+          <%= @user.job_title.presence ||
+            "Sin puesto" %>
+        </strong>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Jefe directo
+        </span>
+
+        <strong>
+          <%= @user.manager_name.presence ||
+            "Sin jefe directo" %>
+        </strong>
+
+        <% if @user.manager_upn.present? %>
+          <small>
+            <%= @user.manager_upn %>
+          </small>
+        <% end %>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Licencias asignadas
+        </span>
+
+        <strong>
+          <%= pluralize(
+            @user.license_count,
+            "licencia"
+          ) %>
+        </strong>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Aplicaciones de Office
+        </span>
+
+        <strong>
+          <%= @user.office_license? ? "Sí" : "No" %>
+        </strong>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Última conexión
+        </span>
+
+        <strong>
+          <% if @user.last_activity_date.present? %>
+            <%= @user.last_activity_date.strftime(
+              "%d/%m/%Y"
+            ) %>
+          <% else %>
+            Sin actividad registrada
+          <% end %>
+        </strong>
+      </article>
+    </div>
+
+    <section class="users365-profile__licenses">
+      <div class="users365-profile__section-heading">
+        <div>
+          <h2>Licencias Microsoft 365</h2>
+
+          <p>
+            Productos actualmente asignados al usuario.
+          </p>
+        </div>
+
+        <span class="users365-profile__license-count">
+          <%= @user.license_count %>
+        </span>
+      </div>
+
+      <% license_names =
+        @user.commercial_license_names %>
+
+      <% if license_names.any? %>
+        <div class="users365-profile__license-list">
+          <% license_names.each do |license_name| %>
+            <span class="users365-profile__license">
+              <%= license_name %>
+            </span>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="users365-profile__empty">
+          Este usuario no tiene licencias asignadas.
+        </p>
+      <% end %>
+    </section>
+  </section>
+
+  <section class="users365-activity">
+  <section class="users365-activity-metrics">
+    <article class="users365-activity-metric">
+      <span>Movimientos</span>
+
+      <strong>
+        <%= number_with_delimiter(@total_count) %>
+      </strong>
+
+      <small>
+        Eventos en el periodo
+      </small>
+    </article>
+
+    <article class="users365-activity-metric">
+      <span>Aplicación principal</span>
+
+      <strong title="<%= @top_application[:label] %>">
+        <%= @top_application[:label] %>
+      </strong>
+
+      <small>
+        <%= number_with_delimiter(
+          @top_application[:events]
+        ) %>
+        movimientos
+      </small>
+    </article>
+
+    <article class="users365-activity-metric">
+      <span>Acción más frecuente</span>
+
+      <strong title="<%= @top_action[:label] %>">
+        <%= @top_action[:label] %>
+      </strong>
+
+      <small>
+        <%= number_with_delimiter(
+          @top_action[:events]
+        ) %>
+        movimientos
+      </small>
+    </article>
+
+    <article class="users365-activity-metric">
+      <span>Archivos únicos</span>
+
+      <strong>
+        <%= number_with_delimiter(
+          @unique_files_count
+        ) %>
+      </strong>
+
+      <small>
+        Archivos o rutas distintas
+      </small>
+    </article>
+
+    <article class="users365-activity-metric">
+      <span>Último movimiento</span>
+
+      <strong class="users365-activity-metric__date">
+        <% if @last_movement_at.present? %>
+          <%= @last_movement_at
+            .in_time_zone("America/Mexico_City")
+            .strftime("%d/%m/%Y") %>
+        <% else %>
+          Sin actividad
+        <% end %>
+      </strong>
+
+      <small>
+        <% if @last_movement_at.present? %>
+          <%= @last_movement_at
+            .in_time_zone("America/Mexico_City")
+            .strftime("%H:%M") %>
+        <% else %>
+          En el periodo seleccionado
+        <% end %>
+      </small>
+    </article>
+  </section>
+
+  <section class="audit-filters users365-activity__filters">
+    <%= form_with(
+      url: user365_path(@user),
+      method: :get,
+      local: true,
+      class: "audit-filters__form users365-activity__filter-form"
+    ) do |form| %>
+
+      <%= form.hidden_field(
+        :sort,
+        value: @sort
+      ) %>
+
+      <%= form.hidden_field(
+        :direction,
+        value: @direction
+      ) %>
+
+      <div class="audit-filter-field">
+        <%= form.label :date_filter, "Periodo" %>
+
+        <%= form.select(
+          :date_filter,
+          options_for_select(
+            [
+              ["Hoy", "today"],
+              ["Ayer", "yesterday"],
+              ["Últimos 7 días", "last_7_days"],
+              ["Últimos 30 días", "last_30_days"],
+              ["Esta semana", "this_week"],
+              ["Semana pasada", "last_week"],
+              ["Este mes", "this_month"],
+              ["Mes pasado", "last_month"],
+              ["Este año", "this_year"],
+              ["Personalizado", "custom"]
+            ],
+            @date_range.filter
+          ),
+          {},
+          {
+            id: "user-dashboard-date-filter"
+          }
+        ) %>
+      </div>
+
+      <div
+        class="
+          audit-filter-field
+          audit-custom-date
+          <%= "is-hidden" unless
+            @date_range.filter == "custom" %>
+        "
+        data-user-dashboard-custom-date
+      >
+        <%= form.label :from, "Desde" %>
+
+        <%= form.date_field(
+          :from,
+          value: params[:from],
+          id: "user-dashboard-date-from"
+        ) %>
+      </div>
+
+      <div
+        class="
+          audit-filter-field
+          audit-custom-date
+          <%= "is-hidden" unless
+            @date_range.filter == "custom" %>
+        "
+        data-user-dashboard-custom-date
+      >
+        <%= form.label :to, "Hasta" %>
+
+        <%= form.date_field(
+          :to,
+          value: params[:to],
+          id: "user-dashboard-date-to"
+        ) %>
+      </div>
+
+      <div class="audit-filter-field">
+  <%= form.label :audit_action, "Acción" %>
+
+  <%= form.select(
+    :audit_action,
+    options_for_select(
+      [["Todas las acciones", ""]] +
+        @actions.map do |audit_action|
+          [audit_action, audit_action]
+        end,
+      params[:audit_action]
+    ),
+    {},
+    {
+      class: "js-searchable-select",
+      autocomplete: "off",
+      data: {
+        placeholder: "Buscar acción"
+      }
+    }
+  ) %>
+</div>
+
+      <div class="audit-filter-field">
+        <%= form.label :per_page, "Registros" %>
+
+        <%= form.select(
+          :per_page,
+          options_for_select(
+            [
+              ["10", 10],
+              ["25", 25],
+              ["50", 50],
+              ["100", 100]
+            ],
+            @per_page
+          )
+        ) %>
+      </div>
+
+      <div class="audit-filters__actions">
+        <%= form.submit(
+          "Buscar",
+          class: "button button--primary"
+        ) %>
+
+        <%= link_to(
+          "Limpiar",
+          user365_path(@user),
+          class: "button button--secondary"
+        ) %>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="audit-table-card">
+    <div class="audit-table-wrapper">
+      <table class="audit-table users365-activity__table">
+        <thead>
+          <tr>
+            <th>
+              <%= sortable_user_activity_header(
+                "Fecha",
+                "dateZ"
+              ) %>
+            </th>
+
+            <th>
+              <%= sortable_user_activity_header(
+                "Acción",
+                "accion"
+              ) %>
+            </th>
+
+            <th>
+              <%= sortable_user_activity_header(
+                "Operación 365",
+                "operacion365"
+              ) %>
+            </th>
+
+            <th>
+              <%= sortable_user_activity_header(
+                "Aplicación",
+                "aplicacion"
+              ) %>
+            </th>
+
+            <th>
+              <%= sortable_user_activity_header(
+                "Tipo de elemento",
+                "tipoItem"
+              ) %>
+            </th>
+
+            <th>
+              <%= sortable_user_activity_header(
+                "Archivo",
+                "archivo"
+              ) %>
+            </th>
+
+            <th>
+              <%= sortable_user_activity_header(
+                "Ruta",
+                "ruta"
+              ) %>
+            </th>
+
+            <th>
+              <%= sortable_user_activity_header(
+                "Sitio",
+                "sitio"
+              ) %>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% if @records.any? %>
+            <% @records.each do |record| %>
+              <tr>
+                <td class="audit-table__date">
+                  <% if record.dateZ.present? %>
+                    <%= record.dateZ
+                      .in_time_zone(
+                        "America/Mexico_City"
+                      )
+                      .strftime("%d/%m/%Y %H:%M") %>
+                  <% elsif record.fechaEv.present? %>
+                    <%= record.fechaEv.strftime(
+                      "%d/%m/%Y"
+                    ) %>
+                  <% else %>
+                    —
+                  <% end %>
+                </td>
+
+                <td>
+                  <strong>
+                    <%= record["accion"].presence || "—" %>
+                  </strong>
+                </td>
+
+                <td>
+                  <%= record[
+                    "operacion365"
+                  ].presence || "—" %>
+                </td>
+
+                <td>
+                  <span class="audit-badge">
+                    <%= record[
+                      "aplicacion"
+                    ].presence || "—" %>
+                  </span>
+                </td>
+
+                <td>
+                  <%= record[
+                    "tipoItem"
+                  ].presence || "—" %>
+                </td>
+
+                <td class="audit-table__file">
+                  <span title="<%= record["archivo"] %>">
+                    <%= record[
+                      "archivo"
+                    ].presence || "—" %>
+                  </span>
+                </td>
+
+                <td class="audit-table__long-text">
+                  <span title="<%= record["ruta"] %>">
+                    <%= record[
+                      "ruta"
+                    ].presence || "—" %>
+                  </span>
+                </td>
+
+                <td class="audit-table__long-text">
+                  <span title="<%= record["sitio"] %>">
+                    <%= record[
+                      "sitio"
+                    ].presence || "—" %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td
+                colspan="8"
+                class="audit-table__empty"
+              >
+                <div>
+                  <strong>
+                    No se encontraron movimientos
+                  </strong>
+
+                  <span>
+                    Cambia el periodo para ampliar la consulta.
+                  </span>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if @total_pages > 1 %>
+      <footer class="audit-pagination">
+      <div class = "audit-pagination__summary">
+            <p>
+          <% if @total_count.positive? %>
+            Mostrando del
+
+            <strong>
+              <%= number_with_delimiter(@first_record) %>
+            </strong>
+
+            al
+
+            <strong>
+              <%= number_with_delimiter(@last_record) %>
+            </strong>
+          <% else %>
+            No hay registros para el periodo seleccionado.
+          <% end %>
+          </p>
+        </div>  
+      
+      <div class="audit-pagination__summary">
+          Página
+
+          <strong>
+            <%= @page %>
+          </strong>
+
+          de
+
+          <strong>
+            <%= @total_pages %>
+          </strong>
+        </div>
+        
+
+        
+
+        <nav
+          class="audit-pagination__controls"
+          aria-label="Paginación de actividad del usuario"
+        >
+          <% preserved_params =
+            request.query_parameters.except("page") %>
+
+          <% if @page > 1 %>
+            <%= link_to(
+              "← Anterior",
+              user365_path(
+                @user,
+                preserved_params.merge(
+                  page: @page - 1
+                )
+              ),
+              class: "audit-pagination__button"
+            ) %>
+          <% else %>
+            <span
+              class="
+                audit-pagination__button
+                is-disabled
+              "
+            >
+              ← Anterior
+            </span>
+          <% end %>
+
+          <span class="audit-pagination__current">
+            <%= @page %>
+          </span>
+
+          <% if @page < @total_pages %>
+            <%= link_to(
+              "Siguiente →",
+              user365_path(
+                @user,
+                preserved_params.merge(
+                  page: @page + 1
+                )
+              ),
+              class: "audit-pagination__button"
+            ) %>
+          <% else %>
+            <span
+              class="
+                audit-pagination__button
+                is-disabled
+              "
+            >
+              Siguiente →
+            </span>
+          <% end %>
+        </nav>
+      </footer>
+    <% end %>
+  </section>
+</section>
+
+<script>
+  (() => {
+    const initializeUserDashboardDateFilters = () => {
+      const periodSelect =
+        document.getElementById(
+          "user-dashboard-date-filter"
+        )
+
+      const customDateFields =
+        document.querySelectorAll(
+          "[data-user-dashboard-custom-date]"
+        )
+
+      if (
+        !periodSelect ||
+        customDateFields.length === 0
+      ) {
+        return
+      }
+
+      const toggleCustomDates = () => {
+        const isCustom =
+          periodSelect.value === "custom"
+
+        customDateFields.forEach((field) => {
+          field.classList.toggle(
+            "is-hidden",
+            !isCustom
+          )
+
+          const input =
+            field.querySelector("input")
+
+          if (!input) {
+            return
+          }
+
+          input.disabled = !isCustom
+
+          if (!isCustom) {
+            input.value = ""
+          }
+        })
+      }
+
+      if (periodSelect.userDashboardHandler) {
+        periodSelect.removeEventListener(
+          "change",
+          periodSelect.userDashboardHandler
+        )
+      }
+
+      periodSelect.userDashboardHandler =
+        toggleCustomDates
+
+      periodSelect.addEventListener(
+        "change",
+        periodSelect.userDashboardHandler
+      )
+
+      toggleCustomDates()
+    }
+
+    document.addEventListener(
+      "turbo:load",
+      initializeUserDashboardDateFilters
+    )
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initializeUserDashboardDateFilters
+    )
+
+    initializeUserDashboardDateFilters()
+  })()
+</script>
+
+  <div class="users365-dashboard__navigation">
+    <%= link_to(
+      "← Volver al catálogo",
+      users365_path,
+      class: "users365-dashboard__back-link"
+    ) %>
+  </div>
+</section>
