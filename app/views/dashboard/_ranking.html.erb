@@ -1,3 +1,6 @@
+<% user_ranking =
+  local_assigns.fetch(:user_ranking, false) %>
+
 <article class="ranking-card">
   <header class="ranking-card__header">
     <h2><%= title %></h2>
@@ -14,9 +17,45 @@
 
       <tbody>
         <% rows.each do |row| %>
+          <% directory_user =
+            user_ranking ? row[:directory_user] : nil %>
+
           <tr>
             <td title="<%= row[:label] %>">
-              <%= row[:label] %>
+              <% if directory_user.present? %>
+                <% user_name =
+                  directory_user.display_name.presence ||
+                  directory_user.user_principal_name.presence ||
+                  "Usuario" %>
+
+                <%= link_to(
+                  user365_path(directory_user),
+                  class: "audit-user-cell audit-user-cell--link",
+                  aria: {
+                    label: "Ver perfil de #{user_name}"
+                  }
+                ) do %>
+                  <span class="audit-user-cell__avatar">
+                    <%= user_name.first.upcase %>
+                  </span>
+
+                  <span class="audit-user-cell__content">
+                    <strong>
+                      <%= directory_user.display_name.presence ||
+                        "Sin nombre" %>
+                    </strong>
+
+                    <small
+                      title="<%= directory_user.user_principal_name %>"
+                    >
+                      <%= directory_user.user_principal_name.presence ||
+                        row[:label] %>
+                    </small>
+                  </span>
+                <% end %>
+              <% else %>
+                <%= row[:label] %>
+              <% end %>
             </td>
 
             <td>
