@@ -14,7 +14,29 @@
     </div>
   </header>
   -->
+<section class="audit-summary">
+    <div>
+      <strong>
+        <%= number_with_delimiter(@total_count) %>
+      </strong>
 
+      <span>movimientos encontrados</span>
+    </div>
+
+    <p>
+      Mostrando información del
+
+      <strong>
+        <%= l(@date_range.from, format: :long) %>
+      </strong>
+
+      al
+
+      <strong>
+        <%= l(@date_range.to - 1.day, format: :long) %>
+      </strong>
+    </p>
+  </section>
   <section class="audit-filters">
     <%= form_with(
       url: audit_logs_path,
@@ -160,30 +182,6 @@
     <% end %>
   </section>
 
-  <section class="audit-summary">
-    <div>
-      <strong>
-        <%= number_with_delimiter(@total_count) %>
-      </strong>
-
-      <span>movimientos encontrados</span>
-    </div>
-
-    <p>
-      Mostrando información del
-
-      <strong>
-        <%= l(@date_range.from, format: :long) %>
-      </strong>
-
-      al
-
-      <strong>
-        <%= l(@date_range.to - 1.day, format: :long) %>
-      </strong>
-    </p>
-  </section>
-
   <section class="audit-table-card">
     <div class="audit-table-wrapper">
       <table class="audit-table">
@@ -277,20 +275,59 @@
                   <% end %>
                 </td>
 
-                <td>
-                  <div class="audit-user-cell">
-                    <span class="audit-user-cell__avatar">
-                      <%= record["usuario"]
-                        .to_s
-                        .first
-                        &.upcase || "?" %>
-                    </span>
+                <% audit_user_email =
+  record["usuario"].to_s.strip %>
 
-                    <span title="<%= record["usuario"] %>">
-                      <%= record["usuario"].presence || "Sin usuario" %>
-                    </span>
-                  </div>
-                </td>
+<% directory_user =
+  @directory_users_by_email[
+    audit_user_email.downcase
+  ] %>
+
+<td>
+  <% if directory_user.present? %>
+    <% user_name =
+      directory_user.display_name.presence ||
+      directory_user.user_principal_name.presence ||
+      "Usuario" %>
+
+    <%= link_to(
+      user365_path(directory_user,
+      return_to: request.fullpath),
+      class: "audit-user-cell audit-user-cell--link",
+      aria: {
+        label: "Ver dashboard de #{user_name}"
+      }
+    ) do %>
+      <span class="audit-user-cell__avatar">
+        <%= user_name.first.upcase %>
+      </span>
+
+      <span class="audit-user-cell__content">
+        <strong title="<%= directory_user.display_name %>">
+          <%= directory_user.display_name.presence ||
+            "Sin nombre" %>
+        </strong>
+
+        <small
+          title="<%= directory_user.user_principal_name %>"
+        >
+          <%= directory_user.user_principal_name.presence ||
+            audit_user_email %>
+        </small>
+      </span>
+    <% end %>
+  <% else %>
+    <div class="audit-user-cell">
+      <span class="audit-user-cell__avatar">
+        <%= audit_user_email.first&.upcase || "?" %>
+      </span>
+
+      <span title="<%= audit_user_email %>">
+        <%= audit_user_email.presence || "Sin usuario" %>
+      </span>
+    </div>
+  <% end %>
+</td>
 
                 <td>
                   <% user_type =

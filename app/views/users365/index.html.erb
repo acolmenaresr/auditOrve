@@ -13,6 +13,30 @@
     </div>
   </header>
 
+  <section class="audit-summary">
+    <div>
+      <strong>
+        <%= number_with_delimiter(@total_count) %>
+      </strong>
+
+      <span>usuarios encontrados</span>
+    </div>
+
+    <p>
+      Mostrando del
+
+      <strong>
+        <%= number_with_delimiter(@first_record) %>
+      </strong>
+
+      al
+
+      <strong>
+        <%= number_with_delimiter(@last_record) %>
+      </strong>
+    </p>
+  </section>
+
   <section class="users365-filters">
     <% empty_filter_value =
       Users365::CatalogQuery::EMPTY_FILTER_VALUE %>
@@ -180,46 +204,21 @@
           }
         ) %>
       </div>
+
+      <div class="users365-filters__actions">
+        <%= button_tag(
+          "Buscar",
+          type: "submit",
+          class: "button button--primary users365-filter-button"
+        ) %>
+
+        <%= link_to(
+          "Limpiar",
+          users365_path,
+          class: "button button--secondary users365-filter-button"
+        ) %>
+      </div>
     <% end %>
-  </section>
-
-  <div class="users365-filters-external-actions">
-    <%= button_tag(
-      "Buscar",
-      type: "submit",
-      form: "users365-filters-form",
-      class: "button button--primary users365-filter-button"
-    ) %>
-
-    <%= link_to(
-      "Limpiar",
-      users365_path,
-      class: "button button--secondary users365-filter-button"
-    ) %>
-  </div>
-
-  <section class="audit-summary">
-    <div>
-      <strong>
-        <%= number_with_delimiter(@total_count) %>
-      </strong>
-
-      <span>usuarios encontrados</span>
-    </div>
-
-    <p>
-      Mostrando del
-
-      <strong>
-        <%= number_with_delimiter(@first_record) %>
-      </strong>
-
-      al
-
-      <strong>
-        <%= number_with_delimiter(@last_record) %>
-      </strong>
-    </p>
   </section>
 
   <section class="audit-table-card">
@@ -249,46 +248,53 @@
               <tr>
                 <td>
                   <%= link_to(
-  user365_path(user),
-  class: "audit-user-cell audit-user-cell--link",
-  aria: {
-    label: "Ver dashboard de #{
-      user.display_name.presence ||
-      user.user_principal_name.presence ||
-      "usuario"
-    }"
-  }
-) do %>
-  <span class="audit-user-cell__avatar">
-    <%= (
-      user.display_name.presence ||
-      user.user_principal_name.presence ||
-      "?"
-    ).first.upcase %>
-  </span>
+                    user365_path(
+                      user,
+                      return_to: request.fullpath
+                    ),
+                    class: "audit-user-cell audit-user-cell--link",
+                    aria: {
+                      label: "Ver dashboard de #{
+                        user.display_name.presence ||
+                        user.user_principal_name.presence ||
+                        "usuario"
+                      }"
+                    }
+                  ) do %>
+                    <span class="audit-user-cell__avatar">
+                      <%= (
+                        user.display_name.presence ||
+                        user.user_principal_name.presence ||
+                        "?"
+                      ).first.upcase %>
+                    </span>
 
-  <span class="audit-user-cell__content">
-    <strong>
-      <%= user.display_name.presence || "Sin nombre" %>
-    </strong>
+                    <span class="audit-user-cell__content">
+                      <strong>
+                        <%= user.display_name.presence || "Sin nombre" %>
+                      </strong>
 
-    <small title="<%= user.user_principal_name %>">
-      <%= user.user_principal_name.presence || "Sin correo" %>
-    </small>
-  </span>
-<% end %>
+                      <small title="<%= user.user_principal_name %>">
+                        <%= user.user_principal_name.presence ||
+                          "Sin correo" %>
+                      </small>
+                    </span>
+                  <% end %>
                 </td>
 
                 <td>
-                  <%= user.department.presence || "Sin departamento" %>
+                  <%= user.department.presence ||
+                    "Sin departamento" %>
                 </td>
 
                 <td>
-                  <%= user.job_title.presence || "Sin puesto" %>
+                  <%= user.job_title.presence ||
+                    "Sin puesto" %>
                 </td>
 
                 <td>
-                  <%= user.manager_name.presence || "Sin jefe directo" %>
+                  <%= user.manager_name.presence ||
+                    "Sin jefe directo" %>
                 </td>
 
                 <td class="audit-table__licenses">
@@ -310,7 +316,10 @@
                     "
                   >
                     <span class="license-tooltip-trigger__count">
-                      <%= pluralize(user.license_count, "licencia") %>
+                      <%= pluralize(
+                        user.license_count,
+                        "licencia"
+                      ) %>
                     </span>
 
                     <span
@@ -322,7 +331,9 @@
 
                     <template data-license-tooltip-target="template">
                       <div class="license-tooltip-popover__header">
-                        <strong>Licencias asignadas</strong>
+                        <strong>
+                          Licencias asignadas
+                        </strong>
 
                         <span>
                           <%= user.license_count %>
@@ -367,7 +378,9 @@
 
                 <td class="audit-table__date">
                   <% if user.last_activity_date.present? %>
-                    <%= user.last_activity_date.strftime("%d/%m/%Y") %>
+                    <%= user.last_activity_date.strftime(
+                      "%d/%m/%Y"
+                    ) %>
                   <% else %>
                     Sin actividad
                   <% end %>

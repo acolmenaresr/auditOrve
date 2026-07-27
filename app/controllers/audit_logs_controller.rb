@@ -18,6 +18,8 @@ class AuditLogsController < ApplicationController
     )
 
     @records = query.records
+    @directory_users_by_email = directory_users_by_email(@records)
+
     @users = query.users
     @actions = query.actions
     @page = query.page
@@ -26,5 +28,28 @@ class AuditLogsController < ApplicationController
     @total_pages = query.total_pages
     @sort = query.sort
     @direction = query.direction
+  end
+
+  private
+
+  def directory_users_by_email(records)
+    normalized_emails = records.filter_map do |record|
+      record["usuario"]
+        .to_s
+        .strip
+        .downcase
+        .presence
+    end.uniq
+
+    return {} if normalized_emails.empty?
+
+    Microsoft365User
+      .where(
+        "LOWER(BTRIM(user_principal_name)) IN (?)",
+        normalized_emails
+      )
+      .index_by do |user|
+        user.user_principal_name.to_s.strip.downcase
+      end
   end
 end

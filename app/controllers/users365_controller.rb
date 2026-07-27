@@ -42,6 +42,7 @@ class Users365Controller < ApplicationController
   end
 
   def show
+    @return_to = safe_return_path(params[:return_to])
     @date_range = Audit::DateRange.new(
       filter:
         params[:date_filter].presence ||
@@ -99,7 +100,17 @@ class Users365Controller < ApplicationController
 
   private
 
-  def set_user
-    @user = Microsoft365User.find(params[:id])
+    def set_user
+      @user = Microsoft365User.find(params[:id])
+    end
+
+    def safe_return_path(value)
+    path = value.to_s.strip
+
+    return users365_path if path.blank?
+    return users365_path unless path.start_with?("/")
+    return users365_path if path.start_with?("//")
+
+    path
   end
 end
