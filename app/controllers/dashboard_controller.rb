@@ -50,6 +50,6 @@ class DashboardController < ApplicationController
   def normalized_top_limit
     value = Integer(params[:top], exception: false)
 
-    [10, 15, 20].include?(value) ? value : 10
+    [ 10, 15, 20 ].include?(value) ? value : 10
   end
 end
