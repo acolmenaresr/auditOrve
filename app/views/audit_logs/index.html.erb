@@ -14,7 +14,29 @@
     </div>
   </header>
   -->
+<section class="audit-summary">
+    <div>
+      <strong>
+        <%= number_with_delimiter(@total_count) %>
+      </strong>
 
+      <span>movimientos encontrados</span>
+    </div>
+
+    <p>
+      Mostrando información del
+
+      <strong>
+        <%= l(@date_range.from, format: :long) %>
+      </strong>
+
+      al
+
+      <strong>
+        <%= l(@date_range.to - 1.day, format: :long) %>
+      </strong>
+    </p>
+  </section>
   <section class="audit-filters">
     <%= form_with(
       url: audit_logs_path,
@@ -160,30 +182,6 @@
     <% end %>
   </section>
 
-  <section class="audit-summary">
-    <div>
-      <strong>
-        <%= number_with_delimiter(@total_count) %>
-      </strong>
-
-      <span>movimientos encontrados</span>
-    </div>
-
-    <p>
-      Mostrando información del
-
-      <strong>
-        <%= l(@date_range.from, format: :long) %>
-      </strong>
-
-      al
-
-      <strong>
-        <%= l(@date_range.to - 1.day, format: :long) %>
-      </strong>
-    </p>
-  </section>
-
   <section class="audit-table-card">
     <div class="audit-table-wrapper">
       <table class="audit-table">
@@ -293,7 +291,8 @@
       "Usuario" %>
 
     <%= link_to(
-      user365_path(directory_user),
+      user365_path(directory_user,
+      return_to: request.fullpath),
       class: "audit-user-cell audit-user-cell--link",
       aria: {
         label: "Ver dashboard de #{user_name}"

@@ -689,6 +689,7 @@
   margin: 0;
   color: #69758a;
 }
+
 /* =========================================================
    COLUMNA LICENCIA OFFICE
    ========================================================= */
@@ -1108,18 +1109,24 @@
   box-shadow: 0 10px 30px rgb(15 23 42 / 4%);
 }
 
-.users365-activity__filter-form {
+.audit-filters__form.users365-activity__filter-form {
   width: 100%;
 
   display: grid;
   grid-template-columns:
-    minmax(180px, 1fr)
-    minmax(150px, 1fr)
-    minmax(150px, 1fr)
-    110px
-    auto;
+    minmax(220px, 1fr)
+    minmax(170px, 0.8fr)
+    minmax(170px, 0.8fr)
+    minmax(260px, 1.2fr)
+    120px
+    200px;
   align-items: end;
   gap: 14px;
+}
+
+.audit-filters__form.users365-activity__filter-form,
+.audit-filters__form.users365-activity__filter-form * {
+  box-sizing: border-box;
 }
 
 .users365-activity__filter-form .audit-filter-field {
@@ -1159,12 +1166,44 @@
   border-color: #2454e6;
 }
 
-.users365-activity__filter-form .audit-filters__actions {
-  min-width: max-content;
+.audit-filters__form.users365-activity__filter-form
+  .audit-filters__actions {
+  width: 100%;
+  min-width: 0;
 
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
   gap: 8px;
+}
+
+.audit-filters__form.users365-activity__filter-form
+  .audit-filters__actions
+  .button {
+  width: 100%;
+  min-width: 0;
+  padding-left: 12px;
+  padding-right: 12px;
+
+  white-space: nowrap;
+}
+
+.audit-filters__form.users365-activity__filter-form
+  > .audit-filter-field {
+  min-width: 0;
+}
+
+.audit-filters__form.users365-activity__filter-form
+  select,
+.audit-filters__form.users365-activity__filter-form
+  input,
+.audit-filters__form.users365-activity__filter-form
+  .ts-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  box-sizing: border-box;
 }
 
 .users365-activity .audit-custom-date.is-hidden {
@@ -1238,8 +1277,11 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .users365-activity__filter-form {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
+  .audit-filters__form.users365-activity__filter-form {
+    grid-template-columns: repeat(
+      3,
+      minmax(180px, 1fr)
+    );
   }
 }
 
@@ -1252,11 +1294,15 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .users365-activity__filter-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .audit-filters__form.users365-activity__filter-form {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
   }
 
-  .users365-activity__filter-form .audit-filters__actions {
+  .audit-filters__form.users365-activity__filter-form
+    .audit-filters__actions {
     grid-column: 1 / -1;
   }
 }
@@ -1305,18 +1351,20 @@
     padding: 18px;
   }
 
-  .users365-activity__filter-form {
+  .audit-filters__form.users365-activity__filter-form {
     grid-template-columns: 1fr;
   }
 
-  .users365-activity__filter-form .audit-filters__actions {
+  .audit-filters__form.users365-activity__filter-form
+    .audit-filters__actions {
     width: 100%;
+    grid-column: auto;
 
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .users365-activity__filter-form
+  .audit-filters__form.users365-activity__filter-form
     .audit-filters__actions
     .button {
     width: 100%;
@@ -1324,7 +1372,108 @@
 }
 
 @media (max-width: 440px) {
-  .users365-activity__filter-form .audit-filters__actions {
+  .audit-filters__form.users365-activity__filter-form
+    .audit-filters__actions {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================================================
+   LAYOUT — FILTROS DEL CATÁLOGO
+   ========================================================= */
+
+.users365-filters,
+.users365-filters * {
+  box-sizing: border-box;
+}
+
+.users365-filters__form {
+  width: 100%;
+
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1fr)
+    minmax(220px, 1fr)
+    minmax(220px, 1fr)
+    minmax(260px, 1.15fr);
+  align-items: end;
+  gap: 18px 24px;
+}
+
+/*
+ * Neutraliza los anchos y valores flex definidos
+ * previamente para cada tipo de filtro.
+ */
+
+.users365-filters__form
+  > .users365-filter-field {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  flex: none;
+}
+
+.users365-filters__form
+  .users365-filter-control,
+.users365-filters__form
+  .ts-wrapper,
+.users365-filters__form
+  .ts-control {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* =========================================================
+   ACCIONES
+   ========================================================= */
+
+.users365-filters__actions {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
+  gap: 10px;
+}
+
+.users365-filters__actions
+  .users365-filter-button {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+
+/* =========================================================
+   RESPONSIVE DEL CATÁLOGO
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .users365-filters__form {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .users365-filters {
+    padding: 18px;
+  }
+
+  .users365-filters__form {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .users365-filters__actions {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 440px) {
+  .users365-filters__actions {
     grid-template-columns: 1fr;
   }
 }

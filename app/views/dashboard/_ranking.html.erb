@@ -29,7 +29,8 @@
                   "Usuario" %>
 
                 <%= link_to(
-                  user365_path(directory_user),
+                  user365_path(directory_user,
+                  return_to: request.fullpath),
                   class: "audit-user-cell audit-user-cell--link",
                   aria: {
                     label: "Ver perfil de #{user_name}"
