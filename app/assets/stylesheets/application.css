@@ -1,5 +1,6 @@
 @import url("vendor/tom-select.css");
 @import url("users365.css");
+
 :root {
   --background: #f5f7fb;
   --surface: #ffffff;
@@ -169,6 +170,7 @@ body {
   flex: 0 0 auto;
   margin: 0;
 }
+
 /* =========================================================
    MENSAJES FLASH
    ========================================================= */
@@ -359,6 +361,10 @@ body {
    MÉTRICAS
    ========================================================= */
 
+/*
+ * Comportamiento general.
+ * El Dashboard principal conserva sus seis columnas.
+ */
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(150px, 1fr));
@@ -368,6 +374,7 @@ body {
 
 .metric-card {
   position: relative;
+  min-width: 0;
   min-height: 150px;
   padding: 18px;
   display: flex;
@@ -387,7 +394,9 @@ body {
 
 .metric-card__value {
   margin: 0;
+  color: var(--text);
   font-size: 29px;
+  font-weight: 700;
   line-height: 1;
   text-align: center;
 }
@@ -396,10 +405,32 @@ body {
   position: absolute;
   right: 18px;
   bottom: 18px;
+  left: 18px;
   margin: 0;
   color: var(--muted);
   font-size: 13px;
+  line-height: 1.4;
   text-align: right;
+}
+
+/*
+ * Modificador para páginas que requieren centrar una cantidad
+ * variable de tarjetas, como Cloud Orve.
+ */
+.metric-grid--centered {
+  width: min(100%, 1330px);
+  margin: 0 auto 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.metric-grid--centered > .metric-card {
+  width: 250px;
+  max-width: 250px;
+  flex: 0 0 250px;
 }
 
 /* =========================================================
@@ -950,6 +981,18 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .metric-grid--centered {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+  }
+
+  .metric-grid--centered > .metric-card {
+    width: 100%;
+    max-width: 420px;
+    flex: 0 0 100%;
+  }
+
   .ranking-card:nth-child(3) {
     grid-column: auto;
   }
@@ -1032,12 +1075,12 @@ body {
     margin-left: auto;
   }
 
-.app-header__user {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-}
+  .app-header__user {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
 @media (max-width: 520px) {

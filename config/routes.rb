@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   get "auditoria", to: "audit_logs#index", as: :audit_logs
   get "usuarios-365", to: "users365#index", as: :users365
   get "usuarios-365/:id", to: "users365#show", as: :user365
+  get "cloudorve", to: "nomenclature_audits#index", as: :cloudorve
 
   # Estado de la aplicación
   get "up" => "rails/health#show", as: :rails_health_check
