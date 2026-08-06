@@ -1,211 +1,148 @@
 <div class="dashboard">
   <header class="dashboard__header">
     <div>
-      <p class="dashboard__eyebrow">Cloud Orve</p>
+      <p class="dashboard__eyebrow">
+        Cloud Orve
+      </p>
 
-      <h1>Auditoría de nomenclatura</h1>
+      <h1>
+        Auditoría de nomenclatura
+      </h1>
 
       <p class="dashboard__subtitle">
         Resumen de cumplimiento de carpetas y archivos almacenados
         en Microsoft 365.
       </p>
     </div>
+
+    <%= link_to "Ver Audit Drive",
+                cloudorve_drives_path,
+                class: "button button--secondary" %>
   </header>
 
-  <section class="dashboard__range">
-    Mostrando los primeros
-    <strong><%= @drives.length %></strong>
-    Drives activos.
+  <section class="metric-grid metric-grid--centered">
+    <article class="metric-card">
+      <span class="metric-card__label">
+        Drives activos
+      </span>
+
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(
+          @overview[:active_drives_count]
+        ) %>
+      </strong>
+
+      <small>
+        Fuentes incluidas en la auditoría
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">
+        Carpetas
+      </span>
+
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(
+          @overview[:folders_count]
+        ) %>
+      </strong>
+
+      <small>
+        <% percentage =
+          @overview[:folders_compliance_percentage] %>
+
+        <% if percentage.nil? %>
+          Sin datos de cumplimiento
+        <% else %>
+          Cumplimiento:
+          <%= number_with_precision(
+            percentage,
+            precision: 2,
+            strip_insignificant_zeros: true
+          ) %> %
+        <% end %>
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">
+        Archivos
+      </span>
+
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(
+          @overview[:files_count]
+        ) %>
+      </strong>
+
+      <small>
+        <% percentage =
+          @overview[:files_compliance_percentage] %>
+
+        <% if percentage.nil? %>
+          Sin datos de cumplimiento
+        <% else %>
+          Cumplimiento:
+          <%= number_with_precision(
+            percentage,
+            precision: 2,
+            strip_insignificant_zeros: true
+          ) %> %
+        <% end %>
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">
+        Pendientes de evaluación
+      </span>
+
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(
+          @overview[:pending_items_count]
+        ) %>
+      </strong>
+
+      <small>
+        Sin auditar o en revisión
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">
+        No auditables
+      </span>
+
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(
+          @overview[:non_auditable_items_count]
+        ) %>
+      </strong>
+
+      <small>
+        Excluidos o sin regla aplicable
+      </small>
+    </article>
   </section>
 
-<section class="metric-grid metric-grid--centered">
-  <article class="metric-card">
-    <span class="metric-card__label">Drives activos</span>
+  <div class="cloudorve-dashboard-tables">
+    <%= render "drives_table",
+               title: "Drives comunes",
+               description:
+                 "Cumplimiento de los repositorios compartidos de Grupo ORVE.",
+               drives: @common_drives,
+               show_position: false,
+               empty_message:
+                 "No se encontraron Drives comunes activos." %>
 
-    <strong class="metric-card__value">
-      <%= number_with_delimiter(
-        @overview[:active_drives_count]
-      ) %>
-    </strong>
-
-    <small>Fuentes incluidas en la auditoría</small>
-  </article>
-
-  <article class="metric-card">
-    <span class="metric-card__label">Carpetas</span>
-
-    <strong class="metric-card__value">
-      <%= number_with_delimiter(
-        @overview[:folders_count]
-      ) %>
-    </strong>
-
-    <small>
-      <% percentage = @overview[:folders_compliance_percentage] %>
-
-      <% if percentage.nil? %>
-        Sin datos de cumplimiento
-      <% else %>
-        Cumplimiento:
-        <%= number_with_precision(
-          percentage,
-          precision: 2,
-          strip_insignificant_zeros: true
-        ) %> %
-      <% end %>
-    </small>
-  </article>
-
-  <article class="metric-card">
-    <span class="metric-card__label">Archivos</span>
-
-    <strong class="metric-card__value">
-      <%= number_with_delimiter(
-        @overview[:files_count]
-      ) %>
-    </strong>
-
-    <small>
-      <% percentage = @overview[:files_compliance_percentage] %>
-
-      <% if percentage.nil? %>
-        Sin datos de cumplimiento
-      <% else %>
-        Cumplimiento:
-        <%= number_with_precision(
-          percentage,
-          precision: 2,
-          strip_insignificant_zeros: true
-        ) %> %
-      <% end %>
-    </small>
-  </article>
-
-  <article class="metric-card">
-    <span class="metric-card__label">
-      Pendientes de evaluación
-    </span>
-
-    <strong class="metric-card__value">
-      <%= number_with_delimiter(
-        @overview[:pending_items_count]
-      ) %>
-    </strong>
-
-    <small>Sin auditar o en revisión</small>
-  </article>
-
-  <article class="metric-card">
-    <span class="metric-card__label">No auditables</span>
-
-    <strong class="metric-card__value">
-      <%= number_with_delimiter(
-        @overview[:non_auditable_items_count]
-      ) %>
-    </strong>
-
-    <small>Excluidos o sin regla aplicable</small>
-  </article>
-</section>
-
-  <section class="audit-table-card">
-    <div class="audit-table-wrapper">
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th scope="col">Drive</th>
-            <th scope="col">Propietario</th>
-            <th scope="col">Carpetas</th>
-            <th scope="col">Cumplimiento carpetas</th>
-            <th scope="col">Archivos</th>
-            <th scope="col">Cumplimiento archivos</th>
-            <th scope="col">Pendientes</th>
-            <th scope="col">No auditables</th>
-            <th scope="col">Última evaluación</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <% if @drives.any? %>
-            <% @drives.each do |drive| %>
-              <tr>
-                <td>
-                  <%= drive.source_name %>
-                </td>
-
-                <td>
-                  <%= drive.owner_name.presence || "Sin propietario" %>
-                </td>
-
-                <td>
-                  <%= number_with_delimiter(drive.folders_count) %>
-                </td>
-
-                <td>
-                  <% if drive.folders_compliance_percentage.nil? %>
-                    Sin datos
-                  <% else %>
-                    <%= number_with_precision(
-                      drive.folders_compliance_percentage,
-                      precision: 2,
-                      strip_insignificant_zeros: true
-                    ) %> %
-                  <% end %>
-                </td>
-
-                <td>
-                  <%= number_with_delimiter(drive.files_count) %>
-                </td>
-
-                <td>
-                  <% if drive.files_compliance_percentage.nil? %>
-                    Sin datos
-                  <% else %>
-                    <%= number_with_precision(
-                      drive.files_compliance_percentage,
-                      precision: 2,
-                      strip_insignificant_zeros: true
-                    ) %> %
-                  <% end %>
-                </td>
-
-                <td>
-                  <%= number_with_delimiter(
-                    drive.pending_items_count
-                  ) %>
-                </td>
-
-                <td>
-                  <%= number_with_delimiter(
-                    drive.non_auditable_items_count
-                  ) %>
-                </td>
-
-                <td class="audit-table__date">
-                  <% if drive.last_evaluated_at.present? %>
-                    <%= drive.last_evaluated_at
-                      .in_time_zone
-                      .strftime("%d/%m/%Y %H:%M") %>
-                  <% else %>
-                    Sin evaluación
-                  <% end %>
-                </td>
-              </tr>
-            <% end %>
-          <% else %>
-            <tr>
-              <td
-                colspan="9"
-                class="audit-table__empty"
-              >
-                <div>
-                  <strong>No se encontraron Drives activos.</strong>
-                </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  </section>
+    <%= render "drives_table",
+               title: "Top 10 por cantidad de documentos",
+               description:
+                 "Drives personales con mayor cantidad de archivos. Se excluyen repositorios comunes y cuentas de servicio.",
+               drives: @top_drives,
+               show_position: true,
+               empty_message:
+                 "No se encontraron Drives para generar el ranking." %>
+  </div>
 </div>

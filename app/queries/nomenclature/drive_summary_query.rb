@@ -100,7 +100,7 @@ end
     end
 
     def status_count(counts, item_type, status)
-      counts.fetch([item_type, status], 0)
+      counts.fetch([ item_type, status ], 0)
     end
 
     def total_for(counts, item_type)

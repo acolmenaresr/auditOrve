@@ -11,7 +11,12 @@ Rails.application.routes.draw do
   get "auditoria", to: "audit_logs#index", as: :audit_logs
   get "usuarios-365", to: "users365#index", as: :users365
   get "usuarios-365/:id", to: "users365#show", as: :user365
+
+  # Cloud Orve
   get "cloudorve", to: "nomenclature_audits#index", as: :cloudorve
+  get "cloudorve/drives", to: "nomenclature_audits#drives", as: :cloudorve_drives
+  get "cloudorve/drives/:id/children", to: "nomenclature_audits#children", as: :cloudorve_drive_children
+  get "cloudorve/drives/:id", to: "nomenclature_audits#show", as: :cloudorve_drive
 
   # Estado de la aplicación
   get "up" => "rails/health#show", as: :rails_health_check

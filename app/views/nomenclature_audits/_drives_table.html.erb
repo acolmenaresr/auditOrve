@@ -1,0 +1,174 @@
+<section class="audit-table-card">
+  <header class="ranking-card__header">
+    <h2>
+      <%= title %>
+    </h2>
+
+    <% if description.present? %>
+      <p class="dashboard__subtitle">
+        <%= description %>
+      </p>
+    <% end %>
+  </header>
+
+  <div class="audit-table-wrapper">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <% if show_position %>
+            <th scope="col">
+              Posición
+            </th>
+          <% end %>
+
+          <th scope="col">
+            Drive
+          </th>
+
+          <th scope="col">
+            Propietario
+          </th>
+
+          <th scope="col">
+            Carpetas
+          </th>
+
+          <th scope="col">
+            Cumplimiento carpetas
+          </th>
+
+          <th scope="col">
+            Archivos
+          </th>
+
+          <th scope="col">
+            Cumplimiento archivos
+          </th>
+
+          <th scope="col">
+            Pendientes
+          </th>
+
+          <th scope="col">
+            No auditables
+          </th>
+
+          <th scope="col">
+            Última evaluación
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% if drives.any? %>
+          <% drives.each_with_index do |drive, index| %>
+            <tr>
+              <% if show_position %>
+                <td>
+                  <strong>
+                    <%= index + 1 %>
+                  </strong>
+                </td>
+              <% end %>
+
+              <td>
+                <%= link_to(
+  drive.source_name.presence || "Drive sin nombre",
+  cloudorve_drive_path(
+    drive.id,
+    return_to: request.fullpath
+  ),
+  class: "cloudorve-drive-link"
+) %>
+              </td>
+
+              <td>
+                <div>
+                  <strong>
+                    <%= drive.owner_name.presence ||
+                        "Sin propietario" %>
+                  </strong>
+
+                  <% if drive.owner_upn.present? %>
+                    <small class="cloudorve-owner-upn">
+                      <%= drive.owner_upn %>
+                    </small>
+                  <% end %>
+                </div>
+              </td>
+
+              <td>
+                <%= number_with_delimiter(
+                  drive.folders_count
+                ) %>
+              </td>
+
+              <td>
+                <span class="<%= compliance_badge_class(
+                  drive.folders_compliance_percentage
+                ) %>">
+                  <%= compliance_badge_text(
+                    drive.folders_compliance_percentage
+                  ) %>
+                </span>
+              </td>
+
+              <td>
+                <strong>
+                  <%= number_with_delimiter(
+                    drive.files_count
+                  ) %>
+                </strong>
+              </td>
+
+              <td>
+                <span class="<%= compliance_badge_class(
+                  drive.files_compliance_percentage
+                ) %>">
+                  <%= compliance_badge_text(
+                    drive.files_compliance_percentage
+                  ) %>
+                </span>
+              </td>
+
+              <td>
+                <%= number_with_delimiter(
+                  drive.pending_items_count
+                ) %>
+              </td>
+
+              <td>
+                <%= number_with_delimiter(
+                  drive.non_auditable_items_count
+                ) %>
+              </td>
+
+              <td class="audit-table__date">
+                <% if drive.last_evaluated_at.present? %>
+                  <%= drive.last_evaluated_at
+                    .in_time_zone
+                    .strftime("%d/%m/%Y %H:%M") %>
+                <% else %>
+                  Sin evaluación
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td
+              colspan="<%= show_position ? 10 : 9 %>"
+              class="audit-table__empty"
+            >
+              <div>
+                <strong>
+                  <%= empty_message %>
+                </strong>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</section>

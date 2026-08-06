@@ -5,7 +5,7 @@ class M365DriveItem < AuditRecord
            class_name: "M365AuditRun",
            foreign_key: :nomenclature_last_audit_run_id,
            optional: true
-  
+
   has_many :source_items,
          class_name: "M365SourceItem",
          foreign_key: :drive_item_id,

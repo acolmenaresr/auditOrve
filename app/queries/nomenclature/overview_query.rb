@@ -6,7 +6,7 @@ module Nomenclature
         .take
 
       {
-        active_drives_count: row.active_drives_count.to_i,
+        active_drives_count: eligible_sources.count,
         folders_count: row.folders_count.to_i,
         folders_compliance_percentage:
           numeric_value(row.folders_compliance_percentage),
@@ -21,13 +21,28 @@ module Nomenclature
 
     private
 
+    def eligible_sources
+      @eligible_sources ||= M365StorageSource
+        .left_joins(:microsoft365_user)
+        .where(active: true)
+        .where(
+          <<~SQL.squish,
+            (
+              users365catalog.user_principal_name IS NULL
+              OR LOWER(
+                users365catalog.user_principal_name
+              ) NOT IN (?)
+            )
+          SQL
+          Nomenclature::ServiceAccounts::OWNER_UPNS
+        )
+    end
+
     def eligible_items
       M365SourceItem
-        .joins(:storage_source, :drive_item)
+        .joins(:drive_item)
         .where(
-          m365_storage_sources: {
-            active: true
-          },
+          source_id: eligible_sources.select(:id),
           m365_source_items: {
             is_deleted: false,
             is_root_item: false
@@ -40,7 +55,6 @@ module Nomenclature
 
     def select_columns
       [
-        active_drives_count_sql,
         item_count_sql(
           "folder",
           "folders_count"
@@ -60,16 +74,6 @@ module Nomenclature
         pending_items_count_sql,
         non_auditable_items_count_sql
       ]
-    end
-
-    def active_drives_count_sql
-      <<~SQL.squish
-        (
-          SELECT COUNT(*)
-          FROM m365_storage_sources
-          WHERE active = TRUE
-        ) AS active_drives_count
-      SQL
     end
 
     def item_count_sql(item_type, alias_name)

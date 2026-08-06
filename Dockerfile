@@ -1,59 +1,95 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t audit_orve .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name audit_orve audit_orve
+# This Dockerfile is designed for production, not development.
+#
+# Build:
+#   docker build -t audit_orve .
+#
+# Run:
+#   docker run -d \
+#     -p 80:80 \
+#     -e RAILS_MASTER_KEY=<value from config/master.key> \
+#     --name audit_orve \
+#     audit_orve
 
-# For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
-
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=3.4.10
-FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
-# Rails app lives here
+FROM docker.io/library/ruby:${RUBY_VERSION}-slim AS base
+
+# Rails application directory
 WORKDIR /rails
 
-# Install base packages
+# Runtime operating-system dependencies.
+#
+# libvips is required because Active Storage uses:
+#   config.active_storage.variant_processor = :vips
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql-client && \
-    ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install --no-install-recommends -y \
+      curl \
+      libjemalloc2 \
+      libvips \
+      postgresql-client && \
+    ln -sf \
+      /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 \
+      /usr/local/lib/libjemalloc.so && \
+    rm -rf \
+      /var/lib/apt/lists/* \
+      /var/cache/apt/archives/*
 
-# Set production environment variables and enable jemalloc for reduced memory usage and latency.
+# Production configuration
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so"
 
-# Throw-away build stage to reduce size of final image
+# =========================================================
+# Build stage
+# =========================================================
+
 FROM base AS build
 
-# Install packages needed to build gems
+# Dependencies required only while building gems and assets.
+# libvips is inherited from the base stage and is not
+# installed a second time here.
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips libyaml-dev pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    apt-get install --no-install-recommends -y \
+      build-essential \
+      git \
+      libpq-dev \
+      libyaml-dev \
+      pkg-config && \
+    rm -rf \
+      /var/lib/apt/lists/* \
+      /var/cache/apt/archives/*
 
 # Install application gems
 COPY vendor/* ./vendor/
 COPY Gemfile Gemfile.lock ./
 
 RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
+    rm -rf \
+      ~/.bundle/ \
+      "${BUNDLE_PATH}"/ruby/*/cache \
+      "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile -j 1 --gemfile
 
-# Copy application code
+# Fail the image build when libvips is unavailable or older
+# than the minimum secure version required by Active Storage.
+RUN bundle exec ruby -rvips -e \
+    'puts "libvips: #{Vips.version_string}"; \
+     puts "ruby-vips: #{Vips::VERSION}"; \
+     abort "libvips debe ser 8.13 o superior" unless Vips.at_least_libvips?(8, 13)'
+
+# Copy application source
 COPY . .
 
-# Precompile bootsnap code for faster boot times.
-# -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
+# Precompile Ruby application code
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
 
-# Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-# Precompile assets with non-secret placeholder database settings.
-# Rails only needs to parse database.yml during this build step.
+# Precompile assets without requiring production secrets.
+# These database values are build-only placeholders.
 RUN DB_HOST=127.0.0.1 \
     DB_PORT=5432 \
     DB_USERNAME=postgres \
@@ -66,24 +102,38 @@ RUN DB_HOST=127.0.0.1 \
     SECRET_KEY_BASE_DUMMY=1 \
     ./bin/rails assets:precompile
 
+# =========================================================
+# Final production image
+# =========================================================
 
-
-
-# Final stage for app image
 FROM base
 
-# Run and own only the runtime files as a non-root user for security
+# Run the application as a non-root user
 RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
+    useradd \
+      --uid 1000 \
+      --gid 1000 \
+      --create-home \
+      --shell /bin/bash \
+      rails
+
 USER 1000:1000
 
-# Copy built artifacts: gems, application
-COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
-COPY --chown=rails:rails --from=build /rails /rails
+# Copy installed gems and compiled application
+COPY --chown=rails:rails \
+  --from=build \
+  "${BUNDLE_PATH}" \
+  "${BUNDLE_PATH}"
 
-# Entrypoint prepares the database.
+COPY --chown=rails:rails \
+  --from=build \
+  /rails \
+  /rails
+
+# Prepare databases and application startup
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start server via Thruster by default, this can be overwritten at runtime
 EXPOSE 80
+
+# Start Rails through Thruster
 CMD ["./bin/thrust", "./bin/rails", "server"]
