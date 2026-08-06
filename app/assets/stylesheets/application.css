@@ -1,5 +1,6 @@
 @import url("vendor/tom-select.css");
 @import url("users365.css");
+
 :root {
   --background: #f5f7fb;
   --surface: #ffffff;
@@ -169,6 +170,7 @@ body {
   flex: 0 0 auto;
   margin: 0;
 }
+
 /* =========================================================
    MENSAJES FLASH
    ========================================================= */
@@ -368,6 +370,7 @@ body {
 
 .metric-card {
   position: relative;
+  min-width: 0;
   min-height: 150px;
   padding: 18px;
   display: flex;
@@ -387,7 +390,9 @@ body {
 
 .metric-card__value {
   margin: 0;
+  color: var(--text);
   font-size: 29px;
+  font-weight: 700;
   line-height: 1;
   text-align: center;
 }
@@ -396,10 +401,28 @@ body {
   position: absolute;
   right: 18px;
   bottom: 18px;
+  left: 18px;
   margin: 0;
   color: var(--muted);
   font-size: 13px;
+  line-height: 1.4;
   text-align: right;
+}
+
+.metric-grid--centered {
+  width: min(100%, 1330px);
+  margin: 0 auto 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.metric-grid--centered > .metric-card {
+  width: 250px;
+  max-width: 250px;
+  flex: 0 0 250px;
 }
 
 /* =========================================================
@@ -471,7 +494,7 @@ body {
 }
 
 /* =========================================================
-   AUDIT LOGS / MOVIMIENTOS DE USUARIOS
+   AUDITORÍA / MOVIMIENTOS
    ========================================================= */
 
 .audit-page {
@@ -577,6 +600,24 @@ body {
 }
 
 /* =========================================================
+   FILTROS CLOUD ORVE
+   ========================================================= */
+
+.cloudorve-filters {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 1fr)
+    140px
+    auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.cloudorve-filters__search {
+  min-width: 0;
+}
+
+/* =========================================================
    RESUMEN AUDITORÍA
    ========================================================= */
 
@@ -585,6 +626,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+  margin: 18px 2px;
   color: var(--muted);
   font-size: 13px;
 }
@@ -917,6 +959,201 @@ body {
 }
 
 /* =========================================================
+   TABLAS DASHBOARD CLOUD ORVE
+   ========================================================= */
+
+.cloudorve-dashboard-tables {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cloudorve-dashboard-tables .ranking-card__header {
+  background: white;
+}
+
+.cloudorve-dashboard-tables .ranking-card__header h2 {
+  font-size: 18px;
+}
+
+.cloudorve-dashboard-tables .dashboard__subtitle {
+  margin: 7px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.cloudorve-owner-upn {
+  display: block;
+  max-width: 280px;
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cloudorve-percentage {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.cloudorve-percentage--empty {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* =========================================================
+   SEMÁFORO DE CUMPLIMIENTO
+   ========================================================= */
+
+.compliance-badge {
+  min-width: 78px;
+  min-height: 28px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.compliance-badge::before {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.compliance-badge--success {
+  border-color: #a7e3c4;
+  background: #e8f7ef;
+  color: #16734a;
+}
+
+.compliance-badge--warning {
+  border-color: #f5d48a;
+  background: #fff7df;
+  color: #95630a;
+}
+
+.compliance-badge--danger {
+  border-color: #f1b8b8;
+  background: #fdefef;
+  color: #b42318;
+}
+
+.compliance-badge--unknown {
+  border-color: #dce2ea;
+  background: #f3f6f9;
+  color: #687386;
+}
+
+/* =========================================================
+   AUDIT DRIVE
+   ========================================================= */
+
+.cloudorve-drives-filters {
+  grid-template-columns:
+    minmax(280px, 1.6fr)
+    minmax(180px, 0.8fr)
+    minmax(180px, 0.8fr)
+    110px
+    auto;
+}
+
+.cloudorve-drives-filters__search {
+  min-width: 0;
+}
+
+.audit-table--drives {
+  min-width: 1800px;
+}
+
+.audit-table--drives td:first-child {
+  min-width: 220px;
+}
+
+.audit-table--drives td:nth-child(2) {
+  min-width: 260px;
+}
+
+.cloudorve-drive-link {
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    color 150ms ease,
+    text-decoration-color 150ms ease;
+}
+
+.cloudorve-drive-link:hover {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cloudorve-drive-link:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   VISTA INDIVIDUAL DEL DRIVE
+   ========================================================= */
+
+.cloudorve-drive-profile .users365-profile__field strong {
+  overflow-wrap: anywhere;
+}
+
+.cloudorve-drive-profile .users365-profile__field small {
+  overflow-wrap: anywhere;
+}
+
+.cloudorve-drive-profile .metric-card small {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cloudorve-drive-tree-card {
+  min-height: 320px;
+}
+
+.cloudorve-drive-tree-card .ranking-card__header {
+  background: white;
+}
+
+.cloudorve-drive-tree-placeholder {
+  min-height: 260px;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cloudorve-drive-tree-placeholder > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.cloudorve-drive-tree-placeholder strong {
+  color: var(--text);
+  font-size: 16px;
+}
+
+/* =========================================================
    RESPONSIVE DASHBOARD
    ========================================================= */
 
@@ -950,6 +1187,18 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .metric-grid--centered {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+  }
+
+  .metric-grid--centered > .metric-card {
+    width: 100%;
+    max-width: 420px;
+    flex: 0 0 100%;
+  }
+
   .ranking-card:nth-child(3) {
     grid-column: auto;
   }
@@ -971,6 +1220,10 @@ body {
   .audit-filters__actions {
     justify-content: flex-end;
   }
+
+  .cloudorve-drives-filters {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -988,6 +1241,11 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .cloudorve-filters,
+  .cloudorve-drives-filters {
+    grid-template-columns: 1fr;
+  }
+
   .audit-summary,
   .audit-pagination {
     align-items: flex-start;
@@ -1002,6 +1260,23 @@ body {
 
   .audit-filters__actions .button {
     flex: 1;
+  }
+
+  .cloudorve-filters .audit-filters__actions {
+    width: 100%;
+  }
+
+  .cloudorve-filters .audit-filters__actions .button {
+    flex: 1;
+  }
+
+  .cloudorve-drive-profile .metric-card small {
+    justify-content: center;
+  }
+
+  .cloudorve-drive-tree-placeholder {
+    min-height: 220px;
+    padding: 24px 18px;
   }
 }
 
@@ -1032,12 +1307,12 @@ body {
     margin-left: auto;
   }
 
-.app-header__user {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-}
+  .app-header__user {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
 @media (max-width: 520px) {
@@ -1068,4 +1343,254 @@ body {
     padding-inline: 12px;
     font-size: 12px;
   }
+}
+/* =========================================================
+   ÁRBOL DOCUMENTAL EN FORMATO TABLA
+   ========================================================= */
+
+.cloudorve-document-tree {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.cloudorve-document-tree__header,
+.cloudorve-document-tree__row {
+  min-width: 1050px;
+  display: grid;
+  grid-template-columns:
+    minmax(320px, 1.5fr)
+    100px
+    130px
+    minmax(260px, 1fr)
+    160px;
+  align-items: center;
+}
+
+.cloudorve-document-tree__header {
+  min-height: 44px;
+  padding: 0 18px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: #f8fafc;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cloudorve-document-tree__body {
+  min-width: 1050px;
+}
+
+.cloudorve-document-tree__node {
+  border-bottom: 1px solid var(--border);
+}
+
+.cloudorve-document-tree__node:last-child {
+  border-bottom: 0;
+}
+
+.cloudorve-document-tree__branch {
+  margin: 0;
+  padding: 0;
+}
+
+.cloudorve-document-tree__branch > summary {
+  list-style: none;
+}
+
+.cloudorve-document-tree__branch > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cloudorve-document-tree__branch > summary::marker {
+  content: "";
+}
+
+.cloudorve-document-tree__row {
+  min-height: 48px;
+  padding: 7px 18px;
+  background: white;
+  color: var(--text);
+  font-size: 12px;
+}
+
+summary.cloudorve-document-tree__row {
+  cursor: pointer;
+}
+
+.cloudorve-document-tree__row:hover {
+  background: #f8fafc;
+}
+
+.cloudorve-document-tree__name {
+  min-width: 0;
+  padding-left: var(--tree-indent);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.cloudorve-document-tree__name strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cloudorve-document-tree__toggle {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: 18px;
+  font-weight: 800;
+  transition: transform 150ms ease;
+}
+
+.cloudorve-document-tree__branch[open]
+  > summary
+  .cloudorve-document-tree__toggle {
+  transform: rotate(90deg);
+}
+
+.cloudorve-document-tree__toggle--inactive {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cloudorve-document-tree__type,
+.cloudorve-document-tree__rules,
+.cloudorve-document-tree__date {
+  min-width: 0;
+  padding-right: 12px;
+}
+
+.cloudorve-document-tree__type {
+  color: var(--text);
+}
+
+.cloudorve-document-tree__status {
+  display: flex;
+  align-items: center;
+}
+
+.cloudorve-document-tree__rules {
+  color: #8a2b1d;
+  line-height: 1.35;
+}
+
+.cloudorve-document-tree__date {
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.cloudorve-document-tree__empty-value {
+  color: var(--muted);
+}
+
+.cloudorve-document-tree__loading,
+.cloudorve-document-tree__empty {
+  min-height: 48px;
+  padding: 14px 24px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.cloudorve-document-tree__toggle--inactive {
+  color: #64748b;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.cloudorve-document-tree__rule-badge {
+  position: relative;
+  min-width: 142px;
+  cursor: default;
+  white-space: nowrap;
+}
+
+.cloudorve-rule-tooltip {
+  cursor: help;
+}
+
+.cloudorve-rule-tooltip::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 4px);
+  z-index: 41;
+  border: 6px solid transparent;
+  border-top-color: #172033;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.cloudorve-rule-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 15px);
+  z-index: 40;
+  width: max-content;
+  min-width: 260px;
+  max-width: 420px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  background: #172033;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.24);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+  white-space: pre-line;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(4px);
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease,
+    visibility 140ms ease;
+  pointer-events: none;
+}
+
+.cloudorve-rule-tooltip:hover::before,
+.cloudorve-rule-tooltip:hover::after,
+.cloudorve-rule-tooltip:focus::before,
+.cloudorve-rule-tooltip:focus::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cloudorve-rule-tooltip:hover::after,
+.cloudorve-rule-tooltip:focus::after {
+  transform: translateX(-50%) translateY(0);
+}
+
+.cloudorve-rule-tooltip:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.compliance-badge--neutral {
+  border-color: #d7dde6;
+  background: #f1f4f8;
+  color: #5f6b7a;
+}
+.compliance-badge--neutral::before {
+  display: none;
+  content: none;
+}
+
+.compliance-badge--neutral {
+  padding-left: 12px;
+  padding-right: 12px;
 }

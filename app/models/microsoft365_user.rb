@@ -1,6 +1,11 @@
 class Microsoft365User < AuditRecord
   self.table_name = "users365catalog"
 
+  has_many :m365_storage_sources,
+            class_name: "M365StorageSource",
+            foreign_key: :user_catalog_id,
+            inverse_of: :microsoft365_user
+
   OFFICE_LICENSE_SKUS = %w[
     O365_BUSINESS_PREMIUM
     O365_BUSINESS_ESSENTIALS

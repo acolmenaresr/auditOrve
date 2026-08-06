@@ -1,0 +1,273 @@
+<% drive_name =
+  @drive.source_name.presence ||
+  "Drive sin nombre"
+%>
+
+<% owner =
+  @drive.microsoft365_user
+%>
+
+<% owner_name =
+  owner&.display_name.presence ||
+  owner&.user_principal_name.presence ||
+  "Sin propietario"
+%>
+
+<% content_for(
+  :title,
+  "#{drive_name} | Cloud Orve"
+) %>
+
+<section
+  class="
+    audit-page
+    users365-dashboard
+    cloudorve-drive-profile
+  "
+>
+  <section class="users365-profile">
+    <header class="users365-profile__header">
+      <div class="users365-profile__identity">
+        <span
+          class="users365-profile__avatar"
+          aria-hidden="true"
+        >
+          <%= drive_name.first.upcase %>
+        </span>
+
+        <div class="users365-profile__heading">
+          <p class="users365-profile__eyebrow">
+            Perfil de Drive
+          </p>
+
+          <div class="users365-profile__title-row">
+            <h1>
+              <%= drive_name %>
+            </h1>
+
+            <span class="audit-badge">
+              <%= @drive.scan_status
+                .to_s
+                .humanize
+                .presence || "Sin estado" %>
+            </span>
+          </div>
+
+          <p class="users365-profile__email">
+            <%= owner&.user_principal_name.presence ||
+              "Sin UPN asociado" %>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div class="users365-profile__details">
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Propietario
+        </span>
+
+        <strong>
+          <%= owner_name %>
+        </strong>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Tipo de fuente
+        </span>
+
+        <strong>
+          <%= @drive.source_type
+            .to_s
+            .humanize
+            .presence || "Sin tipo" %>
+        </strong>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Estado de escaneo
+        </span>
+
+        <strong>
+          <%= @drive.scan_status
+            .to_s
+            .humanize
+            .presence || "Sin estado" %>
+        </strong>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Último escaneo correcto
+        </span>
+
+        <strong>
+          <% if @drive.last_successful_scan_at.present? %>
+            <%= @drive.last_successful_scan_at
+              .in_time_zone("America/Mexico_City")
+              .strftime("%d/%m/%Y %H:%M") %>
+          <% else %>
+            Sin escaneo registrado
+          <% end %>
+        </strong>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Ruta raíz
+        </span>
+
+        <strong title="<%= @drive.root_path %>">
+          <%= @drive.root_path.presence ||
+            "Sin ruta raíz" %>
+        </strong>
+      </article>
+
+      <article class="users365-profile__field">
+        <span class="users365-profile__field-label">
+          Identificador de fuente
+        </span>
+
+        <strong>
+          <%= @drive.id %>
+        </strong>
+      </article>
+    </div>
+  </section>
+
+  <section class="metric-grid metric-grid--centered">
+    <article class="metric-card">
+      <span class="metric-card__label">
+        Carpetas
+      </span>
+
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(
+          @drive_summary.folders_count
+        ) %>
+      </strong>
+
+      <small>
+        <span class="<%= compliance_badge_class(
+          @drive_summary.folders_compliance_percentage
+        ) %>">
+          <%= compliance_badge_text(
+            @drive_summary.folders_compliance_percentage
+          ) %>
+        </span>
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">
+        Archivos
+      </span>
+
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(
+          @drive_summary.files_count
+        ) %>
+      </strong>
+
+      <small>
+        <span class="<%= compliance_badge_class(
+          @drive_summary.files_compliance_percentage
+        ) %>">
+          <%= compliance_badge_text(
+            @drive_summary.files_compliance_percentage
+          ) %>
+        </span>
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">
+        Pendientes
+      </span>
+
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(
+          @drive_summary.pending_items_count
+        ) %>
+      </strong>
+
+      <small>
+        Sin evaluar o en revisión
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">
+        No auditables
+      </span>
+
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(
+          @drive_summary.non_auditable_items_count
+        ) %>
+      </strong>
+
+      <small>
+        Excluidos o sin regla aplicable
+      </small>
+    </article>
+
+    <article class="metric-card">
+      <span class="metric-card__label">
+        Última evaluación
+      </span>
+
+      <strong class="metric-card__value">
+        <% if @drive_summary.last_evaluated_at.present? %>
+          <%= @drive_summary.last_evaluated_at
+            .in_time_zone("America/Mexico_City")
+            .strftime("%d/%m/%Y") %>
+        <% else %>
+          —
+        <% end %>
+      </strong>
+
+      <small>
+        <% if @drive_summary.last_evaluated_at.present? %>
+          <%= @drive_summary.last_evaluated_at
+            .in_time_zone("America/Mexico_City")
+            .strftime("%H:%M") %>
+        <% else %>
+          Sin evaluación
+        <% end %>
+      </small>
+    </article>
+  </section>
+
+  <section
+    class="
+      audit-table-card
+      cloudorve-drive-tree-card
+    "
+  >
+    <header class="ranking-card__header">
+      <h2>
+        Estructura del Drive
+      </h2>
+
+      <p class="dashboard__subtitle">
+        Carpetas, archivos, cumplimiento y reglas de nomenclatura.
+      </p>
+    </header>
+
+    <%= render "drive_tree",
+               items: @tree_items,
+               drive: @drive,
+               root: true %>
+  </section>
+
+  <div class="users365-dashboard__navigation">
+    <%= link_to(
+      "← Volver",
+      @return_to,
+      class: "users365-dashboard__back-link"
+    ) %>
+  </div>
+</section>

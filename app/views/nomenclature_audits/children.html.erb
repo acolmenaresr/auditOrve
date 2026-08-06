@@ -1,0 +1,10 @@
+<%= turbo_frame_tag(
+  "drive_item_children_#{@parent_item.drive_item_id}"
+) do %>
+  <div class="cloudorve-tree__children">
+    <%= render "drive_tree",
+               items: @tree_items,
+               drive: @drive,
+               root: false %>
+  </div>
+<% end %>

@@ -1,0 +1,471 @@
+<div class="audit-page">
+  <header class="audit-page__header">
+    <div>
+      <p class="audit-page__eyebrow">
+        Cloud Orve
+      </p>
+
+      <h1>
+        Audit Drive
+      </h1>
+
+      <p class="audit-page__description">
+        Cumplimiento de nomenclatura de todos los Drives activos,
+        excluyendo cuentas de servicio.
+      </p>
+    </div>
+
+    <%= link_to "Volver al Dashboard",
+                cloudorve_path,
+                class: "button button--secondary" %>
+  </header>
+
+  <section class="audit-summary">
+    <div>
+      <span>Drives encontrados:</span>
+
+      <strong>
+        <%= number_with_delimiter(@total_count) %>
+      </strong>
+    </div>
+
+    <p>
+      <% if @total_count.zero? %>
+        No se encontraron resultados.
+      <% else %>
+        Mostrando
+        <strong>
+          <%= number_with_delimiter(@first_record) %>
+        </strong>
+        al
+        <strong>
+          <%= number_with_delimiter(@last_record) %>
+        </strong>
+        de
+        <strong>
+          <%= number_with_delimiter(@total_count) %>
+        </strong>
+        Drives.
+      <% end %>
+    </p>
+  </section>
+
+  <section class="audit-filters">
+    <%= form_with url: cloudorve_drives_path,
+                  method: :get,
+                  local: true,
+                  class: "audit-filters__form cloudorve-drives-filters" do |form| %>
+
+      <div class="audit-filter-field cloudorve-drives-filters__search">
+        <%= form.label :search, "Buscar Drive o propietario" %>
+
+        <%= form.search_field :search,
+                              value: @search,
+                              placeholder: "Nombre, propietario o correo" %>
+      </div>
+
+      <div class="audit-filter-field">
+        <%= form.label :scan_status, "Estado de escaneo" %>
+
+        <%= form.select :scan_status,
+            options_for_select(
+              [
+                ["Todos", nil]
+              ] +
+              @scan_status_options.map do |status|
+                [
+                  status.to_s.humanize,
+                  status
+                ]
+              end,
+              @scan_status
+            ) %>
+      </div>
+
+      <div class="audit-filter-field">
+        <%= form.label :source_type, "Tipo de fuente" %>
+
+        <%= form.select :source_type,
+            options_for_select(
+              [
+                ["Todos", nil]
+              ] +
+              @source_type_options.map do |source_type|
+                [
+                  source_type.to_s.humanize,
+                  source_type
+                ]
+              end,
+              @source_type
+            ) %>
+      </div>
+
+      <div class="audit-filter-field">
+        <%= form.label :per_page, "Registros" %>
+
+        <%= form.select :per_page,
+            options_for_select(
+              [
+                ["10", 10],
+                ["25", 25],
+                ["50", 50],
+                ["100", 100]
+              ],
+              @per_page
+            ) %>
+      </div>
+
+      <%= form.hidden_field :sort,
+                            value: @sort %>
+
+      <%= form.hidden_field :direction,
+                            value: @direction %>
+
+      <div class="audit-filters__actions">
+        <%= form.submit "Aplicar",
+                        class: "button button--primary" %>
+
+        <%= link_to "Limpiar",
+                    cloudorve_drives_path,
+                    class: "button button--secondary" %>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="audit-table-card">
+    <div class="audit-table-wrapper">
+      <table class="audit-table audit-table--drives">
+        <thead>
+          <tr>
+            <th scope="col">
+              <%= link_to cloudorve_drives_sort_path("name"),
+                          class: cloudorve_drives_sort_class("name") do %>
+                <span>Drive</span>
+
+                <span class="audit-sort-link__icon">
+                  <%= cloudorve_drives_sort_icon("name") %>
+                </span>
+              <% end %>
+            </th>
+
+            <th scope="col">
+              <%= link_to cloudorve_drives_sort_path("owner"),
+                          class: cloudorve_drives_sort_class("owner") do %>
+                <span>Propietario</span>
+
+                <span class="audit-sort-link__icon">
+                  <%= cloudorve_drives_sort_icon("owner") %>
+                </span>
+              <% end %>
+            </th>
+
+            <th scope="col">
+              Tipo
+            </th>
+
+            <th scope="col">
+              Estado scan
+            </th>
+
+            <th scope="col">
+              <%= link_to cloudorve_drives_sort_path("folders_count"),
+                          class: cloudorve_drives_sort_class(
+                            "folders_count"
+                          ) do %>
+                <span>Carpetas</span>
+
+                <span class="audit-sort-link__icon">
+                  <%= cloudorve_drives_sort_icon(
+                    "folders_count"
+                  ) %>
+                </span>
+              <% end %>
+            </th>
+
+            <th scope="col">
+              <%= link_to cloudorve_drives_sort_path(
+                            "folders_compliance"
+                          ),
+                          class: cloudorve_drives_sort_class(
+                            "folders_compliance"
+                          ) do %>
+                <span>Cumplimiento carpetas</span>
+
+                <span class="audit-sort-link__icon">
+                  <%= cloudorve_drives_sort_icon(
+                    "folders_compliance"
+                  ) %>
+                </span>
+              <% end %>
+            </th>
+
+            <th scope="col">
+              <%= link_to cloudorve_drives_sort_path("files_count"),
+                          class: cloudorve_drives_sort_class(
+                            "files_count"
+                          ) do %>
+                <span>Archivos</span>
+
+                <span class="audit-sort-link__icon">
+                  <%= cloudorve_drives_sort_icon(
+                    "files_count"
+                  ) %>
+                </span>
+              <% end %>
+            </th>
+
+            <th scope="col">
+              <%= link_to cloudorve_drives_sort_path(
+                            "files_compliance"
+                          ),
+                          class: cloudorve_drives_sort_class(
+                            "files_compliance"
+                          ) do %>
+                <span>Cumplimiento archivos</span>
+
+                <span class="audit-sort-link__icon">
+                  <%= cloudorve_drives_sort_icon(
+                    "files_compliance"
+                  ) %>
+                </span>
+              <% end %>
+            </th>
+
+            <th scope="col">
+              <%= link_to cloudorve_drives_sort_path("pending"),
+                          class: cloudorve_drives_sort_class(
+                            "pending"
+                          ) do %>
+                <span>Pendientes</span>
+
+                <span class="audit-sort-link__icon">
+                  <%= cloudorve_drives_sort_icon(
+                    "pending"
+                  ) %>
+                </span>
+              <% end %>
+            </th>
+
+            <th scope="col">
+              <%= link_to cloudorve_drives_sort_path(
+                            "non_auditable"
+                          ),
+                          class: cloudorve_drives_sort_class(
+                            "non_auditable"
+                          ) do %>
+                <span>No auditables</span>
+
+                <span class="audit-sort-link__icon">
+                  <%= cloudorve_drives_sort_icon(
+                    "non_auditable"
+                  ) %>
+                </span>
+              <% end %>
+            </th>
+
+            <th scope="col">
+              <%= link_to cloudorve_drives_sort_path(
+                            "last_evaluated_at"
+                          ),
+                          class: cloudorve_drives_sort_class(
+                            "last_evaluated_at"
+                          ) do %>
+                <span>Última evaluación</span>
+
+                <span class="audit-sort-link__icon">
+                  <%= cloudorve_drives_sort_icon(
+                    "last_evaluated_at"
+                  ) %>
+                </span>
+              <% end %>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% if @drives.any? %>
+            <% @drives.each do |drive| %>
+              <tr>
+                <td>
+  <strong>
+    <%= link_to(
+      drive.source_name,
+      cloudorve_drive_path(
+        drive.id,
+        return_to: request.fullpath
+      ),
+      class: "cloudorve-drive-link"
+    ) %>
+  </strong>
+</td>
+
+                <td>
+                  <div>
+                    <strong>
+                      <%= drive.owner_name.presence ||
+                          "Sin propietario" %>
+                    </strong>
+
+                    <% if drive.owner_upn.present? %>
+                      <small class="cloudorve-owner-upn">
+                        <%= drive.owner_upn %>
+                      </small>
+                    <% end %>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="audit-badge">
+                    <%= drive.source_type
+                      .to_s
+                      .humanize
+                      .presence || "Sin tipo" %>
+                  </span>
+                </td>
+
+                <td>
+                  <span class="audit-badge">
+                    <%= drive.scan_status
+                      .to_s
+                      .humanize
+                      .presence || "Sin estado" %>
+                  </span>
+                </td>
+
+                <td>
+                  <%= number_with_delimiter(
+                    drive.folders_count
+                  ) %>
+                </td>
+
+                <td>
+                  <span class="<%= compliance_badge_class(
+                    drive.folders_compliance_percentage
+                  ) %>">
+                    <%= compliance_badge_text(
+                      drive.folders_compliance_percentage
+                    ) %>
+                  </span>
+                </td>
+
+                <td>
+                  <strong>
+                    <%= number_with_delimiter(
+                      drive.files_count
+                    ) %>
+                  </strong>
+                </td>
+
+                <td>
+                  <span class="<%= compliance_badge_class(
+                    drive.files_compliance_percentage
+                  ) %>">
+                    <%= compliance_badge_text(
+                      drive.files_compliance_percentage
+                    ) %>
+                  </span>
+                </td>
+
+                <td>
+                  <%= number_with_delimiter(
+                    drive.pending_items_count
+                  ) %>
+                </td>
+
+                <td>
+                  <%= number_with_delimiter(
+                    drive.non_auditable_items_count
+                  ) %>
+                </td>
+
+                <td class="audit-table__date">
+                  <% if drive.last_evaluated_at.present? %>
+                    <%= drive.last_evaluated_at
+                      .in_time_zone
+                      .strftime("%d/%m/%Y %H:%M") %>
+                  <% else %>
+                    Sin evaluación
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td
+                colspan="11"
+                class="audit-table__empty"
+              >
+                <div>
+                  <strong>
+                    No se encontraron Drives con los filtros aplicados.
+                  </strong>
+
+                  <span>
+                    Modifica los filtros o limpia la búsqueda.
+                  </span>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if @total_pages > 1 %>
+      <footer class="audit-pagination">
+        <div class="audit-pagination__summary">
+          Página
+          <strong>
+            <%= @page %>
+          </strong>
+          de
+          <strong>
+            <%= @total_pages %>
+          </strong>
+        </div>
+
+        <div class="audit-pagination__controls">
+          <% if @page > 1 %>
+            <%= link_to "Anterior",
+                        cloudorve_drives_path(
+                          search: @search,
+                          scan_status: @scan_status,
+                          source_type: @source_type,
+                          sort: @sort,
+                          direction: @direction,
+                          per_page: @per_page,
+                          page: @page - 1
+                        ),
+                        class: "audit-pagination__button" %>
+          <% else %>
+            <span class="audit-pagination__button is-disabled">
+              Anterior
+            </span>
+          <% end %>
+
+          <span class="audit-pagination__current">
+            <%= @page %>
+          </span>
+
+          <% if @page < @total_pages %>
+            <%= link_to "Siguiente",
+                        cloudorve_drives_path(
+                          search: @search,
+                          scan_status: @scan_status,
+                          source_type: @source_type,
+                          sort: @sort,
+                          direction: @direction,
+                          per_page: @per_page,
+                          page: @page + 1
+                        ),
+                        class: "audit-pagination__button" %>
+          <% else %>
+            <span class="audit-pagination__button is-disabled">
+              Siguiente
+            </span>
+          <% end %>
+        </div>
+      </footer>
+    <% end %>
+  </section>
+</div>
