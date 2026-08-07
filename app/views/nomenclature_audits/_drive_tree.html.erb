@@ -1,0 +1,234 @@
+<% root = local_assigns.fetch(:root, false) %>
+
+<% if root %>
+  <div class="cloudorve-document-tree">
+    <div class="cloudorve-document-tree__header">
+      <span>Nombre</span>
+      <span>Tipo</span>
+      <span>Estado</span>
+      <span>Incumple</span>
+      <span>Auditado</span>
+    </div>
+<% end %>
+
+<div class="cloudorve-document-tree__body">
+  <% items.each do |item| %>
+    <% expandable =
+      item.item_type == "folder" &&
+      drive_item_has_children?(item)
+    %>
+
+    <% indentation =
+      [
+        item.depth.to_i - 1,
+        0
+      ].max * 22
+    %>
+
+    <% item_status =
+      item.nomenclature_status.to_s
+    %>
+
+    <% excluded =
+      item_status == "excluded"
+    %>
+
+    <% failed_rules_count =
+      item.nomenclature_non_compliant_rules.to_i
+    %>
+
+    <% failed_rule_messages =
+      drive_item_failed_rule_messages(item)
+    %>
+
+    <% failed_rules_tooltip =
+      if excluded
+        ""
+      else
+        failed_rule_messages
+          .map { |message| "• #{message}" }
+          .join("\n")
+      end
+    %>
+
+    <% rules_badge_class =
+      if excluded
+        "compliance-badge compliance-badge--neutral"
+      elsif failed_rules_count.positive?
+        "compliance-badge compliance-badge--danger"
+      else
+        "compliance-badge compliance-badge--success"
+      end
+    %>
+
+    <% rules_badge_text =
+      if excluded
+        "Excluido"
+      elsif failed_rules_count.positive?
+        pluralize(
+          failed_rules_count,
+          "regla incumplida",
+          plural: "reglas incumplidas"
+        )
+      else
+        "Sin incumplimientos"
+      end
+    %>
+
+    <div class="cloudorve-document-tree__node">
+      <% if expandable %>
+        <details class="cloudorve-document-tree__branch">
+          <summary class="cloudorve-document-tree__row">
+            <div
+              class="cloudorve-document-tree__name"
+              style="--tree-indent: <%= indentation %>px"
+            >
+              <span
+                class="cloudorve-document-tree__toggle"
+                aria-hidden="true"
+              >
+                ›
+              </span>
+
+              <strong title="<%= item.name %>">
+                <%= item.name.presence ||
+                  "Elemento sin nombre" %>
+              </strong>
+            </div>
+
+            <div class="cloudorve-document-tree__type">
+              Carpeta
+            </div>
+
+            <div class="cloudorve-document-tree__status">
+              <span class="<%= drive_item_status_class(
+                item_status
+              ) %>">
+                <%= drive_item_status_label(
+                  item_status
+                ) %>
+              </span>
+            </div>
+
+            <div class="cloudorve-document-tree__rules">
+              <span
+                class="
+                  <%= rules_badge_class %>
+                  cloudorve-document-tree__rule-badge
+                  <%= "cloudorve-rule-tooltip" if
+                    failed_rules_tooltip.present? %>
+                "
+                <% if failed_rules_tooltip.present? %>
+                  data-tooltip="<%= failed_rules_tooltip %>"
+                  aria-label="<%= failed_rules_tooltip %>"
+                  tabindex="0"
+                <% end %>
+              >
+                <%= rules_badge_text %>
+              </span>
+            </div>
+
+            <div class="cloudorve-document-tree__date">
+              <% if item.nomenclature_evaluated_at.present? %>
+                <%= item.nomenclature_evaluated_at
+                  .in_time_zone("America/Mexico_City")
+                  .strftime("%d/%m/%Y %H:%M") %>
+              <% else %>
+                Sin evaluación
+              <% end %>
+            </div>
+          </summary>
+
+          <%= turbo_frame_tag(
+            "drive_item_children_#{item.drive_item_id}",
+            src: cloudorve_drive_children_path(
+              drive.id,
+              parent_item_id: item.item_id
+            ),
+            loading: :lazy
+          ) do %>
+            <div class="cloudorve-document-tree__loading">
+              Cargando elementos…
+            </div>
+          <% end %>
+        </details>
+      <% else %>
+        <div class="cloudorve-document-tree__row">
+          <div
+            class="cloudorve-document-tree__name"
+            style="--tree-indent: <%= indentation %>px"
+          >
+            <span
+              class="
+                cloudorve-document-tree__toggle
+                cloudorve-document-tree__toggle--inactive
+              "
+              aria-hidden="true"
+            >
+              •
+            </span>
+
+            <strong title="<%= item.name %>">
+              <%= item.name.presence ||
+                "Elemento sin nombre" %>
+            </strong>
+          </div>
+
+          <div class="cloudorve-document-tree__type">
+            <%= item.item_type == "folder" ?
+              "Carpeta" :
+              "Archivo" %>
+          </div>
+
+          <div class="cloudorve-document-tree__status">
+            <span class="<%= drive_item_status_class(
+              item_status
+            ) %>">
+              <%= drive_item_status_label(
+                item_status
+              ) %>
+            </span>
+          </div>
+
+          <div class="cloudorve-document-tree__rules">
+            <span
+              class="
+                <%= rules_badge_class %>
+                cloudorve-document-tree__rule-badge
+                <%= "cloudorve-rule-tooltip" if
+                  failed_rules_tooltip.present? %>
+              "
+              <% if failed_rules_tooltip.present? %>
+                data-tooltip="<%= failed_rules_tooltip %>"
+                aria-label="<%= failed_rules_tooltip %>"
+                tabindex="0"
+              <% end %>
+            >
+              <%= rules_badge_text %>
+            </span>
+          </div>
+
+          <div class="cloudorve-document-tree__date">
+            <% if item.nomenclature_evaluated_at.present? %>
+              <%= item.nomenclature_evaluated_at
+                .in_time_zone("America/Mexico_City")
+                .strftime("%d/%m/%Y %H:%M") %>
+            <% else %>
+              Sin evaluación
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if items.empty? %>
+    <div class="cloudorve-document-tree__empty">
+      Esta carpeta no contiene elementos activos.
+    </div>
+  <% end %>
+</div>
+
+<% if root %>
+  </div>
+<% end %>
