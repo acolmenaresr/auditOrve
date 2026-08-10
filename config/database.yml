@@ -3,6 +3,7 @@ default: &default
   encoding: unicode
   max_connections: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
+
 development:
   primary:
     <<: *default
@@ -10,10 +11,14 @@ development:
 
   audit:
     <<: *default
-    database: auditdb_local
-    username: dev_master
+    host: <%= ENV.fetch("AUDIT_DB_HOST", "127.0.0.1") %>
+    port: <%= ENV.fetch("AUDIT_DB_PORT", 5432) %>
+    username: <%= ENV.fetch("AUDIT_DB_USERNAME", "dev_master") %>
+    password: <%= ENV["AUDIT_DB_PASSWORD"].to_s.inspect %>
+    database: <%= ENV.fetch("AUDIT_DATABASE_NAME", "auditdb_local") %>
     database_tasks: false
     schema_dump: false
+
 
 test:
   primary:
@@ -33,6 +38,7 @@ test:
     database: <%= ENV.fetch("AUDIT_TEST_DATABASE", "auditdb_local") %>
     database_tasks: false
     schema_dump: false
+
 
 production:
   primary: &primary_production
