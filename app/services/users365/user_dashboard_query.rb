@@ -53,11 +53,16 @@ module Users365
     end
 
     def actions
-      @actions ||= user_scope
-        .where.not(movement_code: [nil, ""])
-        .distinct
-        .order(:movement_code)
-        .pluck(:movement_code)
+      @actions ||= Rails.cache.fetch(
+        actions_cache_key,
+        expires_in: 1.hour
+      ) do
+        user_scope
+          .where.not(movement_code: [ nil, "" ])
+          .distinct
+          .order(:movement_code)
+          .pluck(:movement_code)
+      end
     end
 
     def records
@@ -106,12 +111,22 @@ module Users365
 
     def unique_files_count
       @unique_files_count ||= filtered_scope
-        .where.not(resource_key: [nil, ""])
+        .where.not(resource_key: [ nil, "" ])
         .distinct
         .count(:resource_key)
     end
 
     private
+
+    def actions_cache_key
+      [
+        "user-dashboard-actions",
+        "v1",
+        user_principal_name,
+        from.to_date.iso8601,
+        to.to_date.iso8601
+      ].join(":")
+    end
 
     def base_scope
       return AuditMovement.none if user_principal_name.blank?
@@ -130,14 +145,7 @@ module Users365
 
     def user_scope
       @user_scope ||= base_scope.where(
-        <<~SQL.squish,
-          LOWER(
-            BTRIM(
-              COALESCE("user_name", '')
-            )
-          ) = ?
-        SQL
-        user_principal_name
+        user_name: user_principal_name
       )
     end
 
@@ -220,7 +228,7 @@ module Users365
         parsed = DEFAULT_PAGE_SIZE
       end
 
-      [parsed, MAX_PAGE_SIZE].min
+      [ parsed, MAX_PAGE_SIZE ].min
     end
 
     def normalize_sort(value)

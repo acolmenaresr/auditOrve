@@ -1,7 +1,7 @@
 module Audit
   class DashboardQuery
     DEFAULT_LIMIT = 10
-    ALLOWED_LIMITS = [10, 15, 20].freeze
+    ALLOWED_LIMITS = [ 10, 15, 20 ].freeze
 
     CACHE_VERSION = "v2"
     CACHE_EXPIRATION = 2.hours

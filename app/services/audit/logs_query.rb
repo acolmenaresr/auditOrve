@@ -62,7 +62,7 @@ module Audit
 
     def users
       @users ||= users_scope
-        .where.not(user_name: [nil, ""])
+        .where.not(user_name: [ nil, "" ])
         .distinct
         .order(:user_name)
         .pluck(:user_name)
@@ -70,7 +70,7 @@ module Audit
 
     def actions
       @actions ||= actions_scope
-        .where.not(movement_code: [nil, ""])
+        .where.not(movement_code: [ nil, "" ])
         .distinct
         .order(:movement_code)
         .pluck(:movement_code)
@@ -152,7 +152,7 @@ module Audit
       parsed = value.to_i
       parsed = DEFAULT_PAGE_SIZE unless parsed.positive?
 
-      [parsed, MAX_PAGE_SIZE].min
+      [ parsed, MAX_PAGE_SIZE ].min
     end
 
     def normalize_sort(value)

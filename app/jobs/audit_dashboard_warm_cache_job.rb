@@ -2,8 +2,8 @@ class AuditDashboardWarmCacheJob < ApplicationJob
   queue_as :default
 
   def perform(
-    periods: ["last_7_days"],
-    limits: [10]
+    periods: [ "last_7_days" ],
+    limits: [ 10 ]
   )
     periods.each do |period|
       next if period.to_s == "custom"
