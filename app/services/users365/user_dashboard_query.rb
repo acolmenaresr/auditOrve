@@ -7,15 +7,16 @@ module Users365
     DEFAULT_SORT = "dateZ"
     DEFAULT_DIRECTION = "desc"
 
+    # Conservamos las keys que ya envía la UI.
     SORTABLE_COLUMNS = {
-      "dateZ" => "dateZ",
-      "accion" => "accion",
-      "operacion365" => "operacion365",
-      "aplicacion" => "aplicacion",
-      "tipoItem" => "tipoItem",
-      "archivo" => "archivo",
-      "ruta" => "ruta",
-      "sitio" => "sitio"
+      "dateZ" => "occurred_at",
+      "accion" => "movement_code",
+      "operacion365" => "operation",
+      "aplicacion" => "application",
+      "tipoItem" => "item_type",
+      "archivo" => "file_name",
+      "ruta" => "path",
+      "sitio" => "site_url"
     }.freeze
 
     DIRECTIONS = %w[asc desc].freeze
@@ -50,12 +51,13 @@ module Users365
       @direction = normalize_direction(direction)
       @action = normalize_filter(action)
     end
+
     def actions
       @actions ||= user_scope
-        .where.not(accion: [ nil, "" ])
+        .where.not(movement_code: [nil, ""])
         .distinct
-        .order(:accion)
-        .pluck(:accion)
+        .order(:movement_code)
+        .pluck(:movement_code)
     end
 
     def records
@@ -79,7 +81,7 @@ module Users365
       @top_application ||= ranked_value(
         <<~SQL.squish
           COALESCE(
-            NULLIF(BTRIM("aplicacion"), ''),
+            NULLIF(BTRIM("application"), ''),
             'Sin aplicación'
           )
         SQL
@@ -90,7 +92,7 @@ module Users365
       @top_action ||= ranked_value(
         <<~SQL.squish
           COALESCE(
-            NULLIF(BTRIM("accion"), ''),
+            NULLIF(BTRIM("movement_code"), ''),
             'Sin acción'
           )
         SQL
@@ -99,36 +101,25 @@ module Users365
 
     def last_movement_at
       @last_movement_at ||=
-        filtered_scope.maximum("dateZ")
+        filtered_scope.maximum(:occurred_at)
     end
 
     def unique_files_count
       @unique_files_count ||= filtered_scope
-        .pick(
-          Arel.sql(
-            <<~SQL.squish
-              COUNT(
-                DISTINCT COALESCE(
-                  NULLIF(BTRIM("ruta"), ''),
-                  NULLIF(BTRIM("url"), ''),
-                  NULLIF(BTRIM("archivo"), '')
-                )
-              )
-            SQL
-          )
-        )
-        .to_i
+        .where.not(resource_key: [nil, ""])
+        .distinct
+        .count(:resource_key)
     end
 
     private
 
     def base_scope
-      return AuditLog.none if user_principal_name.blank?
+      return AuditMovement.none if user_principal_name.blank?
 
       date_column =
-        AuditLog.arel_table["dateZ"]
+        AuditMovement.arel_table[:occurred_at]
 
-      AuditLog.where(
+      AuditMovement.where(
         date_column
           .gteq(from.beginning_of_day)
           .and(
@@ -137,12 +128,12 @@ module Users365
       )
     end
 
-        def user_scope
+    def user_scope
       @user_scope ||= base_scope.where(
         <<~SQL.squish,
           LOWER(
             BTRIM(
-              COALESCE("usuario", '')
+              COALESCE("user_name", '')
             )
           ) = ?
         SQL
@@ -154,7 +145,7 @@ module Users365
       scope = user_scope
 
       scope = scope.where(
-        accion: action
+        movement_code: action
       ) if action.present?
 
       scope
@@ -187,7 +178,7 @@ module Users365
     end
 
     def order_expression
-      table = AuditLog.arel_table
+      table = AuditMovement.arel_table
 
       column_name =
         SORTABLE_COLUMNS.fetch(sort)
@@ -204,7 +195,7 @@ module Users365
 
       [
         primary_order,
-        table[:id].desc
+        table[:movement_id].desc
       ]
     end
 
@@ -229,7 +220,7 @@ module Users365
         parsed = DEFAULT_PAGE_SIZE
       end
 
-      [ parsed, MAX_PAGE_SIZE ].min
+      [parsed, MAX_PAGE_SIZE].min
     end
 
     def normalize_sort(value)
