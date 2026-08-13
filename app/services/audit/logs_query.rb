@@ -7,17 +7,19 @@ module Audit
     DEFAULT_SORT = "dateZ"
     DEFAULT_DIRECTION = "desc"
 
+    # Conservamos las keys que actualmente usa la UI,
+    # pero las dirigimos a las columnas de mv_audit_movements.
     SORTABLE_COLUMNS = {
-      "dateZ" => "dateZ",
-      "usuario" => "usuario",
-      "tipoUsuario" => "tipoUsuario",
-      "accion" => "accion",
-      "operacion365" => "operacion365",
-      "aplicacion" => "aplicacion",
-      "tipoItem" => "tipoItem",
-      "archivo" => "archivo",
-      "ruta" => "ruta",
-      "sitio" => "sitio"
+      "dateZ" => "occurred_at",
+      "usuario" => "user_name",
+      "tipoUsuario" => "user_type",
+      "accion" => "movement_code",
+      "operacion365" => "operation",
+      "aplicacion" => "application",
+      "tipoItem" => "item_type",
+      "archivo" => "file_name",
+      "ruta" => "path",
+      "sitio" => "site_url"
     }.freeze
 
     DIRECTIONS = %w[asc desc].freeze
@@ -60,18 +62,18 @@ module Audit
 
     def users
       @users ||= users_scope
-        .where.not(usuario: [ nil, "" ])
+        .where.not(user_name: [ nil, "" ])
         .distinct
-        .order(:usuario)
-        .pluck(:usuario)
+        .order(:user_name)
+        .pluck(:user_name)
     end
 
     def actions
       @actions ||= actions_scope
-        .where.not(accion: [ nil, "" ])
+        .where.not(movement_code: [ nil, "" ])
         .distinct
-        .order(:accion)
-        .pluck(:accion)
+        .order(:movement_code)
+        .pluck(:movement_code)
     end
 
     def total_count
@@ -87,9 +89,9 @@ module Audit
     private
 
     def base_scope
-      date_column = AuditLog.arel_table["dateZ"]
+      date_column = AuditMovement.arel_table["occurred_at"]
 
-      AuditLog.where(
+      AuditMovement.where(
         date_column
           .gteq(from.beginning_of_day)
           .and(date_column.lt(to.beginning_of_day))
@@ -98,25 +100,25 @@ module Audit
 
     def filtered_scope
       scope = base_scope
-      scope = scope.where(usuario: user) if user.present?
-      scope = scope.where(accion: action) if action.present?
+      scope = scope.where(user_name: user) if user.present?
+      scope = scope.where(movement_code: action) if action.present?
       scope
     end
 
     def users_scope
       scope = base_scope
-      scope = scope.where(accion: action) if action.present?
+      scope = scope.where(movement_code: action) if action.present?
       scope
     end
 
     def actions_scope
       scope = base_scope
-      scope = scope.where(usuario: user) if user.present?
+      scope = scope.where(user_name: user) if user.present?
       scope
     end
 
     def order_expression
-      table = AuditLog.arel_table
+      table = AuditMovement.arel_table
       column_name = SORTABLE_COLUMNS.fetch(sort)
       column = table[column_name]
 
@@ -129,7 +131,7 @@ module Audit
 
       [
         primary_order,
-        table[:id].desc
+        table[:movement_id].desc
       ]
     end
 
