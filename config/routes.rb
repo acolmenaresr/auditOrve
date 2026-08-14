@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   get "login", to: "sessions#new", as: :login
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy", as: :logout
+  get "/reset-password", to: "password_resets#edit", as: :reset_password
+  patch "/reset-password", to: "password_resets#update", as: :update_password
 
   # Aplicación
   get "dashboard", to: "dashboard#index", as: :dashboard

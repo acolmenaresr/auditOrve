@@ -6,4 +6,3 @@ class AuditUserType < AuditRecord
     self["tipoUsuario"].to_s
   end
 end
-
