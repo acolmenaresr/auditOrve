@@ -57,7 +57,8 @@ body {
     background-color 150ms ease,
     border-color 150ms ease,
     color 150ms ease,
-    box-shadow 150ms ease;
+    box-shadow 150ms ease,
+    opacity 150ms ease;
 }
 
 .button:focus-visible {
@@ -65,25 +66,54 @@ body {
   outline-offset: 2px;
 }
 
+/* Estado deshabilitado general */
+.button:disabled,
+.button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.45;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* Botón primario */
 .button--primary {
   border-color: var(--primary);
   background: var(--primary);
   color: white;
 }
 
-.button--primary:hover {
+/* Hover únicamente cuando está habilitado */
+.button--primary:hover:not(:disabled) {
   border-color: var(--primary-dark);
   background: var(--primary-dark);
 }
 
+/* Estado visual específico del primario deshabilitado */
+.button--primary:disabled,
+.button--primary[disabled] {
+  border-color: #94a3b8;
+  background: #94a3b8;
+  color: #ffffff;
+}
+
+/* Botón secundario */
 .button--secondary {
   border-color: var(--border);
   background: white;
   color: var(--text);
 }
 
-.button--secondary:hover {
+/* Hover únicamente cuando está habilitado */
+.button--secondary:hover:not(:disabled) {
   background: #f8fafc;
+}
+
+/* Estado visual específico del secundario deshabilitado */
+.button--secondary:disabled,
+.button--secondary[disabled] {
+  border-color: var(--border);
+  background: #f1f5f9;
+  color: var(--muted);
 }
 
 /* =========================================================

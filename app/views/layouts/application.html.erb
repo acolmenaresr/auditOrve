@@ -46,6 +46,9 @@
       <%= link_to "Movimientos", audit_logs_path %>
       <%= link_to "Usuarios 365", users365_path %>
       <%= link_to "Cloud Orve", cloudorve_path%>
+      <% if [ 9, 10 ].include?(current_user["tipoUsuario"].to_i) %>
+          <%= link_to "Usuarios", new_audit_user_path %>
+      <% end %>
     </nav>
 
       <div class="app-header__session">
