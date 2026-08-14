@@ -3,7 +3,7 @@ module Audit
     DEFAULT_LIMIT = 10
     ALLOWED_LIMITS = [ 10, 15, 20 ].freeze
 
-    CACHE_VERSION = "v2"
+    CACHE_VERSION = "v3"
     CACHE_EXPIRATION = 2.hours
 
     attr_reader :from, :to, :limit
@@ -56,7 +56,7 @@ module Audit
                 ) AS user_label,
 
                 COALESCE(
-                  NULLIF(BTRIM(movement_code), ''),
+                  NULLIF(BTRIM(source_action), ''),
                   'Sin acción'
                 ) AS action_label,
 

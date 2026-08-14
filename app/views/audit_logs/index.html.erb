@@ -1,4 +1,5 @@
 <section class="audit-page">
+
   <!--
   <header class="audit-page__header">
     <div>
@@ -14,7 +15,8 @@
     </div>
   </header>
   -->
-<section class="audit-summary">
+
+  <section class="audit-summary">
     <div>
       <strong>
         <%= number_with_delimiter(@total_count) %>
@@ -37,15 +39,20 @@
       </strong>
     </p>
   </section>
+
+
   <section class="audit-filters">
+
     <%= form_with(
       url: audit_logs_path,
       method: :get,
       local: true,
-      class: "audit-filters__form"
+      class: "audit-filters__form",
+      id: "audit-filters-form"
     ) do |form| %>
 
       <div class="audit-filter-field">
+
         <%= form.label :date_filter, "Periodo" %>
 
         <%= form.select(
@@ -70,7 +77,9 @@
             id: "audit-date-filter"
           }
         ) %>
+
       </div>
+
 
       <div
         class="
@@ -80,6 +89,7 @@
         "
         data-audit-custom-date
       >
+
         <%= form.label :from, "Desde" %>
 
         <%= form.date_field(
@@ -87,7 +97,9 @@
           value: params[:from],
           id: "audit-date-from"
         ) %>
+
       </div>
+
 
       <div
         class="
@@ -97,6 +109,7 @@
         "
         data-audit-custom-date
       >
+
         <%= form.label :to, "Hasta" %>
 
         <%= form.date_field(
@@ -104,9 +117,12 @@
           value: params[:to],
           id: "audit-date-to"
         ) %>
+
       </div>
 
+
       <div class="audit-filter-field users365-filter-field">
+
         <%= form.label :user, "Usuario" %>
 
         <%= form.select(
@@ -125,9 +141,12 @@
             }
           }
         ) %>
+
       </div>
 
+
       <div class="audit-filter-field users365-filter-field">
+
         <%= form.label :audit_action, "Acción" %>
 
         <%= form.select(
@@ -148,9 +167,12 @@
             }
           }
         ) %>
+
       </div>
 
+
       <div class="audit-filter-field audit-filter-field--small">
+
         <%= form.label :per_page, "Registros" %>
 
         <%= form.select(
@@ -165,9 +187,12 @@
             @per_page
           )
         ) %>
+
       </div>
 
+
       <div class="audit-filters__actions">
+
         <%= form.submit(
           "Buscar",
           class: "button button--primary"
@@ -178,15 +203,49 @@
           audit_logs_path,
           class: "button button--secondary"
         ) %>
+
       </div>
+
     <% end %>
+
   </section>
 
+
+  <!--
+    OPCIÓN TEMPORAL
+
+    Está visualmente fuera de audit-filters para no modificar
+    el grid ni el CSS existente.
+
+    El atributo form="audit-filters-form" hace que este checkbox
+    se envíe junto con el formulario superior al presionar Buscar.
+  -->
+  <div>
+    <label for="include_discardables">
+
+      <%= check_box_tag(
+        :include_discardables,
+        "1",
+        @include_discardables,
+        id: "include_discardables",
+        form: "audit-filters-form"
+      ) %>
+
+      Child Events
+
+    </label>
+  </div>
+
+
   <section class="audit-table-card">
+
     <div class="audit-table-wrapper">
+
       <table class="audit-table">
+
         <thead>
           <tr>
+
             <th>
               <%= sortable_audit_header(
                 "Fecha",
@@ -217,22 +276,8 @@
 
             <th>
               <%= sortable_audit_header(
-                "Operación 365",
-                "operacion365"
-              ) %>
-            </th>
-
-            <th>
-              <%= sortable_audit_header(
                 "Aplicación",
                 "aplicacion"
-              ) %>
-            </th>
-
-            <th>
-              <%= sortable_audit_header(
-                "Tipo de elemento",
-                "tipoItem"
               ) %>
             </th>
 
@@ -245,91 +290,127 @@
 
             <th>
               <%= sortable_audit_header(
-                "Ruta",
-                "ruta"
+                "Tipo de elemento",
+                "tipoItem"
               ) %>
             </th>
 
-            <th>
-              <%= sortable_audit_header(
-                "Sitio",
-                "sitio"
-              ) %>
-            </th>
           </tr>
         </thead>
 
+
         <tbody>
+
           <% if @records.any? %>
+
             <% @records.each do |record| %>
+
               <tr>
+
+                <!-- FECHA -->
                 <td class="audit-table__date">
+
                   <% if record.dateZ.present? %>
+
                     <%= record.dateZ
                       .in_time_zone("America/Mexico_City")
                       .strftime("%d/%m/%Y %H:%M") %>
+
                   <% elsif record.fechaEv.present? %>
+
                     <%= record.fechaEv.strftime("%d/%m/%Y") %>
+
                   <% else %>
+
                     —
+
                   <% end %>
+
                 </td>
 
+
+                <!-- USUARIO -->
+
                 <% audit_user_email =
-  record["usuario"].to_s.strip %>
+                  record["usuario"].to_s.strip %>
 
-<% directory_user =
-  @directory_users_by_email[
-    audit_user_email.downcase
-  ] %>
+                <% directory_user =
+                  @directory_users_by_email[
+                    audit_user_email.downcase
+                  ] %>
 
-<td>
-  <% if directory_user.present? %>
-    <% user_name =
-      directory_user.display_name.presence ||
-      directory_user.user_principal_name.presence ||
-      "Usuario" %>
-
-    <%= link_to(
-      user365_path(directory_user,
-      return_to: request.fullpath),
-      class: "audit-user-cell audit-user-cell--link",
-      aria: {
-        label: "Ver dashboard de #{user_name}"
-      }
-    ) do %>
-      <span class="audit-user-cell__avatar">
-        <%= user_name.first.upcase %>
-      </span>
-
-      <span class="audit-user-cell__content">
-        <strong title="<%= directory_user.display_name %>">
-          <%= directory_user.display_name.presence ||
-            "Sin nombre" %>
-        </strong>
-
-        <small
-          title="<%= directory_user.user_principal_name %>"
-        >
-          <%= directory_user.user_principal_name.presence ||
-            audit_user_email %>
-        </small>
-      </span>
-    <% end %>
-  <% else %>
-    <div class="audit-user-cell">
-      <span class="audit-user-cell__avatar">
-        <%= audit_user_email.first&.upcase || "?" %>
-      </span>
-
-      <span title="<%= audit_user_email %>">
-        <%= audit_user_email.presence || "Sin usuario" %>
-      </span>
-    </div>
-  <% end %>
-</td>
 
                 <td>
+
+                  <% if directory_user.present? %>
+
+                    <% user_name =
+                      directory_user.display_name.presence ||
+                      directory_user.user_principal_name.presence ||
+                      "Usuario" %>
+
+
+                    <%= link_to(
+                      user365_path(
+                        directory_user,
+                        return_to: request.fullpath
+                      ),
+                      class: "audit-user-cell audit-user-cell--link",
+                      aria: {
+                        label: "Ver dashboard de #{user_name}"
+                      }
+                    ) do %>
+
+                      <span class="audit-user-cell__avatar">
+                        <%= user_name.first.upcase %>
+                      </span>
+
+                      <span class="audit-user-cell__content">
+
+                        <strong
+                          title="<%= directory_user.display_name %>"
+                        >
+                          <%= directory_user.display_name.presence ||
+                            "Sin nombre" %>
+                        </strong>
+
+                        <small
+                          title="<%= directory_user.user_principal_name %>"
+                        >
+                          <%= directory_user.user_principal_name.presence ||
+                            audit_user_email %>
+                        </small>
+
+                      </span>
+
+                    <% end %>
+
+
+                  <% else %>
+
+
+                    <div class="audit-user-cell">
+
+                      <span class="audit-user-cell__avatar">
+                        <%= audit_user_email.first&.upcase || "?" %>
+                      </span>
+
+                      <span title="<%= audit_user_email %>">
+                        <%= audit_user_email.presence || "Sin usuario" %>
+                      </span>
+
+                    </div>
+
+
+                  <% end %>
+
+                </td>
+
+
+                <!-- TIPO DE USUARIO -->
+
+                <td>
+
                   <% user_type =
                     record["tipoUsuario"].presence ||
                     "Sin clasificar" %>
@@ -344,7 +425,11 @@
                   >
                     <%= user_type %>
                   </span>
+
                 </td>
+
+
+                <!-- ACCIÓN -->
 
                 <td>
                   <strong>
@@ -352,17 +437,15 @@
                   </strong>
                 </td>
 
-                <td>
-                  <%= record["operacion365"].presence || "—" %>
-                </td>
+
+                <!-- APLICACIÓN -->
 
                 <td>
                   <%= record["aplicacion"].presence || "—" %>
                 </td>
 
-                <td>
-                  <%= record["tipoItem"].presence || "—" %>
-                </td>
+
+                <!-- ARCHIVO -->
 
                 <td class="audit-table__file">
                   <span title="<%= record["archivo"] %>">
@@ -370,26 +453,30 @@
                   </span>
                 </td>
 
-                <td class="audit-table__long-text">
-                  <span title="<%= record["ruta"] %>">
-                    <%= record["ruta"].presence || "—" %>
-                  </span>
+
+                <!-- TIPO DE ELEMENTO -->
+
+                <td>
+                  <%= record["tipoItem"].presence || "—" %>
                 </td>
 
-                <td class="audit-table__long-text">
-                  <span title="<%= record["sitio"] %>">
-                    <%= record["sitio"].presence || "—" %>
-                  </span>
-                </td>
               </tr>
+
             <% end %>
+
+
           <% else %>
+
+
             <tr>
+
               <td
-                colspan="10"
+                colspan="7"
                 class="audit-table__empty"
               >
+
                 <div>
+
                   <strong>
                     No se encontraron movimientos
                   </strong>
@@ -397,17 +484,29 @@
                   <span>
                     Modifica los filtros para ampliar la búsqueda.
                   </span>
+
                 </div>
+
               </td>
+
             </tr>
+
+
           <% end %>
+
         </tbody>
+
       </table>
+
     </div>
 
+
     <% if @total_pages > 1 %>
+
       <footer class="audit-pagination">
+
         <div class="audit-pagination__summary">
+
           Página
 
           <strong>
@@ -419,16 +518,21 @@
           <strong>
             <%= @total_pages %>
           </strong>
+
         </div>
+
 
         <nav
           class="audit-pagination__controls"
           aria-label="Paginación de movimientos"
         >
+
           <% preserved_params =
             request.query_parameters.except("page") %>
 
+
           <% if @page > 1 %>
+
             <%= link_to(
               "← Anterior",
               audit_logs_path(
@@ -438,7 +542,9 @@
               ),
               class: "audit-pagination__button"
             ) %>
+
           <% else %>
+
             <span
               class="
                 audit-pagination__button
@@ -447,13 +553,17 @@
             >
               ← Anterior
             </span>
+
           <% end %>
+
 
           <span class="audit-pagination__current">
             <%= @page %>
           </span>
 
+
           <% if @page < @total_pages %>
+
             <%= link_to(
               "Siguiente →",
               audit_logs_path(
@@ -463,7 +573,9 @@
               ),
               class: "audit-pagination__button"
             ) %>
+
           <% else %>
+
             <span
               class="
                 audit-pagination__button
@@ -472,16 +584,25 @@
             >
               Siguiente →
             </span>
+
           <% end %>
+
         </nav>
+
       </footer>
+
     <% end %>
+
   </section>
+
 </section>
+
 
 <script>
   (() => {
+
     const initializeAuditDateFilters = () => {
+
       const periodSelect =
         document.getElementById("audit-date-filter")
 
@@ -497,11 +618,14 @@
         return
       }
 
+
       const toggleCustomDates = () => {
+
         const isCustom =
           periodSelect.value === "custom"
 
         customDateFields.forEach((field) => {
+
           field.classList.toggle(
             "is-hidden",
             !isCustom
@@ -519,37 +643,50 @@
           if (!isCustom) {
             input.value = ""
           }
+
         })
+
       }
 
+
       if (periodSelect.auditToggleHandler) {
+
         periodSelect.removeEventListener(
           "change",
           periodSelect.auditToggleHandler
         )
+
       }
+
 
       periodSelect.auditToggleHandler =
         toggleCustomDates
+
 
       periodSelect.addEventListener(
         "change",
         periodSelect.auditToggleHandler
       )
 
+
       toggleCustomDates()
+
     }
+
 
     document.addEventListener(
       "turbo:load",
       initializeAuditDateFilters
     )
 
+
     document.addEventListener(
       "DOMContentLoaded",
       initializeAuditDateFilters
     )
 
+
     initializeAuditDateFilters()
+
   })()
 </script>
