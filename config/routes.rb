@@ -5,12 +5,15 @@ Rails.application.routes.draw do
   get "login", to: "sessions#new", as: :login
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy", as: :logout
+  get "/reset-password", to: "password_resets#edit", as: :reset_password
+  patch "/reset-password", to: "password_resets#update", as: :update_password
 
   # Aplicación
   get "dashboard", to: "dashboard#index", as: :dashboard
   get "auditoria", to: "audit_logs#index", as: :audit_logs
   get "usuarios-365", to: "users365#index", as: :users365
   get "usuarios-365/:id", to: "users365#show", as: :user365
+  resources :audit_users, path: "usuarios", only: %i[new create]
 
   # Cloud Orve
   get "cloudorve", to: "nomenclature_audits#index", as: :cloudorve
