@@ -43,6 +43,7 @@ class Users365Controller < ApplicationController
 
   def show
     @return_to = safe_return_path(params[:return_to])
+
     @date_range = Audit::DateRange.new(
       filter:
         params[:date_filter].presence ||
@@ -60,7 +61,9 @@ class Users365Controller < ApplicationController
       page: params[:page],
       page_size: params[:per_page],
       sort: params[:sort],
-      direction: params[:direction]
+      direction: params[:direction],
+      include_discardables:
+        params[:include_discardables]
     )
 
     @records = query.records
@@ -72,6 +75,9 @@ class Users365Controller < ApplicationController
     @total_pages = query.total_pages
     @sort = query.sort
     @direction = query.direction
+
+    @include_discardables =
+      query.include_discardables
 
     @top_application =
       query.top_application
@@ -100,11 +106,11 @@ class Users365Controller < ApplicationController
 
   private
 
-    def set_user
-      @user = Microsoft365User.find(params[:id])
-    end
+  def set_user
+    @user = Microsoft365User.find(params[:id])
+  end
 
-    def safe_return_path(value)
+  def safe_return_path(value)
     path = value.to_s.strip
 
     return users365_path if path.blank?

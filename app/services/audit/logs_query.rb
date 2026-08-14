@@ -13,7 +13,7 @@ module Audit
       "dateZ" => "occurred_at",
       "usuario" => "user_name",
       "tipoUsuario" => "user_type",
-      "accion" => "movement_code",
+      "accion" => "source_action",
       "operacion365" => "operation",
       "aplicacion" => "application",
       "tipoItem" => "item_type",
@@ -24,6 +24,33 @@ module Audit
 
     DIRECTIONS = %w[asc desc].freeze
 
+    # TEMPORAL:
+    # Se elimina cuando mv_audit_movements contenga exclusivamente
+    # los movimientos logicos definitivos.
+    TEMPORARY_DISCARDABLE_OPERATIONS = %w[
+      FileSyncUploadedFull
+      FileSyncDownloadedFull
+      FileSyncUploadedPartial
+      FileSyncDownloadedPartial
+
+      FileAccessedExtended
+      FileModifiedExtended
+      PageViewedExtended
+
+      PagePrefetched
+      ClientViewSignaled
+      FileTimelineMetadataAccessed
+      SearchQueryInitiatedSharePoint
+
+      FilePreviewed
+      PageViewed
+      ListViewed
+      ListItemViewed
+      SearchQueryPerformed
+
+      FileUploadedPartial
+    ].freeze
+
     attr_reader :from,
                 :to,
                 :user,
@@ -31,6 +58,7 @@ module Audit
                 :page,
                 :page_size,
                 :sort,
+                :include_discardables,
                 :direction
 
     def initialize(
@@ -41,6 +69,7 @@ module Audit
       page: DEFAULT_PAGE,
       page_size: DEFAULT_PAGE_SIZE,
       sort: DEFAULT_SORT,
+      include_discardables: false,
       direction: DEFAULT_DIRECTION
     )
       @from = from
@@ -50,6 +79,8 @@ module Audit
       @page = normalize_page(page)
       @page_size = normalize_page_size(page_size)
       @sort = normalize_sort(sort)
+      @include_discardables =
+        ActiveModel::Type::Boolean.new.cast(include_discardables)
       @direction = normalize_direction(direction)
     end
 
@@ -70,10 +101,10 @@ module Audit
 
     def actions
       @actions ||= actions_scope
-        .where.not(movement_code: [ nil, "" ])
+        .where.not(source_action: [ nil, "" ])
         .distinct
-        .order(:movement_code)
-        .pluck(:movement_code)
+        .order(:source_action)
+        .pluck(:source_action)
     end
 
     def total_count
@@ -98,21 +129,32 @@ module Audit
       )
     end
 
-    def filtered_scope
+    def visibility_scope
       scope = base_scope
+
+      return scope if include_discardables
+
+      scope.where(
+        "operation IS NULL OR operation NOT IN (?)",
+        TEMPORARY_DISCARDABLE_OPERATIONS
+      )
+    end
+
+    def filtered_scope
+      scope = visibility_scope
       scope = scope.where(user_name: user) if user.present?
-      scope = scope.where(movement_code: action) if action.present?
+      scope = scope.where(source_action: action) if action.present?
       scope
     end
 
     def users_scope
-      scope = base_scope
-      scope = scope.where(movement_code: action) if action.present?
+      scope = visibility_scope
+      scope = scope.where(source_action: action) if action.present?
       scope
     end
 
     def actions_scope
-      scope = base_scope
+      scope = visibility_scope
       scope = scope.where(user_name: user) if user.present?
       scope
     end
@@ -158,13 +200,17 @@ module Audit
     def normalize_sort(value)
       normalized_value = value.to_s
 
-      SORTABLE_COLUMNS.key?(normalized_value) ? normalized_value : DEFAULT_SORT
+      SORTABLE_COLUMNS.key?(normalized_value) ?
+        normalized_value :
+        DEFAULT_SORT
     end
 
     def normalize_direction(value)
       normalized_value = value.to_s.downcase
 
-      DIRECTIONS.include?(normalized_value) ? normalized_value : DEFAULT_DIRECTION
+      DIRECTIONS.include?(normalized_value) ?
+        normalized_value :
+        DEFAULT_DIRECTION
     end
   end
 end

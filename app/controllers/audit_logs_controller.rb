@@ -14,6 +14,7 @@ class AuditLogsController < ApplicationController
       page: params[:page],
       page_size: params[:per_page],
       sort: params[:sort],
+      include_discardables: params[:include_discardables],
       direction: params[:direction]
     )
 
@@ -28,6 +29,7 @@ class AuditLogsController < ApplicationController
     @total_pages = query.total_pages
     @sort = query.sort
     @direction = query.direction
+    @include_discardables = query.include_discardables
   end
 
   private

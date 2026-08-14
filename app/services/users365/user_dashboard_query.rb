@@ -10,7 +10,7 @@ module Users365
     # Conservamos las keys que ya envía la UI.
     SORTABLE_COLUMNS = {
       "dateZ" => "occurred_at",
-      "accion" => "movement_code",
+      "accion" => "source_action",
       "operacion365" => "operation",
       "aplicacion" => "application",
       "tipoItem" => "item_type",
@@ -21,6 +21,33 @@ module Users365
 
     DIRECTIONS = %w[asc desc].freeze
 
+    # TEMPORAL:
+    # Se elimina cuando mv_audit_movements contenga exclusivamente
+    # los movimientos logicos definitivos.
+    TEMPORARY_DISCARDABLE_OPERATIONS = %w[
+      FileSyncUploadedFull
+      FileSyncDownloadedFull
+      FileSyncUploadedPartial
+      FileSyncDownloadedPartial
+
+      FileAccessedExtended
+      FileModifiedExtended
+      PageViewedExtended
+
+      PagePrefetched
+      ClientViewSignaled
+      FileTimelineMetadataAccessed
+      SearchQueryInitiatedSharePoint
+
+      FilePreviewed
+      PageViewed
+      ListViewed
+      ListItemViewed
+      SearchQueryPerformed
+
+      FileUploadedPartial
+    ].freeze
+
     attr_reader :user_principal_name,
                 :from,
                 :to,
@@ -28,7 +55,8 @@ module Users365
                 :page,
                 :page_size,
                 :sort,
-                :direction
+                :direction,
+                :include_discardables
 
     def initialize(
       user_principal_name:,
@@ -38,7 +66,8 @@ module Users365
       page: DEFAULT_PAGE,
       page_size: DEFAULT_PAGE_SIZE,
       sort: DEFAULT_SORT,
-      direction: DEFAULT_DIRECTION
+      direction: DEFAULT_DIRECTION,
+      include_discardables: false
     )
       @user_principal_name =
         normalize_filter(user_principal_name)&.downcase
@@ -50,6 +79,11 @@ module Users365
       @sort = normalize_sort(sort)
       @direction = normalize_direction(direction)
       @action = normalize_filter(action)
+
+      @include_discardables =
+        ActiveModel::Type::Boolean.new.cast(
+          include_discardables
+        )
     end
 
     def actions
@@ -58,10 +92,10 @@ module Users365
         expires_in: 1.hour
       ) do
         user_scope
-          .where.not(movement_code: [ nil, "" ])
+          .where.not(source_action: [ nil, "" ])
           .distinct
-          .order(:movement_code)
-          .pluck(:movement_code)
+          .order(:source_action)
+          .pluck(:source_action)
       end
     end
 
@@ -97,7 +131,7 @@ module Users365
       @top_action ||= ranked_value(
         <<~SQL.squish
           COALESCE(
-            NULLIF(BTRIM("movement_code"), ''),
+            NULLIF(BTRIM("source_action"), ''),
             'Sin acción'
           )
         SQL
@@ -121,10 +155,11 @@ module Users365
     def actions_cache_key
       [
         "user-dashboard-actions",
-        "v1",
+        "v3",
         user_principal_name,
         from.to_date.iso8601,
-        to.to_date.iso8601
+        to.to_date.iso8601,
+        include_discardables ? "with-discardables" : "clean"
       ].join(":")
     end
 
@@ -143,8 +178,19 @@ module Users365
       )
     end
 
+    def visibility_scope
+      scope = base_scope
+
+      return scope if include_discardables
+
+      scope.where(
+        "operation IS NULL OR operation NOT IN (?)",
+        TEMPORARY_DISCARDABLE_OPERATIONS
+      )
+    end
+
     def user_scope
-      @user_scope ||= base_scope.where(
+      @user_scope ||= visibility_scope.where(
         user_name: user_principal_name
       )
     end
@@ -153,7 +199,7 @@ module Users365
       scope = user_scope
 
       scope = scope.where(
-        movement_code: action
+        source_action: action
       ) if action.present?
 
       scope
