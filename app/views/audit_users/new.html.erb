@@ -1,0 +1,92 @@
+<section class="audit-page">
+  <header class="audit-page__header">
+    <div>
+      <p class="audit-page__eyebrow">
+        Administración
+      </p>
+
+      <h1>Crear usuario</h1>
+
+      <p class="audit-page__description">
+        Registra un nuevo usuario para acceder a AuditORVE.
+      </p>
+    </div>
+  </header>
+
+  <section class="audit-filters">
+    <%= form_with(
+      url: audit_users_path,
+      scope: :audit_user,
+      method: :post,
+      local: true,
+      data: {
+  controller: "audit-user-form",
+  action: "input->audit-user-form#validate change->audit-user-form#validate"
+}
+    ) do |form| %>
+
+      <div class="audit-filter-field">
+        <%= form.label :firstname, "Nombre(s)" %>
+
+        <%= form.text_field(
+          :firstname,
+          value: params.dig(:audit_user, :firstname),
+          required: true,
+          autocomplete: "given-name"
+        ) %>
+      </div>
+
+      <div class="audit-filter-field">
+        <%= form.label :lastname, "Apellidos" %>
+
+        <%= form.text_field(
+          :lastname,
+          value: params.dig(:audit_user, :lastname),
+          required: true,
+          autocomplete: "family-name"
+        ) %>
+      </div>
+
+      <div class="audit-filter-field">
+        <%= form.label :usuario, "Correo electrónico" %>
+
+        <%= form.email_field(
+          :usuario,
+          value: params.dig(:audit_user, :usuario),
+          required: true,
+          autocomplete: "email",
+          placeholder: "usuario@grupoorve.mx"
+        ) %>
+      </div>
+
+      <div class="audit-filter-field">
+        <%= form.label :tipo_usuario_id, "Tipo de usuario" %>
+
+        <%= form.select(
+  :tipo_usuario_id,
+  options_from_collection_for_select(
+    @user_types,
+    :id,
+    :label,
+    params.dig(:audit_user, :tipo_usuario_id)
+  ),
+  {},
+  {
+    required: true
+  }
+) %>
+      </div>
+
+      <div class="audit-filters__actions">
+        <%= form.submit(
+  "Crear usuario",
+  class: "button button--primary",
+  disabled: true,
+  data: {
+    audit_user_form_target: "submit"
+  }
+) %>
+      </div>
+    <% end %>
+  </section>
+</section>

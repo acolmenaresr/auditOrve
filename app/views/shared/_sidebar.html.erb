@@ -1,0 +1,628 @@
+<aside
+  class="app-sidebar"
+  data-controller="sidebar-menu"
+  aria-label="Navegación principal"
+>
+  <nav class="app-sidebar__nav">
+
+    <%# =====================================================
+        EVENTOS
+
+        Visible únicamente si el usuario tiene acceso
+        al módulo Eventos.
+
+        6  Event Auditor   -> manage
+        7  Master Auditor  -> manage
+        8  DG              -> read
+        10 Super Admin     -> manage
+       ===================================================== %>
+
+    <% if current_permissions.can_access_events? %>
+      <div
+        class="
+          app-sidebar__group
+          <%= "is-active" if %w[dashboard audit_logs users365].include?(controller_name) %>
+        "
+        data-sidebar-menu-target="group"
+        data-action="
+          mouseenter->sidebar-menu#enter
+          mouseleave->sidebar-menu#leave
+        "
+      >
+        <button
+          type="button"
+          class="app-sidebar__main-button"
+          aria-label="Eventos"
+          aria-haspopup="true"
+          aria-expanded="false"
+          data-sidebar-menu-target="trigger"
+          data-action="click->sidebar-menu#toggle"
+        >
+          <span
+            class="app-sidebar__icon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M3 12h4l2.2-5 4.1 10 2.2-5H21"></path>
+            </svg>
+          </span>
+
+          <span class="app-sidebar__main-label">
+            Eventos
+          </span>
+        </button>
+
+
+        <div
+          class="app-sidebar__submenu"
+          data-sidebar-menu-target="panel"
+        >
+          <div class="app-sidebar__submenu-header">
+            <span class="app-sidebar__submenu-eyebrow">
+              Auditoría
+            </span>
+
+            <strong class="app-sidebar__submenu-title">
+              Eventos
+            </strong>
+          </div>
+
+
+          <div class="app-sidebar__submenu-links">
+
+            <%# Dashboard Eventos %>
+
+            <%= link_to(
+              dashboard_path,
+              class: "
+                app-sidebar__submenu-link
+                #{"is-current" if controller_name == "dashboard"}
+              "
+            ) do %>
+              <span
+                class="app-sidebar__submenu-icon"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+
+                  <rect
+                    x="14"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+
+                  <rect
+                    x="3"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+
+                  <rect
+                    x="14"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+                </svg>
+              </span>
+
+              <span>
+                Dashboard
+              </span>
+            <% end %>
+
+
+            <%# Movimientos %>
+
+            <%= link_to(
+              audit_logs_path,
+              class: "
+                app-sidebar__submenu-link
+                #{"is-current" if controller_name == "audit_logs"}
+              "
+            ) do %>
+              <span
+                class="app-sidebar__submenu-icon"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 12h16"></path>
+                  <path d="M14 6l6 6-6 6"></path>
+                  <path d="M10 6H4"></path>
+                  <path d="M10 18H4"></path>
+                </svg>
+              </span>
+
+              <span>
+                Movimientos
+              </span>
+            <% end %>
+
+
+            <%# Usuarios 365 / actividad %>
+
+            <%= link_to(
+              users365_path,
+              class: "
+                app-sidebar__submenu-link
+                #{"is-current" if controller_name == "users365"}
+              "
+            ) do %>
+              <span
+                class="app-sidebar__submenu-icon"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle
+                    cx="9"
+                    cy="8"
+                    r="4"
+                  ></circle>
+
+                  <path d="M3 21v-2a6 6 0 0 1 6-6h1"></path>
+                  <path d="M16 11l2 2 4-4"></path>
+                </svg>
+              </span>
+
+              <span>
+                Usuarios
+              </span>
+            <% end %>
+
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+
+    <%# =====================================================
+        CLOUD ORVE
+
+        Visible únicamente si existe permiso Cloud.
+
+        5  Cloud Auditor   -> manage
+        7  Master Auditor  -> manage
+        8  DG              -> read
+        10 Super Admin     -> manage
+       ===================================================== %>
+
+    <% if current_permissions.can_access_cloud? %>
+      <div
+        class="
+          app-sidebar__group
+          <%= "is-active" if controller_name == "nomenclature_audits" %>
+        "
+        data-sidebar-menu-target="group"
+        data-action="
+          mouseenter->sidebar-menu#enter
+          mouseleave->sidebar-menu#leave
+        "
+      >
+        <button
+          type="button"
+          class="app-sidebar__main-button"
+          aria-label="Cloud Orve"
+          aria-haspopup="true"
+          aria-expanded="false"
+          data-sidebar-menu-target="trigger"
+          data-action="click->sidebar-menu#toggle"
+        >
+          <span
+            class="app-sidebar__icon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="
+                  M7 18h10
+                  a4 4 0 0 0 .7-7.94
+                  A6 6 0 0 0 6.3 8.5
+                  A4.5 4.5 0 0 0 7 18Z
+                "
+              ></path>
+            </svg>
+          </span>
+
+          <span class="app-sidebar__main-label">
+            Cloud Orve
+          </span>
+        </button>
+
+
+        <div
+          class="app-sidebar__submenu"
+          data-sidebar-menu-target="panel"
+        >
+          <div class="app-sidebar__submenu-header">
+            <span class="app-sidebar__submenu-eyebrow">
+              Auditoría
+            </span>
+
+            <strong class="app-sidebar__submenu-title">
+              Cloud Orve
+            </strong>
+          </div>
+
+
+          <div class="app-sidebar__submenu-links">
+
+            <%# Dashboard Cloud %>
+
+            <%= link_to(
+              cloudorve_path,
+              class: "
+                app-sidebar__submenu-link
+                #{"is-current" if controller_name == "nomenclature_audits" && action_name == "index"}
+              "
+            ) do %>
+              <span
+                class="app-sidebar__submenu-icon"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+
+                  <rect
+                    x="14"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+
+                  <rect
+                    x="3"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+
+                  <rect
+                    x="14"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+                </svg>
+              </span>
+
+              <span>
+                Dashboard
+              </span>
+            <% end %>
+
+
+            <%# Clouds / Drives %>
+
+            <%= link_to(
+              cloudorve_drives_path,
+              class: "
+                app-sidebar__submenu-link
+                #{
+                  "is-current" if
+                    controller_name == "nomenclature_audits" &&
+                    action_name != "index"
+                }
+              "
+            ) do %>
+              <span
+                class="app-sidebar__submenu-icon"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 6h16"></path>
+                  <path d="M5 6l1-2h12l1 2"></path>
+
+                  <rect
+                    x="3"
+                    y="6"
+                    width="18"
+                    height="6"
+                    rx="2"
+                  ></rect>
+
+                  <rect
+                    x="3"
+                    y="14"
+                    width="18"
+                    height="6"
+                    rx="2"
+                  ></rect>
+
+                  <path d="M7 9h.01"></path>
+                  <path d="M7 17h.01"></path>
+                </svg>
+              </span>
+
+              <span>
+                Clouds
+              </span>
+            <% end %>
+
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+
+    <%# =====================================================
+        USUARIOS ADMINISTRATIVOS
+
+        El módulo solamente existe si el usuario tiene al
+        menos permiso :read.
+
+        8  DG          -> read
+        9  Admin       -> manage
+        10 Super Admin -> manage
+
+        DG puede conocer el módulo, pero NO puede conocer ni
+        ejecutar la opción operativa "Usuario Nuevo".
+       ===================================================== %>
+
+    <% if current_permissions.can_access_users? %>
+      <div
+        class="
+          app-sidebar__group
+          <%= "is-active" if controller_name == "audit_users" %>
+        "
+        data-sidebar-menu-target="group"
+        data-action="
+          mouseenter->sidebar-menu#enter
+          mouseleave->sidebar-menu#leave
+        "
+      >
+        <button
+          type="button"
+          class="app-sidebar__main-button"
+          aria-label="Usuarios"
+          aria-haspopup="true"
+          aria-expanded="false"
+          data-sidebar-menu-target="trigger"
+          data-action="click->sidebar-menu#toggle"
+        >
+          <span
+            class="app-sidebar__icon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle
+                cx="9"
+                cy="7"
+                r="4"
+              ></circle>
+
+              <path d="M3 21v-2a6 6 0 0 1 6-6"></path>
+
+              <path d="M17 11v6"></path>
+              <path d="M14 14h6"></path>
+            </svg>
+          </span>
+
+          <span class="app-sidebar__main-label">
+            Usuarios
+          </span>
+        </button>
+
+
+        <div
+          class="app-sidebar__submenu"
+          data-sidebar-menu-target="panel"
+        >
+          <div class="app-sidebar__submenu-header">
+            <span class="app-sidebar__submenu-eyebrow">
+              Administración
+            </span>
+
+            <strong class="app-sidebar__submenu-title">
+              Usuarios
+            </strong>
+          </div>
+
+
+          <div class="app-sidebar__submenu-links">
+
+            <%# =================================================
+                DASHBOARD DE USUARIOS
+
+                Todavía no existe audit_users#index.
+
+                DG sí tiene autorización para conocer esta futura
+                vista, por eso puede mostrarse como pendiente.
+
+                Cuando creemos la ruta, este span se convierte
+                en link_to.
+               ================================================= %>
+
+            <span
+              class="
+                app-sidebar__submenu-link
+                is-disabled
+              "
+              aria-disabled="true"
+            >
+              <span
+                class="app-sidebar__submenu-icon"
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+
+                  <rect
+                    x="14"
+                    y="3"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+
+                  <rect
+                    x="3"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+
+                  <rect
+                    x="14"
+                    y="14"
+                    width="7"
+                    height="7"
+                    rx="1"
+                  ></rect>
+                </svg>
+              </span>
+
+              <span>
+                Dashboard
+              </span>
+            </span>
+
+
+            <%# =================================================
+                USUARIO NUEVO
+
+                Solo existe para usuarios con :manage.
+
+                DG ni siquiera recibe este HTML.
+               ================================================= %>
+
+            <% if current_permissions.can_manage_users? %>
+              <%= link_to(
+                new_audit_user_path,
+                class: "
+                  app-sidebar__submenu-link
+                  #{
+                    "is-current" if
+                      controller_name == "audit_users" &&
+                      %w[new create].include?(action_name)
+                  }
+                "
+              ) do %>
+                <span
+                  class="app-sidebar__submenu-icon"
+                  aria-hidden="true"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle
+                      cx="9"
+                      cy="7"
+                      r="4"
+                    ></circle>
+
+                    <path d="M3 21v-2a6 6 0 0 1 6-6"></path>
+
+                    <path d="M17 11v6"></path>
+                    <path d="M14 14h6"></path>
+                  </svg>
+                </span>
+
+                <span>
+                  Usuario Nuevo
+                </span>
+              <% end %>
+            <% end %>
+
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+  </nav>
+</aside>

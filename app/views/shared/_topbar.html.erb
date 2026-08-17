@@ -1,0 +1,138 @@
+<header
+  class="app-topbar"
+  data-controller="user-menu"
+>
+  <div class="app-topbar__left">
+    <%= link_to(root_path, class: "app-topbar__brand", aria: { label: "AuditORVE" }) do %>
+
+      <span
+        class="app-topbar__brand-mark"
+        aria-hidden="true"
+      >
+        <img
+          src="/auditorve-favicon-v3.png"
+          alt=""
+          class="app-topbar__logo"
+        >
+      </span>
+
+      <span class="app-topbar__brand-copy">
+        <strong class="app-topbar__brand-title">
+          AuditORVE
+        </strong>
+
+        <span class="app-topbar__brand-location">
+          <%= app_section_name %> / <%= app_page_title %>
+        </span>
+      </span>
+
+    <% end %>
+  </div>
+
+
+  <div class="app-topbar__right">
+    <div class="app-user-menu">
+
+      <%# =====================================================
+          TRIGGER
+
+          Solo avatar.
+          ===================================================== %>
+
+      <button
+        type="button"
+        class="app-user-menu__trigger"
+        aria-label="Abrir menú de usuario"
+        aria-expanded="false"
+        aria-controls="app-user-dropdown"
+        data-user-menu-target="trigger"
+        data-action="click->user-menu#toggle"
+      >
+        <span
+          class="app-user-menu__avatar"
+          aria-hidden="true"
+        >
+          <%= current_user_initials %>
+        </span>
+      </button>
+
+
+      <%# =====================================================
+          DROPDOWN
+          ===================================================== %>
+
+      <div
+        id="app-user-dropdown"
+        class="app-user-menu__dropdown"
+        data-user-menu-target="menu"
+        hidden
+      >
+
+        <div class="app-user-menu__dropdown-header">
+
+          <span
+            class="
+              app-user-menu__avatar
+              app-user-menu__avatar--large
+            "
+            aria-hidden="true"
+          >
+            <%= current_user_initials %>
+          </span>
+
+
+          <div class="app-user-menu__identity">
+
+            <strong class="app-user-menu__identity-name">
+              <%= current_user_short_name %>
+            </strong>
+
+            <span class="app-user-menu__identity-email">
+              <%= current_user.usuario %>
+            </span>
+
+            <span class="app-user-menu__type-badge">
+              <%= current_user_type_label %>
+            </span>
+
+          </div>
+        </div>
+
+
+        <div class="app-user-menu__divider"></div>
+
+
+        <%= button_to(
+          logout_path,
+          method: :delete,
+          class: "app-user-menu__logout"
+        ) do %>
+
+          <span
+            class="app-user-menu__logout-icon"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M10 17l5-5-5-5"></path>
+              <path d="M15 12H3"></path>
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            </svg>
+          </span>
+
+          <span>
+            Cerrar sesión
+          </span>
+
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+</header>

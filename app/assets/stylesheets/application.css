@@ -1,5 +1,6 @@
 @import url("vendor/tom-select.css");
 @import url("users365.css");
+@import url("app_shell.css");
 
 :root {
   --background: #f5f7fb;
@@ -57,7 +58,8 @@ body {
     background-color 150ms ease,
     border-color 150ms ease,
     color 150ms ease,
-    box-shadow 150ms ease;
+    box-shadow 150ms ease,
+    opacity 150ms ease;
 }
 
 .button:focus-visible {
@@ -65,25 +67,54 @@ body {
   outline-offset: 2px;
 }
 
+/* Estado deshabilitado general */
+.button:disabled,
+.button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.45;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* Botón primario */
 .button--primary {
   border-color: var(--primary);
   background: var(--primary);
   color: white;
 }
 
-.button--primary:hover {
+/* Hover únicamente cuando está habilitado */
+.button--primary:hover:not(:disabled) {
   border-color: var(--primary-dark);
   background: var(--primary-dark);
 }
 
+/* Estado visual específico del primario deshabilitado */
+.button--primary:disabled,
+.button--primary[disabled] {
+  border-color: #94a3b8;
+  background: #94a3b8;
+  color: #ffffff;
+}
+
+/* Botón secundario */
 .button--secondary {
   border-color: var(--border);
   background: white;
   color: var(--text);
 }
 
-.button--secondary:hover {
+/* Hover únicamente cuando está habilitado */
+.button--secondary:hover:not(:disabled) {
   background: #f8fafc;
+}
+
+/* Estado visual específico del secundario deshabilitado */
+.button--secondary:disabled,
+.button--secondary[disabled] {
+  border-color: var(--border);
+  background: #f1f5f9;
+  color: var(--muted);
 }
 
 /* =========================================================
@@ -957,6 +988,48 @@ body {
   width: 100%;
   margin-top: 4px;
 }
+/* =========================================================
+   LOGIN - RECUPERACIÓN DE CONTRASEÑA
+   ========================================================= */
+
+.login-form__recovery {
+  margin-top: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.login-form__recovery span {
+  color: var(--muted);
+}
+
+.login-form__recovery-link {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+
+  transition:
+    color 150ms ease,
+    text-decoration-color 150ms ease;
+}
+
+.login-form__recovery-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.login-form__recovery-link:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
 
 /* =========================================================
    TABLAS DASHBOARD CLOUD ORVE
@@ -1593,4 +1666,292 @@ summary.cloudorve-document-tree__row {
 .compliance-badge--neutral {
   padding-left: 12px;
   padding-right: 12px;
+}
+/* Password reset */
+
+.password-reset-page {
+  min-height: calc(100vh - 4rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.password-reset-card {
+  width: 100%;
+  max-width: 520px;
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+.password-reset-card__brand {
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.password-reset-card__header {
+  margin-bottom: 1.5rem;
+}
+
+.password-reset-card__header h1 {
+  margin: 0 0 1rem;
+}
+
+.password-reset-card__header p {
+  margin: 0.5rem 0;
+}
+
+.password-reset-card__greeting {
+  font-size: 1.05rem;
+}
+
+.password-reset-card__email {
+  display: block;
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.password-reset-alert {
+  margin-bottom: 1.25rem;
+  padding: 0.875rem 1rem;
+  border-radius: 8px;
+}
+
+.password-reset-alert--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.password-reset-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.password-reset-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.password-reset-field label {
+  font-weight: 600;
+}
+
+.password-reset-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.password-reset-field input:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.password-reset-rules ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.password-reset-rules li {
+  list-style: none;
+}
+
+.password-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  transition:
+    color 0.2s ease,
+    font-weight 0.2s ease;
+}
+
+.password-rule [data-password-rule-icon] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  flex: 0 0 1.2rem;
+  font-weight: 700;
+}
+
+.password-rule--pending {
+  color: #6b7280;
+}
+
+.password-rule--valid {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.password-match {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.password-match--pending {
+  color: #6b7280;
+}
+
+.password-match--valid {
+  color: #15803d;
+}
+
+.password-match--invalid {
+  color: #b91c1c;
+}
+
+.password-reset-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+/* =========================================================
+   PASSWORD RESET - VISIBILIDAD DE CONTRASEÑA
+   ========================================================= */
+
+.password-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-reset-field
+  .password-input-wrapper
+  .password-input-with-toggle {
+  width: 100%;
+  padding-right: 3.5rem;
+}
+
+.password-visibility-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 0;
+  border-radius: 7px;
+
+  background: transparent;
+  color: var(--muted);
+
+  cursor: pointer;
+  appearance: none;
+
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.password-visibility-toggle:hover {
+  background: #f1f5f9;
+  color: var(--text);
+}
+
+.password-visibility-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.password-eye {
+  width: 21px;
+  height: 21px;
+
+  display: block;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  pointer-events: none;
+}
+
+.password-eye.is-hidden {
+  display: none;
+}
+
+
+/* =========================================================
+   PASSWORD RESET - BOTÓN PRINCIPAL
+   ========================================================= */
+
+.password-reset-submit {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 0.25rem;
+  padding: 0 16px;
+
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+
+  background: var(--primary);
+  color: #ffffff;
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease;
+}
+
+.password-reset-submit:hover:not(:disabled) {
+  border-color: var(--primary-dark);
+  background: var(--primary-dark);
+}
+
+.password-reset-submit:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.password-reset-submit:disabled {
+  border-color: #94a3b8;
+  background: #94a3b8;
+  color: #ffffff;
+
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+
+/* =========================================================
+   PASSWORD RESET - RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 520px) {
+  .password-reset-page {
+    padding: 1rem;
+  }
+
+  .password-reset-card {
+    padding: 1.5rem;
+  }
+
+  .password-visibility-toggle {
+    right: 0.5rem;
+  }
 }

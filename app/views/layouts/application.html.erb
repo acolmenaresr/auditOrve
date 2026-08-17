@@ -1,138 +1,287 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <title><%= content_for(:title) || "Audit Orve" %></title>
+    <title>
+      <%= if content_for?(:title)
+            yield(:title)
+          elsif authenticated_shell?
+            app_document_title
+          else
+            "Audit Orve"
+          end %>
+    </title>
 
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="Audit Orve">
-  <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Audit Orve">
+    <meta name="mobile-web-app-capable" content="yes">
 
-  <%= csrf_meta_tags %>
-  <%= csp_meta_tag %>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
 
-  <%= yield :head %>
+    <%= yield :head %>
 
-  <%# Enable PWA manifest for installable apps %>
-  <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+    <%# Enable PWA manifest for installable apps %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-  <link rel="icon" href="/auditorve-favicon-v3.png?v=3" type="image/png">
-  <link rel="apple-touch-icon" href="/auditorve-favicon-v3.png?v=3">
+    <link
+      rel="icon"
+      href="/auditorve-favicon-v3.png?v=3"
+      type="image/png"
+    >
 
-  <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <link
+      rel="apple-touch-icon"
+      href="/auditorve-favicon-v3.png?v=3"
+    >
 
-  <%= stylesheet_link_tag(
-    "application",
-    "data-turbo-track": "reload"
-  ) %>
+    <%= stylesheet_link_tag(
+      :app,
+      "data-turbo-track": "reload"
+    ) %>
 
-  <script
-    src="https://cdn.jsdelivr.net/npm/tom-select@2.6.2/dist/js/tom-select.complete.min.js"
-    data-turbo-track="reload"
-  ></script>
+    <%= stylesheet_link_tag(
+      "application",
+      "data-turbo-track": "reload"
+    ) %>
 
-  <%= javascript_importmap_tags %>
-</head>
+    <script
+      src="https://cdn.jsdelivr.net/npm/tom-select@2.6.2/dist/js/tom-select.complete.min.js"
+      data-turbo-track="reload"
+    ></script>
 
-<body>
-  <% if authenticated? %>
-    <header class="app-header">
-      <div class="app-header__brand">
-        <strong>AuditORVE</strong>
-      </div>
+    <%= javascript_importmap_tags %>
+  </head>
 
-    <nav class="app-header__navigation">
-      <%= link_to "Dashboard", dashboard_path %>
-      <%= link_to "Movimientos", audit_logs_path %>
-      <%= link_to "Usuarios 365", users365_path %>
-      <%= link_to "Cloud Orve", cloudorve_path%>
-    </nav>
+  <body
+    class="<%= authenticated_shell? ? "app-body app-body--authenticated" : "app-body app-body--guest" %>"
+  >
+    <% if authenticated_shell? %>
+      <%# ======================================================
+          APLICACIÓN AUTENTICADA
 
-      <div class="app-header__session">
-        <div class="app-header__user">
-          <strong>
-            <%= current_user.first_name.presence || current_user.usuario %>
-          </strong>
+          Estructura:
+          app-shell
+          ├── topbar
+          └── workspace
+              ├── sidebar
+              └── main
+                  ├── flashes
+                  └── contenido
+          ====================================================== %>
 
-          <small>
-            <%= current_user.usuario %>
-          </small>
+      <div class="app-shell">
+
+        <%# ====================================================
+            TOPBAR GLOBAL
+
+            Ocupa todo el ancho de la aplicación y queda por
+            encima de la navegación lateral.
+            ==================================================== %>
+
+        <%= render "shared/topbar" %>
+
+
+        <%# ====================================================
+            WORKSPACE
+
+            Comienza debajo del topbar.
+            ==================================================== %>
+
+        <div class="app-shell__workspace">
+
+          <%# ==================================================
+              NAVEGACIÓN LATERAL
+              ================================================== %>
+
+          <%= render "shared/sidebar" %>
+
+
+          <%# ==================================================
+              ÁREA PRINCIPAL
+              ================================================== %>
+
+          <div class="app-shell__main">
+
+            <%# ================================================
+                FLASH MESSAGES
+                ================================================ %>
+
+            <div class="app-shell__flash-region">
+              <% if notice.present? %>
+                <div
+                  class="flash flash--notice"
+                  data-auto-dismiss-flash
+                >
+                  <span>
+                    <%= notice %>
+                  </span>
+
+                  <button
+                    type="button"
+                    class="flash__close"
+                    aria-label="Cerrar mensaje"
+                    data-flash-close
+                  >
+                    ×
+                  </button>
+                </div>
+              <% end %>
+
+              <% if alert.present? %>
+                <div
+                  class="flash flash--alert"
+                  data-auto-dismiss-flash
+                >
+                  <span>
+                    <%= alert %>
+                  </span>
+
+                  <button
+                    type="button"
+                    class="flash__close"
+                    aria-label="Cerrar mensaje"
+                    data-flash-close
+                  >
+                    ×
+                  </button>
+                </div>
+              <% end %>
+            </div>
+
+
+            <%# ================================================
+                CONTENIDO DE CADA VISTA
+                ================================================ %>
+
+            <main class="app-shell__content">
+              <%= yield %>
+            </main>
+
+          </div>
+          <%# /app-shell__main %>
+
         </div>
+        <%# /app-shell__workspace %>
 
-        <%= button_to(
-          "Cerrar sesión",
-          logout_path,
-          method: :delete,
-          class: "button button--secondary"
-        ) %>
       </div>
-    </header>
-  <% end %>
+      <%# /app-shell %>
 
-<% if notice.present? %>
-  <div class="flash flash--notice" data-auto-dismiss-flash>
-    <span><%= notice %></span>
 
-    <button
-      type="button"
-      class="flash__close"
-      aria-label="Cerrar mensaje"
-      data-flash-close
-    >
-      ×
-    </button>
-  </div>
-<% end %>
+    <% else %>
+      <%# ======================================================
+          VISTAS PÚBLICAS
 
-<% if alert.present? %>
-  <div class="flash flash--alert" data-auto-dismiss-flash>
-    <span><%= alert %></span>
+          Incluye:
+          - Login
+          - Reset Password
+          - Estados de enlace inválido / expirado
 
-    <button
-      type="button"
-      class="flash__close"
-      aria-label="Cerrar mensaje"
-      data-flash-close
-    >
-      ×
-    </button>
-  </div>
-<% end %>
+          Estas vistas permanecen fuera del shell interno,
+          incluso si el navegador tiene una sesión activa.
+          ====================================================== %>
 
-  <%= yield %>
-<script>
-  (() => {
-    const initializeFlashMessages = () => {
-      document
-        .querySelectorAll("[data-auto-dismiss-flash]")
-        .forEach((flash) => {
-          if (flash.dataset.initialized === "true") return
+      <div class="guest-shell">
 
-          flash.dataset.initialized = "true"
+        <% if notice.present? %>
+          <div
+            class="flash flash--notice"
+            data-auto-dismiss-flash
+          >
+            <span>
+              <%= notice %>
+            </span>
 
-          const closeFlash = () => {
-            flash.classList.add("is-hiding")
+            <button
+              type="button"
+              class="flash__close"
+              aria-label="Cerrar mensaje"
+              data-flash-close
+            >
+              ×
+            </button>
+          </div>
+        <% end %>
 
-            window.setTimeout(() => {
-              flash.remove()
-            }, 250)
-          }
+        <% if alert.present? %>
+          <div
+            class="flash flash--alert"
+            data-auto-dismiss-flash
+          >
+            <span>
+              <%= alert %>
+            </span>
 
-          const closeButton = flash.querySelector("[data-flash-close]")
+            <button
+              type="button"
+              class="flash__close"
+              aria-label="Cerrar mensaje"
+              data-flash-close
+            >
+              ×
+            </button>
+          </div>
+        <% end %>
 
-          if (closeButton) {
-            closeButton.addEventListener("click", closeFlash)
-          }
+        <%= yield %>
 
-          window.setTimeout(closeFlash, 4000)
-        })
-    }
+      </div>
+    <% end %>
 
-    document.addEventListener("turbo:load", initializeFlashMessages)
-    document.addEventListener("DOMContentLoaded", initializeFlashMessages)
 
-    initializeFlashMessages()
-  })()
-</script>
-</body>
+    <%# ========================================================
+        CONTROL DE FLASH MESSAGES
+        ======================================================== %>
+
+    <script>
+      (() => {
+        const initializeFlashMessages = () => {
+          document
+            .querySelectorAll("[data-auto-dismiss-flash]")
+            .forEach((flash) => {
+              if (flash.dataset.initialized === "true") {
+                return
+              }
+
+              flash.dataset.initialized = "true"
+
+              const closeFlash = () => {
+                flash.classList.add("is-hiding")
+
+                window.setTimeout(() => {
+                  flash.remove()
+                }, 250)
+              }
+
+              const closeButton =
+                flash.querySelector("[data-flash-close]")
+
+              if (closeButton) {
+                closeButton.addEventListener(
+                  "click",
+                  closeFlash
+                )
+              }
+
+              window.setTimeout(
+                closeFlash,
+                4000
+              )
+            })
+        }
+
+        document.addEventListener(
+          "turbo:load",
+          initializeFlashMessages
+        )
+
+        document.addEventListener(
+          "DOMContentLoaded",
+          initializeFlashMessages
+        )
+
+        initializeFlashMessages()
+      })()
+    </script>
+  </body>
 </html>

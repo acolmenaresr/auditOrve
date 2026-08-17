@@ -1,4 +1,5 @@
 class AuditLogsController < ApplicationController
+  before_action :authorize_events!
   def index
     @date_range = Audit::DateRange.new(
       filter: params[:date_filter],

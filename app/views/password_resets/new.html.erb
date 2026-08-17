@@ -1,0 +1,90 @@
+<% content_for :title, "Recuperar contraseña | AuditORVE" %>
+
+<section class="password-recovery">
+  <div class="password-recovery__card">
+
+    <%# ======================================================
+        ENCABEZADO
+        ====================================================== %>
+
+    <header class="password-recovery__header">
+      <div class="password-recovery__brand">
+        AuditORVE
+      </div>
+
+      <h1 class="password-recovery__title">
+        Recuperar contraseña
+      </h1>
+
+      <p class="password-recovery__description">
+        Ingresa el correo electrónico asociado a tu cuenta.
+        Si está registrado, recibirás instrucciones para
+        restablecer tu contraseña.
+      </p>
+    </header>
+
+
+    <%# ======================================================
+        FORMULARIO
+        ====================================================== %>
+
+    <%= form_with(
+      url: forgot_password_path,
+      method: :post,
+      scope: :password_recovery,
+      class: "password-recovery__form",
+      local: true
+    ) do |form| %>
+
+      <div class="password-recovery__field">
+        <%= form.label(
+          :email,
+          "Correo electrónico",
+          class: "password-recovery__label"
+        ) %>
+
+        <%= form.email_field(
+          :email,
+          value: params.dig(
+            :password_recovery,
+            :email
+          ),
+          required: true,
+          autofocus: true,
+          autocomplete: "email",
+          placeholder: "usuario@grupoorve.mx",
+          class: "password-recovery__input"
+        ) %>
+      </div>
+
+
+      <div class="password-recovery__actions">
+        <%= form.submit(
+          "Enviar instrucciones",
+          class: "password-recovery__submit"
+        ) %>
+
+        <%= link_to(
+          "Cancelar",
+          login_path,
+          class: "password-recovery__cancel"
+        ) %>
+      </div>
+
+    <% end %>
+
+
+    <%# ======================================================
+        REGRESAR AL LOGIN
+        ====================================================== %>
+
+    <div class="password-recovery__footer">
+      <%= link_to(
+        "Volver al inicio de sesión",
+        login_path,
+        class: "password-recovery__login-link"
+      ) %>
+    </div>
+
+  </div>
+</section>
