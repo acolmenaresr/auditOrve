@@ -1,5 +1,9 @@
 class Users365Controller < ApplicationController
-  before_action :set_user, only: :show
+  before_action :authorize_events!
+
+  before_action :set_user,
+                only: :show
+
 
   def index
     query = Users365::CatalogQuery.new(
@@ -23,8 +27,10 @@ class Users365Controller < ApplicationController
 
     @page = query.page
     @per_page = query.page_size
+
     @total_count = query.total_count
     @total_pages = query.total_pages
+
     @sort = query.sort
     @direction = query.direction
 
@@ -32,17 +38,25 @@ class Users365Controller < ApplicationController
       if @total_count.zero?
         0
       else
-        ((@page - 1) * @per_page) + 1
+        (
+          (@page - 1) *
+          @per_page
+        ) + 1
       end
 
-    @last_record = [
-      @page * @per_page,
-      @total_count
-    ].min
+    @last_record =
+      [
+        @page * @per_page,
+        @total_count
+      ].min
   end
 
+
   def show
-    @return_to = safe_return_path(params[:return_to])
+    @return_to =
+      safe_return_path(
+        params[:return_to]
+      )
 
     @date_range = Audit::DateRange.new(
       filter:
@@ -52,27 +66,30 @@ class Users365Controller < ApplicationController
       custom_to: params[:to]
     )
 
-    query = Users365::UserDashboardQuery.new(
-      user_principal_name:
-        @user.user_principal_name,
-      from: @date_range.from,
-      to: @date_range.to,
-      action: params[:audit_action],
-      page: params[:page],
-      page_size: params[:per_page],
-      sort: params[:sort],
-      direction: params[:direction],
-      include_discardables:
-        params[:include_discardables]
-    )
+    query =
+      Users365::UserDashboardQuery.new(
+        user_principal_name:
+          @user.user_principal_name,
+        from: @date_range.from,
+        to: @date_range.to,
+        action: params[:audit_action],
+        page: params[:page],
+        page_size: params[:per_page],
+        sort: params[:sort],
+        direction: params[:direction],
+        include_discardables:
+          params[:include_discardables]
+      )
 
     @records = query.records
     @actions = query.actions
 
     @page = query.page
     @per_page = query.page_size
+
     @total_count = query.total_count
     @total_pages = query.total_pages
+
     @sort = query.sort
     @direction = query.direction
 
@@ -95,27 +112,46 @@ class Users365Controller < ApplicationController
       if @total_count.zero?
         0
       else
-        ((@page - 1) * @per_page) + 1
+        (
+          (@page - 1) *
+          @per_page
+        ) + 1
       end
 
-    @last_record = [
-      @page * @per_page,
-      @total_count
-    ].min
+    @last_record =
+      [
+        @page * @per_page,
+        @total_count
+      ].min
   end
+
 
   private
 
+
   def set_user
-    @user = Microsoft365User.find(params[:id])
+    @user =
+      Microsoft365User.find(
+        params[:id]
+      )
   end
 
+
   def safe_return_path(value)
-    path = value.to_s.strip
+    path =
+      value
+        .to_s
+        .strip
 
     return users365_path if path.blank?
-    return users365_path unless path.start_with?("/")
-    return users365_path if path.start_with?("//")
+
+    return users365_path unless path.start_with?(
+      "/"
+    )
+
+    return users365_path if path.start_with?(
+      "//"
+    )
 
     path
   end

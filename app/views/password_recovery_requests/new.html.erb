@@ -1,0 +1,82 @@
+<% content_for :title, "Recuperar contraseña | AuditORVE" %>
+
+<section class="login-page">
+  <div class="login-card">
+
+    <%# ======================================================
+        ENCABEZADO
+        ====================================================== %>
+
+    <header class="login-card__header">
+      <p class="login-card__eyebrow">
+        AuditORVE
+      </p>
+
+      <h1>
+        Recuperar contraseña
+      </h1>
+
+      <p>
+        Ingresa el correo electrónico asociado a tu cuenta.
+        Si está registrado, recibirás instrucciones para
+        restablecer tu contraseña.
+      </p>
+    </header>
+
+
+    <%# ======================================================
+        FORMULARIO
+        ====================================================== %>
+
+    <%= form_with(
+      url: forgot_password_path,
+      scope: :password_recovery,
+      method: :post,
+      local: true,
+      class: "login-form"
+    ) do |form| %>
+
+      <div class="login-form__field">
+        <%= form.label(
+          :email,
+          "Correo electrónico"
+        ) %>
+
+        <%= form.email_field(
+          :email,
+          value: params.dig(
+            :password_recovery,
+            :email
+          ),
+          autocomplete: "email",
+          autofocus: true,
+          required: true,
+          placeholder: "usuario@grupoorve.mx"
+        ) %>
+      </div>
+
+
+      <%# ====================================================
+          ENVIAR SOLICITUD
+          ==================================================== %>
+
+      <%= form.submit(
+        "Enviar instrucciones",
+        class: "button button--primary login-form__submit"
+      ) %>
+
+
+      <%# ====================================================
+          CANCELAR Y REGRESAR AL LOGIN
+          ==================================================== %>
+
+      <%= link_to(
+        "Cancelar",
+        login_path,
+        class: "button button--secondary login-form__submit"
+      ) %>
+
+    <% end %>
+
+  </div>
+</section>
