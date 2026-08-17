@@ -1,21 +1,67 @@
 class AuditUsersController < ApplicationController
-  ALLOWED_USER_TYPES = [ 9, 10 ].freeze
+  # =========================================================
+  # AUTORIZACIÓN
+  #
+  # Actualmente este controller únicamente contiene acciones
+  # administrativas:
+  #
+  #   new
+  #   create
+  #
+  # Por lo tanto ambas requieren permiso :manage sobre
+  # el módulo Usuarios.
+  #
+  # Actualmente:
+  #
+  # 8  DG          -> read   -> NO puede crear usuarios
+  # 9  Admin       -> manage -> puede crear usuarios
+  # 10 Super Admin -> manage -> puede crear usuarios
+  #
+  # Los demás tipos reciben 404.
+  # =========================================================
 
-  before_action :authorize_user_management
+  before_action :authorize_users_management!
+
+
+  # =========================================================
+  # NUEVO USUARIO
+  # =========================================================
 
   def new
     load_user_types
   end
 
+
+  # =========================================================
+  # CREAR USUARIO
+  # =========================================================
+
   def create
     load_user_types
 
-    attributes = audit_user_params
+    attributes =
+      audit_user_params
 
-    firstname = attributes[:firstname].to_s.strip
-    lastname = attributes[:lastname].to_s.strip
-    usuario = attributes[:usuario].to_s.strip.downcase
-    tipo_usuario_id = attributes[:tipo_usuario_id].to_i
+    firstname =
+      attributes[:firstname]
+        .to_s
+        .strip
+
+    lastname =
+      attributes[:lastname]
+        .to_s
+        .strip
+
+    usuario =
+      attributes[:usuario]
+        .to_s
+        .strip
+        .downcase
+
+    tipo_usuario_id =
+      attributes[:tipo_usuario_id]
+        .to_i
+
 
     unless valid_form?(
       firstname: firstname,
@@ -23,31 +69,48 @@ class AuditUsersController < ApplicationController
       usuario: usuario,
       tipo_usuario_id: tipo_usuario_id
     )
-      flash.now[:alert] = "Completa correctamente todos los campos."
+      flash.now[:alert] =
+        "Completa correctamente todos los campos."
 
-      return render :new,
-                    status: :unprocessable_entity
+      return render(
+        :new,
+        status: :unprocessable_entity
+      )
     end
 
-    result = AuditUsers::CreateUser.new(
-      firstname: firstname,
-      lastname: lastname,
-      usuario: usuario,
-      tipo_usuario_id: tipo_usuario_id
-    ).call
+
+    result =
+      AuditUsers::CreateUser.new(
+        firstname: firstname,
+        lastname: lastname,
+        usuario: usuario,
+        tipo_usuario_id: tipo_usuario_id
+      ).call
+
 
     if result.success?
-      redirect_to new_audit_user_path,
-                  notice: result.message
+      redirect_to(
+        new_audit_user_path,
+        notice: result.message
+      )
     else
-      flash.now[:alert] = result.message
+      flash.now[:alert] =
+        result.message
 
-      render :new,
-             status: :unprocessable_entity
+      render(
+        :new,
+        status: :unprocessable_entity
+      )
     end
   end
 
+
   private
+
+
+  # =========================================================
+  # PARÁMETROS
+  # =========================================================
 
   def audit_user_params
     params.expect(
@@ -60,9 +123,22 @@ class AuditUsersController < ApplicationController
     )
   end
 
+
+  # =========================================================
+  # TIPOS DE USUARIO
+  # =========================================================
+
   def load_user_types
-    @user_types = AuditUserType.order(:id)
+    @user_types =
+      AuditUserType.order(
+        :id
+      )
   end
+
+
+  # =========================================================
+  # VALIDACIÓN DEL FORMULARIO
+  # =========================================================
 
   def valid_form?(
     firstname:,
@@ -73,17 +149,13 @@ class AuditUsersController < ApplicationController
     return false if firstname.blank?
     return false if lastname.blank?
     return false if usuario.blank?
-    return false unless usuario.match?(URI::MailTo::EMAIL_REGEXP)
 
-    AuditUserType.exists?(id: tipo_usuario_id)
-  end
-
-  def authorize_user_management
-    return if ALLOWED_USER_TYPES.include?(
-      current_user["tipoUsuario"].to_i
+    return false unless usuario.match?(
+      URI::MailTo::EMAIL_REGEXP
     )
 
-    redirect_to dashboard_path,
-                alert: "No tienes permisos para administrar usuarios."
+    AuditUserType.exists?(
+      id: tipo_usuario_id
+    )
   end
 end

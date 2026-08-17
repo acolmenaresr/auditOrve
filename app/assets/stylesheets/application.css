@@ -1,5 +1,6 @@
 @import url("vendor/tom-select.css");
 @import url("users365.css");
+@import url("app_shell.css");
 
 :root {
   --background: #f5f7fb;
@@ -986,6 +987,48 @@ body {
 .login-form__submit {
   width: 100%;
   margin-top: 4px;
+}
+/* =========================================================
+   LOGIN - RECUPERACIÓN DE CONTRASEÑA
+   ========================================================= */
+
+.login-form__recovery {
+  margin-top: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.login-form__recovery span {
+  color: var(--muted);
+}
+
+.login-form__recovery-link {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+
+  transition:
+    color 150ms ease,
+    text-decoration-color 150ms ease;
+}
+
+.login-form__recovery-link:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.login-form__recovery-link:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
 }
 
 /* =========================================================
