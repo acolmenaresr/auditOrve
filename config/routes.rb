@@ -58,4 +58,17 @@ Rails.application.routes.draw do
   # =========================================================
 
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # =========================================================
+  # PUSH NOTIFICATIONS
+  # =========================================================
+
+  resources :push_devices, only: [ :create ]
+
+  namespace :api do
+    namespace :internal do
+      post "push_notifications",
+        to: "push_notifications#create"
+    end
+  end
 end
