@@ -14,177 +14,84 @@ import {
 } from "firebase/messaging"
 
 export default class extends Controller {
+  static targets = [ "status", "button" ]
+
+  static values = {
+    enforce: { type: Boolean, default: false }
+  }
+
+  async connect() {
+    if (!this.enforceValue) {
+      return
+    }
+
+    await this.verifyExistingDevice()
+  }
+
   async register() {
     try {
-      console.log("[FCM] Iniciando registro")
+      this.setStatus("Activando alertas en este dispositivo...")
+      this.setButtonBusy(true)
 
-      // ======================================================
-      // 1. SOPORTE DEL NAVEGADOR
-      // ======================================================
+      const token = await this.obtainToken({
+        requestPermission: true
+      })
 
-      if (!(await isSupported())) {
-        throw new Error(
-          "Firebase Messaging no está soportado por este navegador"
-        )
-      }
-
-      if (!("Notification" in window)) {
-        throw new Error(
-          "Este navegador no soporta notificaciones"
-        )
-      }
-
-      if (!("serviceWorker" in navigator)) {
-        throw new Error(
-          "Este navegador no soporta Service Workers"
-        )
-      }
-
-      // ======================================================
-      // 2. PERMISO DE NOTIFICACIONES
-      // ======================================================
-
-      let permission = Notification.permission
-
-      if (permission !== "granted") {
-        permission = await Notification.requestPermission()
-      }
-
-      console.log(
-        "[FCM] Permiso:",
-        permission
-      )
-
-      if (permission !== "granted") {
-        throw new Error(
-          "Permiso de notificaciones no concedido"
-        )
-      }
-
-      // ======================================================
-      // 3. SERVICE WORKER
-      // ======================================================
-
-      const registration =
-        await navigator.serviceWorker.register(
-          "/firebase-messaging-sw.js"
-        )
-
-      await navigator.serviceWorker.ready
-
-      console.log(
-        "[FCM] Service Worker activo:",
-        registration.scope
-      )
-
-      // ======================================================
-      // 4. FIREBASE WEB
-      // ======================================================
-
-      const firebaseConfig = {
-        apiKey:
-          "AIzaSyABKFbXYo_2KFLW1F2jGD-CwCpA2kOWG88",
-
-        authDomain:
-          "auditorve-notifications.firebaseapp.com",
-
-        projectId:
-          "auditorve-notifications",
-
-        storageBucket:
-          "auditorve-notifications.firebasestorage.app",
-
-        messagingSenderId:
-          "963513125883",
-
-        appId:
-          "1:963513125883:web:6c8c5744c26d4a06cfd95e"
-      }
-
-      const app =
-        getApps().length > 0
-          ? getApp()
-          : initializeApp(firebaseConfig)
-
-      const messaging =
-        getMessaging(app)
-
-      // ======================================================
-      // 5. MENSAJES FCM EN PRIMER PLANO
-      // ======================================================
-
-      this.configureForegroundMessages(
-        messaging,
-        registration
-      )
-
-      // ======================================================
-      // 6. VAPID PUBLIC KEY
-      // ======================================================
-
-      const vapidKey =
-        document
-          .querySelector(
-            'meta[name="firebase-vapid-key"]'
-          )
-          ?.getAttribute("content")
-          ?.trim()
-
-      if (!vapidKey) {
-        throw new Error(
-          "No se encontró FIREBASE_VAPID_PUBLIC_KEY"
-        )
-      }
-
-      // ======================================================
-      // 7. TOKEN FCM DEL NAVEGADOR
-      // ======================================================
-
-      const token =
-        await getToken(
-          messaging,
-          {
-            vapidKey: vapidKey,
-
-            serviceWorkerRegistration:
-              registration
-          }
-        )
-
-      if (!token) {
-        throw new Error(
-          "Firebase no devolvió un registration token"
-        )
-      }
-
-      console.log(
-        "[FCM] Token obtenido correctamente"
-      )
-
-      // ======================================================
-      // 8. REGISTRAR DISPOSITIVO EN RAILS
-      // ======================================================
-
-      const result =
-        await this.registerTokenInRails(token)
+      const result = await this.registerTokenInRails(token)
 
       console.log(
         "[FCM] Dispositivo registrado en Rails:",
         result.device
       )
 
-      alert(
-        "Notificaciones activadas correctamente"
-      )
-    } catch (error) {
-      console.error(
-        "[FCM] Error:",
-        error
-      )
+      if (this.enforceValue) {
+        this.setStatus("Dispositivo registrado. Continuando...")
+        await this.completeSetup()
+        return
+      }
 
-      alert(
-        `Error activando notificaciones: ${error.message}`
-      )
+      alert("Notificaciones activadas correctamente")
+    } catch (error) {
+      console.error("[FCM] Error:", error)
+
+      this.setStatus(error.message)
+      this.setButtonBusy(false)
+
+      if (!this.enforceValue) {
+        alert(
+          `Error activando notificaciones: ${error.message}`
+        )
+      }
+    }
+  }
+
+  async verifyExistingDevice() {
+    try {
+      if (!(await isSupported()) || !("Notification" in window)) {
+        this.setStatus(
+          "Este navegador no soporta alertas push. Usa Chrome o Edge."
+        )
+        return
+      }
+
+      if (Notification.permission !== "granted") {
+        return
+      }
+
+      this.setStatus("Verificando este dispositivo...")
+
+      const token = await this.obtainToken({
+        requestPermission: false
+      })
+
+      const status = await this.checkTokenInRails(token)
+
+      if (status.registered) {
+        this.setStatus("Este dispositivo ya está registrado. Continuando...")
+        await this.completeSetup()
+      }
+    } catch (error) {
+      console.error("[FCM] Verificación:", error)
     }
   }
 
@@ -192,51 +99,160 @@ export default class extends Controller {
   // REGISTRAR TOKEN FCM EN RAILS
   // ==========================================================
 
-  async registerTokenInRails(token) {
-    const csrfToken =
-      document
-        .querySelector(
-          'meta[name="csrf-token"]'
-        )
-        ?.getAttribute("content")
-
-    if (!csrfToken) {
+  async obtainToken({ requestPermission }) {
+    if (!(await isSupported())) {
       throw new Error(
-        "No se encontró CSRF token"
+        "Firebase Messaging no está soportado por este navegador"
       )
     }
 
-    const response =
-      await fetch(
-        "/push_devices",
-        {
-          method: "POST",
-
-          credentials: "same-origin",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            "Accept":
-              "application/json",
-
-            "X-CSRF-Token":
-              csrfToken
-          },
-
-          body: JSON.stringify({
-            token: token,
-            platform: "web"
-          })
-        }
+    if (!("Notification" in window)) {
+      throw new Error(
+        "Este navegador no soporta notificaciones"
       )
+    }
+
+    if (!("serviceWorker" in navigator)) {
+      throw new Error(
+        "Este navegador no soporta Service Workers"
+      )
+    }
+
+    let permission = Notification.permission
+
+    if (permission !== "granted" && requestPermission) {
+      permission = await Notification.requestPermission()
+    }
+
+    if (permission !== "granted") {
+      throw new Error(
+        "Permiso de notificaciones no concedido"
+      )
+    }
+
+    const registration =
+      await navigator.serviceWorker.register(
+        "/firebase-messaging-sw.js"
+      )
+
+    await navigator.serviceWorker.ready
+
+    const firebaseConfig = {
+      apiKey:
+        "AIzaSyABKFbXYo_2KFLW1F2jGD-CwCpA2kOWG88",
+      authDomain:
+        "auditorve-notifications.firebaseapp.com",
+      projectId:
+        "auditorve-notifications",
+      storageBucket:
+        "auditorve-notifications.firebasestorage.app",
+      messagingSenderId:
+        "963513125883",
+      appId:
+        "1:963513125883:web:6c8c5744c26d4a06cfd95e"
+    }
+
+    const app =
+      getApps().length > 0
+        ? getApp()
+        : initializeApp(firebaseConfig)
+
+    const messaging = getMessaging(app)
+
+    this.configureForegroundMessages(
+      messaging,
+      registration
+    )
+
+    const vapidKey =
+      document
+        .querySelector('meta[name="firebase-vapid-key"]')
+        ?.getAttribute("content")
+        ?.trim()
+
+    if (!vapidKey) {
+      throw new Error(
+        "No se encontró FIREBASE_VAPID_PUBLIC_KEY"
+      )
+    }
+
+    const token = await getToken(messaging, {
+      vapidKey: vapidKey,
+      serviceWorkerRegistration: registration
+    })
+
+    if (!token) {
+      throw new Error(
+        "Firebase no devolvió un registration token"
+      )
+    }
+
+    return token
+  }
+
+  async checkTokenInRails(token) {
+    return this.railsFetch(
+      "/push_devices/status",
+      { token: token }
+    )
+  }
+
+  async completeSetup() {
+    const data = await this.railsFetch(
+      "/alertas-push",
+      {}
+    )
+
+    window.location.assign(
+      data.redirect || "/"
+    )
+  }
+
+  setStatus(message) {
+    if (!this.hasStatusTarget) {
+      return
+    }
+
+    this.statusTarget.textContent = message
+  }
+
+  setButtonBusy(busy) {
+    if (!this.hasButtonTarget) {
+      return
+    }
+
+    this.buttonTarget.disabled = busy
+  }
+
+  csrfToken() {
+    const token =
+      document
+        .querySelector('meta[name="csrf-token"]')
+        ?.getAttribute("content")
+
+    if (!token) {
+      throw new Error("No se encontró CSRF token")
+    }
+
+    return token
+  }
+
+  async railsFetch(path, body) {
+    const response = await fetch(path, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-CSRF-Token": this.csrfToken()
+      },
+      body: JSON.stringify(body)
+    })
 
     let data = {}
 
     try {
-      data =
-        await response.json()
+      data = await response.json()
     } catch (_error) {
       throw new Error(
         `Respuesta inválida de Rails (${response.status})`
@@ -246,11 +262,21 @@ export default class extends Controller {
     if (!response.ok) {
       throw new Error(
         data.error ||
-        `No fue posible registrar el dispositivo (${response.status})`
+        `No fue posible completar la operación (${response.status})`
       )
     }
 
     return data
+  }
+
+  async registerTokenInRails(token) {
+    return this.railsFetch(
+      "/push_devices",
+      {
+        token: token,
+        platform: "web"
+      }
+    )
   }
 
   // ==========================================================

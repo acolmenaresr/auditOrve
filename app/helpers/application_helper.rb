@@ -7,6 +7,7 @@ module ApplicationHelper
     case controller_name
     when "dashboard",
          "audit_logs",
+         "audit_notifications",
          "users365"
       "Eventos"
 
@@ -26,6 +27,9 @@ module ApplicationHelper
     case controller_name
     when "dashboard"
       "Dashboard"
+
+    when "audit_notifications"
+      action_name == "show" ? "Detalle de alerta" : "Alertas"
 
     when "audit_logs"
       "Movimientos"

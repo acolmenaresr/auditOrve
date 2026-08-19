@@ -1,6 +1,7 @@
 module Notifications
   class AuditAlertPushService
     TARGET_USER_TYPES = [ 6, 7, 10 ].freeze
+    MANDATORY_SETUP_USER_TYPES = [ 6, 7 ].freeze
 
     def initialize(
       total:,
@@ -8,7 +9,7 @@ module Notifications
       high: 0,
       medium: 0,
       low: 0,
-      path: "/dashboard"
+      path: "/alertas"
     )
       @total = total.to_i
       @critical = critical.to_i

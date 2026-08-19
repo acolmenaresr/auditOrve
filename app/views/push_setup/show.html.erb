@@ -1,0 +1,50 @@
+<% content_for :title, "Activar alertas | AuditORVE" %>
+
+<section
+  class="login-page"
+  data-controller="push-notifications"
+  data-push-notifications-enforce-value="true"
+>
+  <div class="login-card">
+    <header class="login-card__header">
+      <p class="login-card__eyebrow">
+        AuditORVE
+      </p>
+
+      <h1>
+        Activa las alertas push
+      </h1>
+
+      <p>
+        Este dispositivo no está registrado para recibir alertas
+        de auditoría. Debes activarlas para continuar.
+      </p>
+    </header>
+
+    <p
+      class="push-setup-status"
+      data-push-notifications-target="status"
+    >
+      Permite las notificaciones del navegador para este sitio.
+    </p>
+
+    <button
+      type="button"
+      class="button button--primary login-form__submit"
+      data-action="click->push-notifications#register"
+      data-push-notifications-target="button"
+    >
+      Activar alertas
+    </button>
+
+    <div class="login-form__recovery">
+      <%= button_to(
+        "Cerrar sesión",
+        logout_path,
+        method: :delete,
+        class: "login-form__recovery-link",
+        form: { class: "push-setup-logout" }
+      ) %>
+    </div>
+  </div>
+</section>

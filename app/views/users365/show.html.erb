@@ -371,6 +371,39 @@
     </section>
 
 
+    <section class="users365-activity-metrics users365-activity-metrics--alerts">
+      <article class="users365-activity-metric">
+        <span>Alertas</span>
+        <strong><%= number_with_delimiter(@alert_metrics[:total]) %></strong>
+        <small>Total del periodo</small>
+      </article>
+
+      <article class="users365-activity-metric">
+        <span>Atendidas</span>
+        <strong><%= number_with_delimiter(@alert_metrics[:atendida]) %></strong>
+        <small>Resueltas</small>
+      </article>
+
+      <article class="users365-activity-metric">
+        <span>Críticas</span>
+        <strong><%= number_with_delimiter(@alert_metrics[:critica]) %></strong>
+        <small>Severidad máxima</small>
+      </article>
+
+      <article class="users365-activity-metric">
+        <span>Altas</span>
+        <strong><%= number_with_delimiter(@alert_metrics[:alta]) %></strong>
+        <small>Prioridad alta</small>
+      </article>
+
+      <article class="users365-activity-metric">
+        <span>Medias</span>
+        <strong><%= number_with_delimiter(@alert_metrics[:media]) %></strong>
+        <small>Prioridad media</small>
+      </article>
+    </section>
+
+
     <section class="audit-filters users365-activity__filters">
 
       <%= form_with(
@@ -550,6 +583,154 @@
       </label>
 
     </div>
+
+
+    <section class="audit-table-card users365-alerts-table">
+      <div class="audit-table-wrapper users365-alerts-table__wrapper">
+        <table class="audit-table users365-activity__table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Severidad</th>
+              <th>Estado</th>
+              <th>Tipo de alerta</th>
+              <th>Acción</th>
+              <th>Archivo</th>
+              <th>Motivo</th>
+              <th>Asignado a</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @alert_records.any? %>
+              <% @alert_records.each do |record| %>
+                <% occurred_at = record.occurred_at %>
+                <tr>
+                  <td class="audit-table__date">
+                    <%= link_to alert_path(record, return_to: request.fullpath), class: "audit-alert-link" do %>
+                      <span class="audit-table__date-short">
+                        <%= alert_table_datetime(occurred_at) %>
+                      </span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <span class="audit-badge audit-badge--<%= record["severidad"].to_s.parameterize %>">
+                      <%= alert_severity_label(record["severidad"]) %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="audit-badge audit-badge--<%= record["estado"].to_s.parameterize %>">
+                      <%= alert_status_label(record["estado"]) %>
+                    </span>
+                  </td>
+                  <td>
+                    <%= link_to alert_path(record, return_to: request.fullpath), class: "audit-alert-link" do %>
+                      <strong title="<%= record["tipoAlerta"] %>">
+                        <%= alert_type_label(record["tipoAlerta"]) %>
+                      </strong>
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= record["accion"].presence || "—" %>
+                  </td>
+                  <td class="audit-table__file">
+                    <span title="<%= record["archivo"] %>">
+                      <%= record["archivo"].presence || "—" %>
+                    </span>
+                  </td>
+                  <td class="audit-table__motivo">
+                    <%= record["motivo"].presence || "—" %>
+                  </td>
+                  <td class="audit-table__assign">
+                    <%= render(
+                      "audit_notifications/assign_select",
+                      record: record,
+                      can_assign: @can_assign_alerts,
+                      assignable_users: @assignable_alert_users,
+                      return_to: request.fullpath
+                    ) %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr class="users365-alerts-table__empty-row">
+                <td colspan="8" class="audit-table__empty">
+                  <div>
+                    <strong>No hay alertas para este usuario</strong>
+                    <span>Cambia el periodo para ampliar la consulta.</span>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <% if @alerts_total_pages > 1 %>
+        <footer class="audit-pagination">
+          <div class="audit-pagination__summary">
+            <p>
+              Mostrando del
+              <strong><%= number_with_delimiter(@alerts_first_record) %></strong>
+              al
+              <strong><%= number_with_delimiter(@alerts_last_record) %></strong>
+            </p>
+          </div>
+
+          <div class="audit-pagination__summary">
+            Página
+            <strong><%= @alerts_page %></strong>
+            de
+            <strong><%= @alerts_total_pages %></strong>
+          </div>
+
+          <nav
+            class="audit-pagination__controls"
+            aria-label="Paginación de alertas del usuario"
+          >
+            <% alerts_preserved_params =
+              request.query_parameters.except("alerts_page") %>
+
+            <% if @alerts_page > 1 %>
+              <%= link_to(
+                "← Anterior",
+                user365_path(
+                  @user,
+                  alerts_preserved_params.merge(
+                    alerts_page: @alerts_page - 1
+                  )
+                ),
+                class: "audit-pagination__button"
+              ) %>
+            <% else %>
+              <span class="audit-pagination__button is-disabled">
+                ← Anterior
+              </span>
+            <% end %>
+
+            <span class="audit-pagination__current">
+              <%= @alerts_page %>
+            </span>
+
+            <% if @alerts_page < @alerts_total_pages %>
+              <%= link_to(
+                "Siguiente →",
+                user365_path(
+                  @user,
+                  alerts_preserved_params.merge(
+                    alerts_page: @alerts_page + 1
+                  )
+                ),
+                class: "audit-pagination__button"
+              ) %>
+            <% else %>
+              <span class="audit-pagination__button is-disabled">
+                Siguiente →
+              </span>
+            <% end %>
+          </nav>
+        </footer>
+      <% end %>
+    </section>
 
 
     <section class="audit-table-card">

@@ -1,0 +1,44 @@
+<% if record.closed? || !can_assign %>
+  <span>
+    <%= alert_assignee_display_name(record, assignable_users) %>
+  </span>
+<% else %>
+  <% selected_id = selected_alert_assignee_id(record, assignable_users) %>
+  <%= form_with(
+    url: alert_path(record),
+    method: :patch,
+    local: true,
+    class: "alert-assign-form",
+    data: {
+      controller: "alert-assign",
+      action: "change->alert-assign#submit"
+    }
+  ) do %>
+    <%= hidden_field_tag :attend_action, "asignar" %>
+    <%= hidden_field_tag :return_to, return_to %>
+    <%= select_tag(
+      :assignee_id,
+      safe_join(
+        [
+          (
+            unless selected_id
+              tag.option(
+                "Sin asignar",
+                value: "",
+                disabled: true,
+                selected: true,
+                hidden: true
+              )
+            end
+          ),
+          options_for_select(
+            alert_assignee_options(assignable_users),
+            selected_id
+          )
+        ]
+      ),
+      class: "alert-assign-form__select",
+      aria: { label: "Asignar alerta" }
+    ) %>
+  <% end %>
+<% end %>

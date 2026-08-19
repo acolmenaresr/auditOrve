@@ -123,6 +123,39 @@ class Users365Controller < ApplicationController
         @page * @per_page,
         @total_count
       ].min
+
+    alerts_query =
+      AuditNotifications::DashboardQuery.new(
+        from: @date_range.from,
+        to: @date_range.to,
+        user_principal_name:
+          @user.user_principal_name,
+        page: params[:alerts_page],
+        page_size: params[:alerts_per_page]
+      )
+
+    @alert_metrics = alerts_query.metrics
+    @alert_records = alerts_query.records
+    @alerts_page = alerts_query.page
+    @alerts_per_page = alerts_query.page_size
+    @alerts_total_count = alerts_query.total_count
+    @alerts_total_pages = alerts_query.total_pages
+
+    @alerts_first_record =
+      if @alerts_total_count.zero?
+        0
+      else
+        ((@alerts_page - 1) * @alerts_per_page) + 1
+      end
+
+    @alerts_last_record = [
+      @alerts_page * @alerts_per_page,
+      @alerts_total_count
+    ].min
+
+    @can_assign_alerts = current_permissions.can_assign_alerts?
+    @assignable_alert_users =
+      current_permissions.assignable_alert_users
   end
 
 
