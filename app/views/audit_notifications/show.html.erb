@@ -1,0 +1,200 @@
+<div class="dashboard alert-detail">
+  <header class="dashboard__header alert-detail__header">
+    <div>
+      <p class="dashboard__eyebrow">
+        Alerta
+        <%= @notification["clave"] %>
+      </p>
+      <h1>
+        <%= alert_type_label(@notification["tipoAlerta"]) %>
+      </h1>
+      <p class="dashboard__subtitle">
+        <%= @notification["motivo"].presence || "Sin motivo registrado." %>
+      </p>
+    </div>
+  </header>
+
+  <section class="alert-detail__grid">
+    <article class="alert-detail__card">
+      <div class="alert-detail__card-heading">
+        <h2>Datos de la alerta</h2>
+        <div class="alert-detail__badges">
+          <span class="audit-badge audit-badge--<%= @notification["severidad"].to_s.parameterize %>">
+            <%= alert_severity_label(@notification["severidad"]) %>
+          </span>
+          <span class="audit-badge audit-badge--<%= @notification["estado"].to_s.parameterize %>">
+            <%= alert_status_label(@notification["estado"]) %>
+          </span>
+        </div>
+      </div>
+
+      <dl class="alert-detail__list">
+        <div>
+          <dt>Fecha</dt>
+          <dd>
+            <% occurred_at = @notification.occurred_at %>
+            <% if occurred_at.present? %>
+              <%= occurred_at
+                .in_time_zone("America/Mexico_City")
+                .strftime("%d/%m/%Y %H:%M") %>
+            <% else %>
+              —
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt>Categoría</dt>
+          <dd><%= @notification["categoriaAlerta"].presence || "—" %></dd>
+        </div>
+        <div>
+          <dt>Usuario</dt>
+          <dd>
+            <% email = @notification["usuario"].to_s.strip %>
+            <% if @directory_user.present? %>
+              <%= link_to(
+                @directory_user.display_name.presence || email,
+                user365_path(@directory_user, return_to: request.fullpath)
+              ) %>
+              <small><%= email %></small>
+            <% else %>
+              <%= email.presence || "Sin usuario" %>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt>Acción</dt>
+          <dd><%= @notification["accion"].presence || "—" %></dd>
+        </div>
+        <div>
+          <dt>Operación 365</dt>
+          <dd><%= @notification["operacion365"].presence || "—" %></dd>
+        </div>
+        <div>
+          <dt>Archivo</dt>
+          <dd><%= @notification["archivo"].presence || "—" %></dd>
+        </div>
+        <div>
+          <dt>IP</dt>
+          <dd><%= @notification["ip"].presence || "—" %></dd>
+        </div>
+        <div>
+          <dt>Asignado a</dt>
+          <dd>
+            <%= render(
+              "audit_notifications/assign_select",
+              record: @notification,
+              can_assign: @can_assign_alerts && !@notification.closed?,
+              assignable_users: @assignable_alert_users,
+              return_to: alert_path(@notification, return_to: @return_to)
+            ) %>
+          </dd>
+        </div>
+        <div>
+          <dt>Revisado por</dt>
+          <dd><%= @notification["revisadoPor"].presence || "—" %></dd>
+        </div>
+        <div>
+          <dt>Resolución</dt>
+          <dd><%= @notification["comentarioRevision"].presence || @notification["resolucion"].presence || "—" %></dd>
+        </div>
+      </dl>
+    </article>
+
+    <article class="alert-detail__card">
+      <h2>Atender alerta</h2>
+
+      <% if @notification.closed? %>
+        <p class="alert-detail__closed">
+          Esta alerta ya fue cerrada y no admite más cambios.
+        </p>
+      <% elsif !@can_attend %>
+        <p class="alert-detail__closed">
+          Tu perfil solo puede consultar la alerta.
+        </p>
+      <% else %>
+        <%= form_with(
+          url: alert_path(@notification),
+          method: :patch,
+          local: true,
+          class: "alert-detail__complete-form",
+          data: { controller: "alert-resolution" }
+        ) do |form| %>
+          <%= hidden_field_tag :return_to, @return_to %>
+
+          <div class="alert-detail__field">
+            <%= form.label :comment, "Comentario" %>
+            <%= text_area_tag(
+              :comment,
+              params[:comment],
+              required: true,
+              rows: 4,
+              placeholder: "Describe el seguimiento o cómo se atendió la alerta."
+            ) %>
+          </div>
+
+          <div class="alert-detail__field alert-detail__field--checkbox">
+            <%= check_box_tag(
+              :create_exception,
+              "1",
+              false,
+              data: {
+                action: "alert-resolution#toggle",
+                "alert-resolution-target": "exceptionToggle"
+              }
+            ) %>
+            <%= label_tag(
+              :create_exception,
+              "Eximir el movimiento en auditExcepciones"
+            ) %>
+          </div>
+
+          <div
+            class="alert-detail__field"
+            data-alert-resolution-target="exceptionFields"
+            hidden
+          >
+            <%= label_tag :exception_reason, "Motivo de la excepción" %>
+            <%= text_area_tag(
+              :exception_reason,
+              nil,
+              rows: 3,
+              placeholder: "Explica por qué este movimiento queda exento.",
+              disabled: true,
+              data: { "alert-resolution-target": "exceptionReason" }
+            ) %>
+          </div>
+
+          <div class="alert-detail__actions">
+            <div class="alert-detail__field alert-detail__field--status">
+              <%= label_tag :attend_action, "Estado" %>
+              <%= select_tag(
+                :attend_action,
+                options_for_select(
+                  [
+                    [ "Agregar comentario", "comentario" ],
+                    [ "Terminado", "terminado" ]
+                  ],
+                  "comentario"
+                ),
+                data: {
+                  action: "alert-resolution#syncSubmitLabel",
+                  "alert-resolution-target": "action"
+                }
+              ) %>
+            </div>
+
+            <%= submit_tag(
+              "Guardar comentario",
+              class: "button button--primary",
+              data: { "alert-resolution-target": "submit" }
+            ) %>
+          </div>
+        <% end %>
+      <% end %>
+    </article>
+  </section>
+
+  <p class="alert-detail__back">
+    <%= link_to "← Volver", @return_to, class: "button button--secondary" %>
+  </p>
+</div>

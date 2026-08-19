@@ -37,4 +37,28 @@ class PushDevicesController < ApplicationController
       error: e.record.errors.full_messages.join(", ")
     }, status: :unprocessable_entity
   end
+
+  def status
+    token = params[:token].to_s.strip
+
+    if token.blank?
+      return render json: {
+        ok: false,
+        registered: false,
+        error: "FCM token requerido"
+      }, status: :unprocessable_entity
+    end
+
+    device = PushDevice.find_by(token: token)
+
+    registered =
+      device.present? &&
+      device.active? &&
+      device.user_id == current_user.id
+
+    render json: {
+      ok: true,
+      registered: registered
+    }
+  end
 end

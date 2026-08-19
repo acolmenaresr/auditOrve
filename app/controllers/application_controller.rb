@@ -2,12 +2,14 @@ class ApplicationController < ActionController::Base
   allow_browser versions: :modern
 
   before_action :require_authentication
+  before_action :require_push_setup!
 
   helper_method :current_user,
                 :authenticated?,
                 :authenticated_shell?,
                 :current_permissions,
-                :authorized_home_path
+                :authorized_home_path,
+                :firebase_vapid_public_key
 
   SESSION_DURATION = 8.hours
 
@@ -15,6 +17,16 @@ class ApplicationController < ActionController::Base
     sessions
     password_recovery_requests
     password_resets
+    push_setup
+  ].freeze
+
+  PUSH_SETUP_EXEMPT_CONTROLLERS = %w[
+    sessions
+    password_recovery_requests
+    password_resets
+    push_setup
+    push_devices
+    health
   ].freeze
 
 
@@ -76,6 +88,32 @@ class ApplicationController < ActionController::Base
     redirect_to(
       login_path,
       alert: "Inicia sesión para continuar."
+    )
+  end
+
+
+  def require_push_setup!
+    return unless authenticated?
+    return unless session[:push_setup_pending]
+    return unless push_alerts_required_for?(current_user)
+    return if PUSH_SETUP_EXEMPT_CONTROLLERS.include?(
+      controller_name
+    )
+    return if request.path == "/up"
+
+    redirect_to push_setup_path
+  end
+
+
+  def firebase_vapid_public_key
+    ENV["FIREBASE_VAPID_PUBLIC_KEY"].to_s.strip.presence ||
+      Rails.application.credentials.dig(:firebase, :vapid_public_key).to_s.strip.presence
+  end
+
+
+  def push_alerts_required_for?(user)
+    Notifications::AuditAlertPushService::MANDATORY_SETUP_USER_TYPES.include?(
+      user.tipoUsuario.to_i
     )
   end
 

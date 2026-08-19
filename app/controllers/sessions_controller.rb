@@ -66,12 +66,8 @@ class SessionsController < ApplicationController
 
     update_last_login(user)
 
-
-    # =======================================================
-    # ROOT SEGURO
-    #
-    # HomeController resolverá la ventana correspondiente.
-    # =======================================================
+    session[:push_setup_pending] =
+      push_alerts_required_for?(user)
 
     redirect_to(
       root_path,

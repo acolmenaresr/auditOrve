@@ -67,9 +67,9 @@ module Api
       def notification_path
         path = params[:path].to_s.strip
 
-        return "/dashboard" if path.blank?
+        return "/alertas" if path.blank?
 
-        path.start_with?("/") ? path : "/dashboard"
+        path.start_with?("/") ? path : "/alertas"
       end
     end
   end
