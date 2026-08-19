@@ -143,6 +143,25 @@ class AuditPermissions
   end
 
 
+  def can_assign_alerts?
+    user_type_id >= MASTER_AUDITOR &&
+      accessible?(:events)
+  end
+
+
+  def assignable_alert_users
+    return AuditUser.none unless can_assign_alerts?
+
+    AuditUser
+      .where(
+        '"tipoUsuario" >= ? AND "tipoUsuario" <= ?',
+        EVENT_AUDITOR,
+        user_type_id
+      )
+      .order(:firstname, :lastname, :usuario)
+  end
+
+
   # =========================================================
   # CLOUD ORVE
   # =========================================================

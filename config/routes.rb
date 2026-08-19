@@ -33,6 +33,9 @@ Rails.application.routes.draw do
   # =========================================================
 
   get "dashboard", to: "dashboard#index", as: :dashboard
+  get "alertas", to: "audit_notifications#index", as: :alerts
+  get "alertas/:id", to: "audit_notifications#show", as: :alert
+  patch "alertas/:id", to: "audit_notifications#update"
   get "auditoria", to: "audit_logs#index", as: :audit_logs
   get "usuarios-365", to: "users365#index", as: :users365
   get "usuarios-365/:id", to: "users365#show", as: :user365
@@ -63,7 +66,14 @@ Rails.application.routes.draw do
   # PUSH NOTIFICATIONS
   # =========================================================
 
-  resources :push_devices, only: [ :create ]
+  resources :push_devices, only: [ :create ] do
+    collection do
+      post :status
+    end
+  end
+
+  get "alertas-push", to: "push_setup#show", as: :push_setup
+  post "alertas-push", to: "push_setup#complete", as: :complete_push_setup
 
   namespace :api do
     namespace :internal do

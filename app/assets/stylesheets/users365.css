@@ -1222,6 +1222,15 @@
   overflow-x: auto;
 }
 
+.users365-alerts-table__wrapper {
+  min-height: 220px;
+}
+
+.users365-alerts-table__empty-row td {
+  height: 180px;
+  vertical-align: middle;
+}
+
 .users365-activity .audit-sort-link {
   display: inline-flex;
   align-items: center;
@@ -1245,9 +1254,26 @@
 }
 
 .users365-activity .audit-table__date {
-  min-width: 150px;
+  width: 72px;
+  min-width: 72px;
+  max-width: 84px;
+  white-space: normal;
+}
 
-  white-space: nowrap;
+.users365-activity .audit-table__file {
+  max-width: 240px;
+}
+
+.users365-activity .audit-table__long-text {
+  max-width: 300px;
+}
+
+.users365-activity .audit-table__motivo {
+  min-width: 220px;
+  max-width: 420px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .users365-activity .audit-table__file {
