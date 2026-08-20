@@ -4,6 +4,8 @@ module AuditNotificationsHelper
     "asignada" => "Asignada",
     "en_revision" => "En revisión",
     "en_trabajo" => "En trabajo",
+    "activas" => "Activas",
+    "finalizadas" => "Finalizadas",
     "resuelta" => "Atendida",
     "descartada" => "Descartada"
   }.freeze
@@ -28,6 +30,13 @@ module AuditNotificationsHelper
 
   def alert_type_label(value)
     value.to_s.tr("_", " ").downcase.capitalize.presence || "—"
+  end
+
+  def alert_motive_filter_label(value, limit: 42)
+    text = value.to_s.squish
+    return "—" if text.blank?
+
+    text.length > limit ? "#{text[0, limit - 1]}…" : text
   end
 
   def alert_table_datetime(value)
@@ -84,11 +93,14 @@ module AuditNotificationsHelper
     active =
       case filter_key
       when :estado
-        @status.to_s == filter_value.to_s
+        @status.to_s == filter_value.to_s ||
+          @alert_status.to_s == filter_value.to_s
       when :severidad
-        @severity.to_s == filter_value.to_s
+        @severity.to_s == filter_value.to_s ||
+          @alert_severity.to_s == filter_value.to_s
       when :all
-        @status.blank? && @severity.blank?
+        (@status.blank? && @severity.blank?) &&
+          (@alert_status.blank? && @alert_severity.blank?)
       else
         false
       end
@@ -98,6 +110,19 @@ module AuditNotificationsHelper
       "metric-card--link",
       ("is-active" if active)
     ].compact.join(" ")
+  end
+
+  def user_alert_filter_path(overrides = {})
+    params = request.query_parameters.merge(
+      overrides.stringify_keys
+    )
+
+    overrides.each do |key, value|
+      params.delete(key.to_s) if value.blank?
+    end
+
+    params["alerts_page"] = "1"
+    user365_path(@user, params)
   end
 
   def alert_assignee_options(users)

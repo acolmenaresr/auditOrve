@@ -1,5 +1,7 @@
 <% user_ranking =
   local_assigns.fetch(:user_ranking, false) %>
+<% value_title =
+  local_assigns.fetch(:value_title, "Eventos") %>
 
 <article class="ranking-card">
   <header class="ranking-card__header">
@@ -11,7 +13,7 @@
       <thead>
         <tr>
           <th><%= column_title %></th>
-          <th>Eventos</th>
+          <th><%= value_title %></th>
         </tr>
       </thead>
 
@@ -19,8 +21,9 @@
         <% rows.each do |row| %>
           <% directory_user =
             user_ranking ? row[:directory_user] : nil %>
+          <% row_url = row[:url].presence %>
 
-          <tr>
+          <tr class="<%= "ranking-table__row--link" if row_url %>">
             <td title="<%= row[:label] %>">
               <% if directory_user.present? %>
                 <% user_name =
@@ -54,13 +57,36 @@
                     </small>
                   </span>
                 <% end %>
+              <% elsif user_ranking %>
+                <% user_label =
+                  audit_user_display_label(row[:label]) %>
+
+                <div class="audit-user-cell">
+                  <span class="audit-user-cell__avatar">
+                    <%= user_label.first.upcase %>
+                  </span>
+
+                  <span title="<%= user_label %>">
+                    <%= user_label %>
+                  </span>
+                </div>
+              <% elsif row_url %>
+                <%= link_to row[:label], row_url, class: "ranking-table__label-link" %>
               <% else %>
                 <%= row[:label] %>
               <% end %>
             </td>
 
             <td>
-              <%= number_with_delimiter(row[:events]) %>
+              <% if row_url && directory_user.blank? %>
+                <%= link_to(
+                  number_with_delimiter(row[:events]),
+                  row_url,
+                  class: "ranking-table__label-link"
+                ) %>
+              <% else %>
+                <%= number_with_delimiter(row[:events]) %>
+              <% end %>
             </td>
           </tr>
         <% end %>

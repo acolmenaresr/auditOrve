@@ -1,0 +1,125 @@
+<%#
+  locals:
+    metrics: Hash
+    total_url:, unassigned_url:, in_progress_url:, finished_url:
+    critica_url:, alta_url:, media_url:, baja_url:
+    total_active: Boolean (optional)
+    unassigned_active: Boolean (optional)
+    in_progress_active: Boolean (optional)
+    finished_active: Boolean (optional)
+    total_caption: String (optional)
+%>
+<% total_caption = local_assigns.fetch(:total_caption, "Total del periodo") %>
+<% severity_total = metrics[:severity_total].to_i %>
+<% severity_max = [
+  metrics[:critica].to_i,
+  metrics[:alta].to_i,
+  metrics[:media].to_i,
+  metrics[:baja].to_i
+].max %>
+<% severity_max = 1 if severity_max.zero? %>
+
+<section class="metric-grid metric-grid--alerts metric-grid--alerts-compact">
+  <%= link_to(
+    total_url,
+    class: [
+      "metric-card",
+      "metric-card--link",
+      ("is-active" if local_assigns[:total_active])
+    ].compact.join(" ")
+  ) do %>
+    <article>
+      <span class="metric-card__label">Alertas</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(metrics[:total]) %>
+      </strong>
+      <small><%= total_caption %></small>
+    </article>
+  <% end %>
+
+  <%= link_to(
+    unassigned_url,
+    class: [
+      "metric-card",
+      "metric-card--link",
+      ("is-active" if local_assigns[:unassigned_active])
+    ].compact.join(" ")
+  ) do %>
+    <article>
+      <span class="metric-card__label">Sin asignar</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(metrics[:sin_asignar]) %>
+      </strong>
+      <small>Sin responsable</small>
+    </article>
+  <% end %>
+
+  <%= link_to(
+    in_progress_url,
+    class: [
+      "metric-card",
+      "metric-card--link",
+      ("is-active" if local_assigns[:in_progress_active])
+    ].compact.join(" ")
+  ) do %>
+    <article>
+      <span class="metric-card__label">En trabajo</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(metrics[:en_trabajo]) %>
+      </strong>
+      <small>Asignadas o en revisión</small>
+    </article>
+  <% end %>
+
+  <%= link_to(
+    finished_url,
+    class: [
+      "metric-card",
+      "metric-card--link",
+      ("is-active" if local_assigns[:finished_active])
+    ].compact.join(" ")
+  ) do %>
+    <article>
+      <span class="metric-card__label">Finalizadas</span>
+      <strong class="metric-card__value">
+        <%= number_with_delimiter(metrics[:atendida]) %>
+      </strong>
+      <small>Resueltas o descartadas</small>
+    </article>
+  <% end %>
+
+  <article class="metric-card metric-card--severity-chart" aria-label="Severidad de alertas">
+    <span class="metric-card__label">Severidad</span>
+
+    <div class="alert-severity-chart">
+      <% [
+        [ "Crítica", :critica, critica_url ],
+        [ "Alta", :alta, alta_url ],
+        [ "Media", :media, media_url ],
+        [ "Baja", :baja, baja_url ]
+      ].each do |label, key, url| %>
+        <% value = metrics[key].to_i %>
+        <% width = ((value.to_f / severity_max) * 100).round %>
+        <%= link_to(
+          url,
+          class: [
+            "alert-severity-chart__row",
+            "alert-severity-chart__row--#{key}",
+            ("alert-severity-chart__row--empty" if value.zero?)
+          ].compact.join(" ")
+        ) do %>
+          <span class="alert-severity-chart__name"><%= label %></span>
+          <span class="alert-severity-chart__track" aria-hidden="true">
+            <span
+              class="alert-severity-chart__bar"
+              style="width: <%= width %>%;"
+            ></span>
+          </span>
+          <span class="alert-severity-chart__value">
+            <%= number_with_delimiter(value) %>
+          </span>
+        <% end %>
+      <% end %>
+    </div>
+  </article>
+</section>
