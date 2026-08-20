@@ -1,0 +1,81 @@
+<% inbox = alerts_inbox %>
+
+<% if inbox.present? %>
+  <div
+    class="app-alerts-inbox"
+    data-controller="alerts-inbox"
+  >
+    <button
+      type="button"
+      class="app-alerts-inbox__trigger"
+      aria-label="Alertas no atendidas"
+      aria-expanded="false"
+      aria-controls="app-alerts-inbox-menu"
+      data-alerts-inbox-target="trigger"
+      data-action="click->alerts-inbox#toggle"
+    >
+      <span
+        class="app-alerts-inbox__icon"
+        aria-hidden="true"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+      </span>
+
+      <% if inbox.total.positive? %>
+        <span class="app-alerts-inbox__badge">
+          <%= inbox.total > 99 ? "99+" : inbox.total %>
+        </span>
+      <% end %>
+    </button>
+
+    <div
+      id="app-alerts-inbox-menu"
+      class="app-alerts-inbox__dropdown"
+      data-alerts-inbox-target="menu"
+      hidden
+    >
+      <% if inbox.items.any? %>
+        <div class="app-alerts-inbox__list">
+          <% inbox.items.each do |item| %>
+            <%= link_to(
+              item.path,
+              class: "app-alerts-inbox__item app-alerts-inbox__item--#{item.kind}"
+            ) do %>
+              <div class="app-alerts-inbox__heading">
+                <strong><%= item.title %></strong>
+
+                <% if item.category.present? %>
+                  <span class="app-alerts-inbox__pill">
+                    <%= item.category %>
+                  </span>
+                <% end %>
+              </div>
+
+              <span><%= item.hint %></span>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="app-alerts-inbox__empty">
+          No hay alertas pendientes.
+        </p>
+      <% end %>
+
+      <%= link_to(
+        "Ver panel de alertas",
+        alerts_path,
+        class: "app-alerts-inbox__footer"
+      ) %>
+    </div>
+  </div>
+<% end %>

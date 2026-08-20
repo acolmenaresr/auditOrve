@@ -3,6 +3,7 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = [
     "action",
+    "comment",
     "exceptionToggle",
     "exceptionFields",
     "exceptionReason",
@@ -12,12 +13,11 @@ export default class extends Controller {
   connect() {
     this.toggle()
     this.syncSubmitLabel()
+    this.syncSubmitState()
   }
 
   toggle() {
-    const enabled =
-      this.hasExceptionToggleTarget &&
-      this.exceptionToggleTarget.checked
+    const enabled = this.exceptionEnabled()
 
     if (this.hasExceptionFieldsTarget) {
       this.exceptionFieldsTarget.hidden = !enabled
@@ -31,6 +31,8 @@ export default class extends Controller {
         this.exceptionReasonTarget.value = ""
       }
     }
+
+    this.syncSubmitState()
   }
 
   syncSubmitLabel() {
@@ -42,6 +44,41 @@ export default class extends Controller {
       this.selectedAction() === "comentario" ?
         "Guardar comentario" :
         "Terminar alerta"
+  }
+
+  syncSubmitState() {
+    if (!this.hasSubmitTarget) {
+      return
+    }
+
+    this.submitTarget.disabled = !this.canSubmit()
+  }
+
+  canSubmit() {
+    if (!this.hasComment()) {
+      return false
+    }
+
+    if (!this.exceptionEnabled()) {
+      return true
+    }
+
+    return this.hasExceptionReason()
+  }
+
+  hasComment() {
+    return this.hasCommentTarget &&
+      this.commentTarget.value.trim().length > 0
+  }
+
+  hasExceptionReason() {
+    return this.hasExceptionReasonTarget &&
+      this.exceptionReasonTarget.value.trim().length > 0
+  }
+
+  exceptionEnabled() {
+    return this.hasExceptionToggleTarget &&
+      this.exceptionToggleTarget.checked
   }
 
   selectedAction() {

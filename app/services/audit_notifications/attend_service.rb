@@ -39,12 +39,26 @@ module AuditNotifications
       assignee = eligible_assignee
       return assignee if assignee.is_a?(Result)
 
+      previous_email =
+        @notification["asignadoA"].to_s.strip.downcase
+      new_email =
+        assignee.usuario.to_s.strip.downcase
+
       @notification.update_columns(
         "estado" => "en_revision",
         "asignadoA" => assignee.usuario.to_s,
         "requiereSeguimiento" => true,
         "updatedAt" => Time.current
       )
+
+      if previous_email == new_email
+        Rails.logger.info(
+          "[AssignedAlertPush] omitido: la alerta #{@notification.id} " \
+          "ya estaba asignada a #{new_email}"
+        )
+      else
+        notify_assignment(assignee)
+      end
 
       success
     end
@@ -146,6 +160,47 @@ module AuditNotifications
 
     def actor_email
       @actor.usuario.to_s
+    end
+
+    def notify_assignment(assignee)
+      deliver_assignment_push(assignee)
+      deliver_assignment_webhook(assignee)
+    end
+
+    def deliver_assignment_push(assignee)
+      result = Notifications::AssignedAlertPushService.new(
+        notification: @notification,
+        assignee: assignee
+      ).call
+
+      Rails.logger.info(
+        "[AssignedAlertPush] alerta=#{@notification.id} " \
+        "assignee=#{assignee.usuario} " \
+        "devices=#{result[:eligible_devices]} " \
+        "sent=#{result[:sent]} failed=#{result[:failed]}"
+      )
+
+      if result[:failed_devices].present?
+        Rails.logger.error(
+          "[AssignedAlertPush] fallos: #{result[:failed_devices].inspect}"
+        )
+      end
+    rescue StandardError => error
+      Rails.logger.error(
+        "[AssignedAlertPush] #{error.class}: #{error.message}"
+      )
+    end
+
+    def deliver_assignment_webhook(assignee)
+      Notifications::AssignedAlertWebhookService.new(
+        notification: @notification,
+        assignee: assignee,
+        actor: @actor
+      ).call
+    rescue StandardError => error
+      Rails.logger.error(
+        "[AssignedAlertWebhook] #{error.class}: #{error.message}"
+      )
     end
 
     def success

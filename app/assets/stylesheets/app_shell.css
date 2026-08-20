@@ -701,6 +701,294 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+
+  gap: 8px;
+}
+
+
+/* =========================================================
+   INBOX DE ALERTAS (CAMPANA)
+   ========================================================= */
+
+.app-alerts-inbox {
+  position: relative;
+}
+
+.app-alerts-inbox__trigger {
+  position: relative;
+
+  width: 44px;
+  height: 44px;
+
+  margin: 0;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid transparent;
+  border-radius: 50%;
+
+  background: transparent;
+
+  color: var(--text);
+
+  appearance: none;
+
+  cursor: pointer;
+
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.app-alerts-inbox__trigger:hover {
+  background: #f3f4f6;
+
+  border-color: #e5e7eb;
+}
+
+.app-alerts-inbox__trigger:active {
+  transform: scale(0.96);
+}
+
+.app-alerts-inbox__trigger:focus-visible {
+  outline: 2px solid var(--primary);
+
+  outline-offset: 2px;
+}
+
+.app-alerts-inbox.is-open .app-alerts-inbox__trigger {
+  background: #f3f4f6;
+
+  border-color: #e5e7eb;
+}
+
+.app-alerts-inbox__icon,
+.app-alerts-inbox__icon svg {
+  width: 20px;
+  height: 20px;
+
+  display: block;
+}
+
+.app-alerts-inbox__badge {
+  position: absolute;
+
+  top: 4px;
+  right: 4px;
+
+  min-width: 18px;
+  height: 18px;
+
+  padding: 0 5px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+
+  background: #dc2626;
+
+  color: #ffffff;
+
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.app-alerts-inbox__dropdown {
+  position: absolute;
+
+  top: calc(100% + 10px);
+  right: 0;
+
+  z-index: 600;
+
+  display: flex;
+  flex-direction: column;
+
+  width: 380px;
+  max-height: min(420px, calc(100vh - var(--app-topbar-height) - 24px));
+
+  padding: 8px;
+
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 22px 55px rgb(15 23 42 / 16%);
+}
+
+.app-alerts-inbox__dropdown[hidden] {
+  display: none !important;
+}
+
+.app-alerts-inbox__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  padding-right: 2px;
+}
+
+.app-alerts-inbox__item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  padding: 10px 12px;
+
+  border-radius: 12px;
+
+  text-decoration: none;
+}
+
+.app-alerts-inbox__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.app-alerts-inbox__item strong {
+  min-width: 0;
+
+  color: var(--text);
+
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.app-alerts-inbox__pill {
+  flex: 0 1 auto;
+
+  max-width: 46%;
+  padding: 3px 8px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: rgb(255 255 255 / 72%);
+
+  color: inherit;
+
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-alerts-inbox__item > span {
+  color: var(--muted);
+
+  font-size: 12px;
+  line-height: 1.35;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.app-alerts-inbox__item--assigned {
+  background: #e8eef9;
+  color: #294a7a;
+}
+
+.app-alerts-inbox__item--assigned:hover {
+  background: #dbe4f2;
+}
+
+.app-alerts-inbox__item--critica {
+  background: #fde8e8;
+  color: #b42318;
+}
+
+.app-alerts-inbox__item--critica:hover {
+  background: #f9d2d2;
+}
+
+.app-alerts-inbox__item--alta {
+  background: #ffead5;
+  color: #b54708;
+}
+
+.app-alerts-inbox__item--alta:hover {
+  background: #fbd9b8;
+}
+
+.app-alerts-inbox__item--media {
+  background: #fff2d9;
+  color: #92610a;
+}
+
+.app-alerts-inbox__item--media:hover {
+  background: #ffe6b3;
+}
+
+.app-alerts-inbox__item--baja {
+  background: #e8eef9;
+  color: #294a7a;
+}
+
+.app-alerts-inbox__item--baja:hover {
+  background: #dbe4f2;
+}
+
+.app-alerts-inbox__item--new {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.app-alerts-inbox__item--new:hover {
+  background: #dbeafe;
+}
+
+.app-alerts-inbox__empty {
+  margin: 0;
+  padding: 12px 10px 8px;
+
+  color: var(--muted);
+
+  font-size: 13px;
+}
+
+.app-alerts-inbox__footer {
+  display: block;
+
+  flex: 0 0 auto;
+
+  margin-top: 6px;
+  padding: 8px 10px 4px;
+
+  color: var(--primary);
+
+  font-size: 12px;
+  font-weight: 700;
+
+  text-align: center;
+  text-decoration: none;
+}
+
+.app-alerts-inbox__footer:hover {
+  text-decoration: underline;
 }
 
 
@@ -1143,6 +1431,18 @@
     font-size: 7px;
   }
 
+  .app-alerts-inbox__trigger {
+    width: 40px;
+    height: 40px;
+  }
+
+  .app-alerts-inbox__dropdown {
+    width: min(
+      380px,
+      calc(100vw - 24px)
+    );
+  }
+
   .app-user-menu__trigger {
     width: 40px;
     height: 40px;
@@ -1217,6 +1517,7 @@
     max-width: 150px;
   }
 
+  .app-alerts-inbox__dropdown,
   .app-user-menu__dropdown {
     width: min(
       270px,

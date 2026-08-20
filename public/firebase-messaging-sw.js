@@ -12,7 +12,7 @@ self.addEventListener(
       event.notification.data || {}
 
     const path =
-      data.path || "/dashboard"
+      data.path || "/alertas"
 
     const destination =
       new URL(
