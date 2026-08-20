@@ -128,6 +128,9 @@ class Users365Controller < ApplicationController
       AuditNotifications::DashboardQuery.new(
         from: @date_range.from,
         to: @date_range.to,
+        status: params[:alert_estado],
+        severity: params[:alert_severidad],
+        assignment: params[:alert_asignacion],
         user_principal_name:
           @user.user_principal_name,
         page: params[:alerts_page],
@@ -135,6 +138,9 @@ class Users365Controller < ApplicationController
       )
 
     @alert_metrics = alerts_query.metrics
+    @alert_status = alerts_query.status
+    @alert_severity = alerts_query.severity
+    @alert_assignment = alerts_query.assignment
     @alert_records = alerts_query.records
     @alerts_page = alerts_query.page
     @alerts_per_page = alerts_query.page_size

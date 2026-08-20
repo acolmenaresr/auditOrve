@@ -194,6 +194,34 @@ module ApplicationHelper
 
 
   # =========================================================
+  # USUARIO ANÓNIMO (ETIQUETA DE VISUALIZACIÓN)
+  # =========================================================
+
+  ANONYMOUS_USER_DISPLAY_LABEL = "Usuario anónimo".freeze
+
+  ANONYMOUS_USER_LABELS = [
+    "anonimo",
+    "anónimo",
+    "usuario anonimo",
+    "usuario anónimo"
+  ].freeze
+
+  def anonymous_audit_user?(value)
+    ANONYMOUS_USER_LABELS.include?(
+      value.to_s.squish.downcase
+    )
+  end
+
+  def audit_user_display_label(value)
+    text = value.to_s.squish
+    return "Sin usuario" if text.blank?
+    return ANONYMOUS_USER_DISPLAY_LABEL if anonymous_audit_user?(text)
+
+    text
+  end
+
+
+  # =========================================================
   # INBOX DE ALERTAS (CAMPANA)
   # =========================================================
 

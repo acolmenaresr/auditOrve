@@ -20,13 +20,60 @@ class DashboardController < ApplicationController
     @top_users = attach_user_profiles(
       dashboard[:top_users]
     )
-    @top_actions = dashboard[:top_actions]
-    @top_applications =
-      dashboard[:top_applications]
+    @top_actions = attach_action_links(
+      dashboard[:top_actions]
+    )
+
+    alert_rankings = AuditNotifications::RankingsQuery.new(
+      from: @date_range.from,
+      to: @date_range.to,
+      limit: @top_limit
+    ).call
+
+    @top_alert_users = attach_user_profiles(
+      alert_rankings[:top_alert_users]
+    )
+    @top_alert_types = attach_alert_type_links(
+      alert_rankings[:top_alert_types]
+    )
+
+    @alert_metrics = AuditNotifications::DashboardQuery.new(
+      from: @date_range.from,
+      to: @date_range.to,
+      page_size: 1
+    ).metrics
   end
 
 
   private
+
+
+  def attach_action_links(rows)
+    rows.map do |row|
+      row.merge(
+        url: audit_logs_path(
+          date_filter: @date_range.filter,
+          from: params[:from],
+          to: params[:to],
+          audit_action: row[:label]
+        )
+      )
+    end
+  end
+
+
+  def attach_alert_type_links(rows)
+    rows.map do |row|
+      row.merge(
+        url: alerts_path(
+          period: @date_range.filter,
+          from: params[:from],
+          to: params[:to],
+          motivo: row[:label]
+        )
+      )
+    end
+  end
 
 
   def attach_user_profiles(rows)

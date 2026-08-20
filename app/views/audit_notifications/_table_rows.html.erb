@@ -1,0 +1,103 @@
+<% records.each do |record| %>
+  <% audit_user_email = record["usuario"].to_s.strip %>
+  <% directory_user =
+    @directory_users_by_email[audit_user_email.downcase] %>
+  <% occurred_at = record.occurred_at %>
+
+  <tr>
+    <td class="audit-table__date">
+      <%= link_to alert_path(record, return_to: request.fullpath), class: "audit-alert-link" do %>
+        <span class="audit-table__date-short">
+          <%= alert_table_datetime(occurred_at) %>
+        </span>
+      <% end %>
+    </td>
+
+    <td>
+      <span class="audit-badge audit-badge--<%= record["severidad"].to_s.parameterize %>">
+        <%= alert_severity_label(record["severidad"]) %>
+      </span>
+    </td>
+
+    <td>
+      <span class="audit-badge audit-badge--<%= record["estado"].to_s.parameterize %>">
+        <%= alert_status_label(record["estado"]) %>
+      </span>
+    </td>
+
+    <td>
+      <%= link_to alert_path(record, return_to: request.fullpath), class: "audit-alert-link" do %>
+        <strong title="<%= record["tipoAlerta"] %>">
+          <%= alert_type_label(record["tipoAlerta"]) %>
+        </strong>
+      <% end %>
+    </td>
+
+    <td>
+      <% if directory_user.present? %>
+        <% user_name =
+          directory_user.display_name.presence ||
+          directory_user.user_principal_name.presence ||
+          "Usuario" %>
+
+        <%= link_to(
+          user365_path(
+            directory_user,
+            return_to: request.fullpath
+          ),
+          class: "audit-user-cell audit-user-cell--link",
+          aria: { label: "Ver dashboard de #{user_name}" }
+        ) do %>
+          <span class="audit-user-cell__avatar">
+            <%= user_name.first.upcase %>
+          </span>
+          <span class="audit-user-cell__content">
+            <strong>
+              <%= directory_user.display_name.presence || "Sin nombre" %>
+            </strong>
+            <small>
+              <%= directory_user.user_principal_name.presence ||
+                audit_user_email %>
+            </small>
+          </span>
+        <% end %>
+      <% else %>
+        <% display_user =
+          audit_user_display_label(audit_user_email) %>
+
+        <div class="audit-user-cell">
+          <span class="audit-user-cell__avatar">
+            <%= display_user.first.upcase %>
+          </span>
+          <span title="<%= display_user %>">
+            <%= display_user %>
+          </span>
+        </div>
+      <% end %>
+    </td>
+
+    <td>
+      <%= record["accion"].presence || "—" %>
+    </td>
+
+    <td class="audit-table__file">
+      <span title="<%= record["archivo"] %>">
+        <%= record["archivo"].presence || "—" %>
+      </span>
+    </td>
+
+    <td class="audit-table__motivo">
+      <%= record["motivo"].presence || "—" %>
+    </td>
+
+    <td class="audit-table__assign">
+      <%= render(
+        "audit_notifications/assign_select",
+        record: record,
+        can_assign: @can_assign_alerts,
+        assignable_users: @assignable_alert_users,
+        return_to: request.fullpath
+      ) %>
+    </td>
+  </tr>
+<% end %>

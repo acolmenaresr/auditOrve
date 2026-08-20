@@ -371,37 +371,23 @@
     </section>
 
 
-    <section class="users365-activity-metrics users365-activity-metrics--alerts">
-      <article class="users365-activity-metric">
-        <span>Alertas</span>
-        <strong><%= number_with_delimiter(@alert_metrics[:total]) %></strong>
-        <small>Total del periodo</small>
-      </article>
-
-      <article class="users365-activity-metric">
-        <span>Atendidas</span>
-        <strong><%= number_with_delimiter(@alert_metrics[:atendida]) %></strong>
-        <small>Resueltas</small>
-      </article>
-
-      <article class="users365-activity-metric">
-        <span>Críticas</span>
-        <strong><%= number_with_delimiter(@alert_metrics[:critica]) %></strong>
-        <small>Severidad máxima</small>
-      </article>
-
-      <article class="users365-activity-metric">
-        <span>Altas</span>
-        <strong><%= number_with_delimiter(@alert_metrics[:alta]) %></strong>
-        <small>Prioridad alta</small>
-      </article>
-
-      <article class="users365-activity-metric">
-        <span>Medias</span>
-        <strong><%= number_with_delimiter(@alert_metrics[:media]) %></strong>
-        <small>Prioridad media</small>
-      </article>
-    </section>
+    <%= render(
+      "shared/alert_metric_cards",
+      metrics: @alert_metrics,
+      total_caption: "Según filtros actuales",
+      total_url: user_alert_filter_path(alert_estado: nil, alert_severidad: nil, alert_asignacion: nil),
+      unassigned_url: user_alert_filter_path(alert_asignacion: "sin_asignar", alert_estado: nil),
+      in_progress_url: user_alert_filter_path(alert_estado: "en_trabajo"),
+      finished_url: user_alert_filter_path(alert_estado: "finalizadas"),
+      critica_url: user_alert_filter_path(alert_severidad: "critica"),
+      alta_url: user_alert_filter_path(alert_severidad: "alta"),
+      media_url: user_alert_filter_path(alert_severidad: "media"),
+      baja_url: user_alert_filter_path(alert_severidad: "baja"),
+      total_active: @alert_status.blank? && @alert_severity.blank? && @alert_assignment.blank?,
+      unassigned_active: @alert_assignment.to_s == "sin_asignar",
+      in_progress_active: @alert_status.to_s == "en_trabajo",
+      finished_active: @alert_status.to_s == "finalizadas"
+    ) %>
 
 
     <section class="audit-filters users365-activity__filters">

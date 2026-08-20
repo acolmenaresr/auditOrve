@@ -1,5 +1,7 @@
 module Notifications
   class AssignedAlertPushService
+    MOTIVE_LIMIT = 150
+
     def initialize(notification:, assignee:)
       @notification = notification
       @assignee = assignee
@@ -75,9 +77,8 @@ module Notifications
 
     def notification_body
       parts = [
-        @notification["clave"].presence,
-        alert_type_text,
-        @notification["motivo"].presence
+        alert_label,
+        alert_motive
       ].compact
 
       return "Ábrela en AuditORVE para atenderla." if parts.empty?
@@ -116,11 +117,25 @@ module Notifications
       @notification["severidad"].to_s
     end
 
-    def alert_type_text
-      value = @notification["tipoAlerta"].to_s.tr("_", " ").strip
-      return if value.blank?
+    def alert_label
+      humanize_label(
+        @notification["categoriaAlerta"].presence ||
+          @notification["tipoAlerta"]
+      )
+    end
 
-      value.downcase.capitalize
+    def alert_motive
+      motive = @notification["motivo"].to_s.squish
+      return if motive.blank?
+
+      motive.truncate(MOTIVE_LIMIT)
+    end
+
+    def humanize_label(value)
+      text = value.to_s.tr("_-", " ").squish
+      return if text.blank?
+
+      text.downcase.sub(/\S/, &:upcase)
     end
   end
 end
