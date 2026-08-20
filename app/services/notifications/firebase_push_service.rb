@@ -10,12 +10,31 @@ module Notifications
     FCM_SCOPE = "https://www.googleapis.com/auth/firebase.messaging"
 
     def initialize
-      @project_id = ENV.fetch("FIREBASE_PROJECT_ID")
-      @service_account_base64 =
-        ENV.fetch("FIREBASE_SERVICE_ACCOUNT_BASE64")
+      @project_id = firebase_config(
+        :project_id,
+        "FIREBASE_PROJECT_ID"
+      )
+      @service_account_base64 = firebase_config(
+        :service_account_base64,
+        "FIREBASE_SERVICE_ACCOUNT_BASE64"
+      )
+
+      if @project_id.blank?
+        raise KeyError, "Falta FIREBASE_PROJECT_ID (ENV o credentials.firebase.project_id)"
+      end
+
+      if @service_account_base64.blank?
+        raise KeyError, "Falta FIREBASE_SERVICE_ACCOUNT_BASE64 (ENV o credentials.firebase.service_account_base64)"
+      end
     end
 
-    def send_to_token(token:, title:, body:, data: {})
+    def send_to_token(
+      token:,
+      title:,
+      body:,
+      data: {},
+      tag: "auditorve-alert-summary"
+    )
       raise ArgumentError, "FCM token requerido" if token.blank?
       raise ArgumentError, "Título requerido" if title.blank?
       raise ArgumentError, "Body requerido" if body.blank?
@@ -32,7 +51,32 @@ module Notifications
       request["Content-Type"] =
         "application/json"
 
-      string_data = stringify_data(data)
+      string_data = stringify_data(
+        data.merge(tag: tag)
+      )
+
+      webpush = {
+        notification: {
+          title: title,
+          body: body,
+
+          icon: "/auditorve-favicon-v3.png",
+          badge: "/auditorve-favicon-v3.png",
+
+          tag: tag,
+
+          renotify: true,
+          requireInteraction: true,
+
+          data: string_data
+        }
+      }
+
+      if string_data["link"].present?
+        webpush[:fcm_options] = {
+          link: string_data["link"]
+        }
+      end
 
       request.body = {
         message: {
@@ -45,22 +89,7 @@ module Notifications
 
           data: string_data,
 
-          webpush: {
-            notification: {
-              title: title,
-              body: body,
-
-              icon: "/auditorve-favicon-v3.png",
-              badge: "/auditorve-favicon-v3.png",
-
-              tag: "auditorve-alert-summary",
-
-              renotify: true,
-              requireInteraction: true,
-
-              data: string_data
-            }
-          }
+          webpush: webpush
         }
       }.to_json
 
@@ -115,6 +144,11 @@ module Notifications
       data.transform_values do |value|
         value.nil? ? "" : value.to_s
       end
+    end
+
+    def firebase_config(credential_key, env_key)
+      ENV[env_key].to_s.strip.presence ||
+        Rails.application.credentials.dig(:firebase, credential_key).to_s.strip.presence
     end
   end
 end

@@ -2248,6 +2248,10 @@ a.metric-card--link.is-active {
   gap: 7px;
 }
 
+.alert-detail__field[hidden] {
+  display: none !important;
+}
+
 .alert-detail__field label {
   color: var(--muted);
   font-size: 13px;

@@ -191,4 +191,30 @@ module ApplicationHelper
     user_type&.label.presence ||
       "Tipo #{user_type_id}"
   end
+
+
+  # =========================================================
+  # INBOX DE ALERTAS (CAMPANA)
+  # =========================================================
+
+  def alerts_inbox
+    return @alerts_inbox if defined?(@alerts_inbox)
+
+    unless authenticated? &&
+        current_permissions.can_access_events?
+      return @alerts_inbox = nil
+    end
+
+    @alerts_inbox =
+      AuditNotifications::InboxSummary.new(
+        viewer: current_user,
+        restrict_to_queue: current_permissions.event_auditor?
+      ).call
+  rescue StandardError => error
+    Rails.logger.error(
+      "[AlertsInbox] #{error.class}: #{error.message}"
+    )
+
+    @alerts_inbox = nil
+  end
 end

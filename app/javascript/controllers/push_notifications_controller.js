@@ -348,6 +348,7 @@ export default class extends Controller {
               // Todas las notificaciones resumen utilizan
               // el mismo tag.
               tag:
+                data.tag ||
                 "auditorve-alert-summary",
 
               // Si ya existe una notificación con el mismo tag,

@@ -68,6 +68,7 @@ module Api
         path = params[:path].to_s.strip
 
         return "/alertas" if path.blank?
+        return "/alertas" if path == "dashboard" || path == "/dashboard"
 
         path.start_with?("/") ? path : "/alertas"
       end
