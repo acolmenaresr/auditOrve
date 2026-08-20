@@ -53,7 +53,7 @@
               ) %>
               <small><%= email %></small>
             <% else %>
-              <%= email.presence || "Sin usuario" %>
+              <%= audit_user_display_label(email) %>
             <% end %>
           </dd>
         </div>

@@ -388,15 +388,17 @@
 
                   <% else %>
 
+                    <% display_user =
+                      audit_user_display_label(audit_user_email) %>
 
                     <div class="audit-user-cell">
 
                       <span class="audit-user-cell__avatar">
-                        <%= audit_user_email.first&.upcase || "?" %>
+                        <%= display_user.first.upcase %>
                       </span>
 
-                      <span title="<%= audit_user_email %>">
-                        <%= audit_user_email.presence || "Sin usuario" %>
+                      <span title="<%= display_user %>">
+                        <%= display_user %>
                       </span>
 
                     </div>

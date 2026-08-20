@@ -3,6 +3,31 @@
 // Debe declararse antes de cargar Firebase Messaging.
 // ============================================================
 
+function resolveNotificationPath(data) {
+  const payload = data || {}
+
+  if (payload.path) {
+    return payload.path
+  }
+
+  if (payload.alert_id) {
+    return `/alertas/${payload.alert_id}`
+  }
+
+  if (payload.link) {
+    try {
+      return new URL(
+        payload.link,
+        self.location.origin
+      ).pathname
+    } catch (_error) {
+      // ignore invalid absolute links
+    }
+  }
+
+  return "/alertas"
+}
+
 self.addEventListener(
   "notificationclick",
   (event) => {
@@ -12,7 +37,7 @@ self.addEventListener(
       event.notification.data || {}
 
     const path =
-      data.path || "/alertas"
+      resolveNotificationPath(data)
 
     const destination =
       new URL(

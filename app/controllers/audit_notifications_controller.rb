@@ -16,23 +16,36 @@ class AuditNotificationsController < ApplicationController
       status: params[:estado],
       severity: params[:severidad],
       assignment: params[:asignacion],
+      motive: params[:motivo],
       viewer: current_user,
       restrict_to_queue: current_permissions.event_auditor?,
       page: params[:page],
+      closed_page: params[:page_finalizadas],
       page_size: params[:per_page]
     )
 
     @metrics = query.metrics
-    @records = query.records
+    @open_records = query.open_records
+    @closed_records = query.closed_records
+    @show_open_table = query.show_open_table?
+    @show_closed_table = query.show_closed_table?
     @status = query.status
     @severity = query.severity
     @assignment = query.assignment
+    @motive = query.motive
+    @motive_options = query.motive_options
     @page = query.page
+    @closed_page = query.closed_page
     @per_page = query.page_size
+    @open_total_count = query.open_total_count
+    @closed_total_count = query.closed_total_count
+    @open_total_pages = query.open_total_pages
+    @closed_total_pages = query.closed_total_pages
     @total_count = query.total_count
-    @total_pages = query.total_pages
     @directory_users_by_email =
-      directory_users_by_email(@records)
+      directory_users_by_email(
+        Array(@open_records) + Array(@closed_records)
+      )
     @can_assign_alerts = current_permissions.can_assign_alerts?
     @assignable_alert_users =
       current_permissions.assignable_alert_users

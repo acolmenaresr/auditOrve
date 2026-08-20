@@ -147,21 +147,44 @@
     </article>
   </section>
 
+  <%= render(
+    "shared/alert_metric_cards",
+    metrics: @alert_metrics,
+    total_url: alerts_path(period: @date_range.filter),
+    unassigned_url: alerts_path(period: @date_range.filter, asignacion: "sin_asignar"),
+    in_progress_url: alerts_path(period: @date_range.filter, estado: "en_trabajo"),
+    finished_url: alerts_path(period: @date_range.filter, estado: "finalizadas"),
+    critica_url: alerts_path(period: @date_range.filter, severidad: "critica"),
+    alta_url: alerts_path(period: @date_range.filter, severidad: "alta"),
+    media_url: alerts_path(period: @date_range.filter, severidad: "media"),
+    baja_url: alerts_path(period: @date_range.filter, severidad: "baja")
+  ) %>
+
   <section class="ranking-grid">
     <%= render "ranking",
       title: "Top usuarios",
       column_title: "Usuario",
+      value_title: "Eventos",
       rows: @top_users,
       user_ranking: true %>
 
     <%= render "ranking",
       title: "Top acciones",
       column_title: "Acción",
+      value_title: "Eventos",
       rows: @top_actions %>
 
     <%= render "ranking",
-      title: "Top aplicaciones",
-      column_title: "Aplicación",
-      rows: @top_applications %>
+      title: "Top Usuarios Alerta",
+      column_title: "Usuario",
+      value_title: "Alertas",
+      rows: @top_alert_users,
+      user_ranking: true %>
+
+    <%= render "ranking",
+      title: "Top Tipo Alerta",
+      column_title: "Motivo",
+      value_title: "Alertas",
+      rows: @top_alert_types %>
   </section>
 </div>

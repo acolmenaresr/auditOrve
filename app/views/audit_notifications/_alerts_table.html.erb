@@ -1,0 +1,89 @@
+<section class="audit-table-card">
+  <div class="audit-summary">
+    <div>
+      <strong class="audit-table-card__title"><%= title %></strong>
+      <span>
+        <%= number_with_delimiter(total_count) %> alertas
+      </span>
+    </div>
+  </div>
+
+  <div class="audit-table-wrapper">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Severidad</th>
+          <th>Estado</th>
+          <th>Tipo de alerta</th>
+          <th>Usuario</th>
+          <th>Acción</th>
+          <th>Archivo</th>
+          <th>Motivo</th>
+          <th>Asignado a</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if records.any? %>
+          <%= render(
+            "audit_notifications/table_rows",
+            records: records
+          ) %>
+        <% else %>
+          <tr>
+            <td colspan="9" class="audit-table__empty">
+              <div>
+                <strong>No hay alertas para el filtro seleccionado.</strong>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if total_count.positive? && total_pages > 1 %>
+    <footer class="audit-pagination">
+      <div>
+        Página
+        <strong><%= page %></strong>
+        de
+        <strong><%= total_pages %></strong>
+      </div>
+
+      <nav
+        class="audit-pagination__controls"
+        aria-label="Paginación de <%= title %>"
+      >
+        <% preserved_params =
+          request.query_parameters.except(page_param.to_s) %>
+
+        <% if page > 1 %>
+          <%= link_to(
+            "← Anterior",
+            alerts_path(preserved_params.merge(page_param => page - 1)),
+            class: "audit-pagination__button"
+          ) %>
+        <% else %>
+          <span class="audit-pagination__button is-disabled">
+            ← Anterior
+          </span>
+        <% end %>
+
+        <span class="audit-pagination__current"><%= page %></span>
+
+        <% if page < total_pages %>
+          <%= link_to(
+            "Siguiente →",
+            alerts_path(preserved_params.merge(page_param => page + 1)),
+            class: "audit-pagination__button"
+          ) %>
+        <% else %>
+          <span class="audit-pagination__button is-disabled">
+            Siguiente →
+          </span>
+        <% end %>
+      </nav>
+    </footer>
+  <% end %>
+</section>

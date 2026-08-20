@@ -6,128 +6,30 @@
     <strong><%= l(@date_range.to - 1.day, format: :long) %></strong>
   </section>
 
-  <section class="metric-grid metric-grid--alerts">
-    <%= link_to(
-      alert_filter_path(estado: nil, severidad: nil),
-      class: alert_metric_card_class(:all, nil)
-    ) do %>
-      <article>
-        <span class="metric-card__label">Notificaciones</span>
-        <strong class="metric-card__value">
-          <%= number_with_delimiter(@metrics[:total]) %>
-        </strong>
-        <small>Total del periodo</small>
-      </article>
-    <% end %>
-
-    <%= link_to(
-      alert_filter_path(estado: "pendiente"),
-      class: alert_metric_card_class(:estado, "pendiente")
-    ) do %>
-      <article>
-        <span class="metric-card__label">Pendientes</span>
-        <strong class="metric-card__value">
-          <%= number_with_delimiter(@metrics[:pendiente]) %>
-        </strong>
-        <small>Sin asignar</small>
-      </article>
-    <% end %>
-
-    <%= link_to(
-      alert_filter_path(estado: "en_trabajo"),
-      class: alert_metric_card_class(:estado, "en_trabajo")
-    ) do %>
-      <article>
-        <span class="metric-card__label">En trabajo</span>
-        <strong class="metric-card__value">
-          <%= number_with_delimiter(@metrics[:en_trabajo]) %>
-        </strong>
-        <small>Asignadas o en revisión</small>
-      </article>
-    <% end %>
-
-    <%= link_to(
-      alert_filter_path(estado: "resuelta"),
-      class: alert_metric_card_class(:estado, "resuelta")
-    ) do %>
-      <article>
-        <span class="metric-card__label">Atendidas</span>
-        <strong class="metric-card__value">
-          <%= number_with_delimiter(@metrics[:atendida]) %>
-        </strong>
-        <small>Resueltas</small>
-      </article>
-    <% end %>
-  </section>
-
-  <section class="metric-grid metric-grid--alerts">
-    <%= link_to(
-      alert_filter_path(severidad: "critica"),
-      class: alert_metric_card_class(:severidad, "critica")
-    ) do %>
-      <article>
-        <span class="metric-card__label">Críticas</span>
-        <strong class="metric-card__value">
-          <%= number_with_delimiter(@metrics[:critica]) %>
-        </strong>
-        <small>
-          <%= percentage(@metrics[:critica], @metrics[:total]) %>
-        </small>
-      </article>
-    <% end %>
-
-    <%= link_to(
-      alert_filter_path(severidad: "alta"),
-      class: alert_metric_card_class(:severidad, "alta")
-    ) do %>
-      <article>
-        <span class="metric-card__label">Altas</span>
-        <strong class="metric-card__value">
-          <%= number_with_delimiter(@metrics[:alta]) %>
-        </strong>
-        <small>
-          <%= percentage(@metrics[:alta], @metrics[:total]) %>
-        </small>
-      </article>
-    <% end %>
-
-    <%= link_to(
-      alert_filter_path(severidad: "media"),
-      class: alert_metric_card_class(:severidad, "media")
-    ) do %>
-      <article>
-        <span class="metric-card__label">Medias</span>
-        <strong class="metric-card__value">
-          <%= number_with_delimiter(@metrics[:media]) %>
-        </strong>
-        <small>
-          <%= percentage(@metrics[:media], @metrics[:total]) %>
-        </small>
-      </article>
-    <% end %>
-
-    <%= link_to(
-      alert_filter_path(severidad: "baja"),
-      class: alert_metric_card_class(:severidad, "baja")
-    ) do %>
-      <article>
-        <span class="metric-card__label">Bajas</span>
-        <strong class="metric-card__value">
-          <%= number_with_delimiter(@metrics[:baja]) %>
-        </strong>
-        <small>
-          <%= percentage(@metrics[:baja], @metrics[:total]) %>
-        </small>
-      </article>
-    <% end %>
-  </section>
+  <%= render(
+    "shared/alert_metric_cards",
+    metrics: @metrics,
+    total_caption: "Según filtros actuales",
+    total_url: alert_filter_path(estado: nil, severidad: nil, asignacion: @assignment),
+    unassigned_url: alert_filter_path(asignacion: "sin_asignar", estado: nil),
+    in_progress_url: alert_filter_path(estado: "en_trabajo"),
+    finished_url: alert_filter_path(estado: "finalizadas"),
+    critica_url: alert_filter_path(severidad: "critica"),
+    alta_url: alert_filter_path(severidad: "alta"),
+    media_url: alert_filter_path(severidad: "media"),
+    baja_url: alert_filter_path(severidad: "baja"),
+    total_active: @status.blank? && @severity.blank? && @assignment.blank?,
+    unassigned_active: @assignment.to_s == "sin_asignar",
+    in_progress_active: @status.to_s == "en_trabajo",
+    finished_active: @status.to_s == "finalizadas"
+  ) %>
 
   <section class="audit-filters">
     <%= form_with(
       url: alerts_path,
       method: :get,
       local: true,
-      class: "audit-filters__form",
+      class: "audit-filters__form audit-filters__form--alerts",
       id: "alerts-filters-form"
     ) do |form| %>
       <div class="audit-filter-field">
@@ -204,10 +106,12 @@
           options_for_select(
             [
               [ "Todos", "" ],
+              [ "Activas", "activas" ],
               [ "Pendiente", "pendiente" ],
               [ "En trabajo", "en_trabajo" ],
               [ "Asignada", "asignada" ],
               [ "En revisión", "en_revision" ],
+              [ "Finalizadas", "finalizadas" ],
               [ "Atendida", "resuelta" ],
               [ "Descartada", "descartada" ]
             ],
@@ -233,6 +137,25 @@
         ) %>
       </div>
 
+      <div class="audit-filter-field audit-filter-field--motive">
+        <%= form.label :motivo, "Motivo" %>
+        <%= form.select(
+          :motivo,
+          options_for_select(
+            [ [ "Todos", "" ] ] +
+              @motive_options.map { |value|
+                [ alert_motive_filter_label(value), value ]
+              },
+            @motive
+          ),
+          {},
+          {
+            class: "js-searchable-select",
+            data: { placeholder: "Todos los motivos" }
+          }
+        ) %>
+      </div>
+
       <div class="filter-actions">
         <%= form.submit "Aplicar", class: "button button--primary" %>
         <%= link_to "Limpiar", alerts_path, class: "button button--secondary" %>
@@ -240,188 +163,29 @@
     <% end %>
   </section>
 
-  <section class="audit-table-card">
-    <div class="audit-summary">
-      <div>
-        <strong><%= number_with_delimiter(@total_count) %></strong>
-        <span>alertas en la tabla</span>
-      </div>
-    </div>
+  <% if @show_open_table %>
+    <%= render(
+      "audit_notifications/alerts_table",
+      title: "Pendientes",
+      records: @open_records,
+      total_count: @open_total_count,
+      page: @page,
+      total_pages: @open_total_pages,
+      page_param: :page
+    ) %>
+  <% end %>
 
-    <div class="audit-table-wrapper">
-      <table class="audit-table">
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Severidad</th>
-            <th>Estado</th>
-            <th>Tipo de alerta</th>
-            <th>Usuario</th>
-            <th>Acción</th>
-            <th>Archivo</th>
-            <th>Motivo</th>
-            <th>Asignado a</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if @records.any? %>
-            <% @records.each do |record| %>
-              <% audit_user_email = record["usuario"].to_s.strip %>
-              <% directory_user =
-                @directory_users_by_email[audit_user_email.downcase] %>
-              <% occurred_at = record.occurred_at %>
-
-              <tr>
-                <td class="audit-table__date">
-                  <%= link_to alert_path(record, return_to: request.fullpath), class: "audit-alert-link" do %>
-                    <span class="audit-table__date-short">
-                      <%= alert_table_datetime(occurred_at) %>
-                    </span>
-                  <% end %>
-                </td>
-
-                <td>
-                  <span class="audit-badge audit-badge--<%= record["severidad"].to_s.parameterize %>">
-                    <%= alert_severity_label(record["severidad"]) %>
-                  </span>
-                </td>
-
-                <td>
-                  <span class="audit-badge audit-badge--<%= record["estado"].to_s.parameterize %>">
-                    <%= alert_status_label(record["estado"]) %>
-                  </span>
-                </td>
-
-                <td>
-                  <%= link_to alert_path(record, return_to: request.fullpath), class: "audit-alert-link" do %>
-                    <strong title="<%= record["tipoAlerta"] %>">
-                      <%= alert_type_label(record["tipoAlerta"]) %>
-                    </strong>
-                  <% end %>
-                </td>
-
-                <td>
-                  <% if directory_user.present? %>
-                    <% user_name =
-                      directory_user.display_name.presence ||
-                      directory_user.user_principal_name.presence ||
-                      "Usuario" %>
-
-                    <%= link_to(
-                      user365_path(
-                        directory_user,
-                        return_to: request.fullpath
-                      ),
-                      class: "audit-user-cell audit-user-cell--link",
-                      aria: { label: "Ver dashboard de #{user_name}" }
-                    ) do %>
-                      <span class="audit-user-cell__avatar">
-                        <%= user_name.first.upcase %>
-                      </span>
-                      <span class="audit-user-cell__content">
-                        <strong>
-                          <%= directory_user.display_name.presence || "Sin nombre" %>
-                        </strong>
-                        <small>
-                          <%= directory_user.user_principal_name.presence ||
-                            audit_user_email %>
-                        </small>
-                      </span>
-                    <% end %>
-                  <% else %>
-                    <div class="audit-user-cell">
-                      <span class="audit-user-cell__avatar">
-                        <%= audit_user_email.first&.upcase || "?" %>
-                      </span>
-                      <span title="<%= audit_user_email %>">
-                        <%= audit_user_email.presence || "Sin usuario" %>
-                      </span>
-                    </div>
-                  <% end %>
-                </td>
-
-                <td>
-                  <%= record["accion"].presence || "—" %>
-                </td>
-
-                <td class="audit-table__file">
-                  <span title="<%= record["archivo"] %>">
-                    <%= record["archivo"].presence || "—" %>
-                  </span>
-                </td>
-
-                <td class="audit-table__motivo">
-                  <%= record["motivo"].presence || "—" %>
-                </td>
-
-                <td class="audit-table__assign">
-                  <%= render(
-                    "audit_notifications/assign_select",
-                    record: record,
-                    can_assign: @can_assign_alerts,
-                    assignable_users: @assignable_alert_users,
-                    return_to: request.fullpath
-                  ) %>
-                </td>
-              </tr>
-            <% end %>
-          <% else %>
-            <tr>
-              <td colspan="9" class="audit-table__empty">
-                <div>
-                  <strong>No hay alertas para el filtro seleccionado.</strong>
-                </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-
-    <% if @total_count.positive? %>
-      <footer class="audit-pagination">
-        <div>
-          Página
-          <strong><%= @page %></strong>
-          de
-          <strong><%= @total_pages %></strong>
-        </div>
-
-        <nav
-          class="audit-pagination__controls"
-          aria-label="Paginación de alertas"
-        >
-          <% preserved_params = request.query_parameters.except("page") %>
-
-          <% if @page > 1 %>
-            <%= link_to(
-              "← Anterior",
-              alerts_path(preserved_params.merge(page: @page - 1)),
-              class: "audit-pagination__button"
-            ) %>
-          <% else %>
-            <span class="audit-pagination__button is-disabled">
-              ← Anterior
-            </span>
-          <% end %>
-
-          <span class="audit-pagination__current"><%= @page %></span>
-
-          <% if @page < @total_pages %>
-            <%= link_to(
-              "Siguiente →",
-              alerts_path(preserved_params.merge(page: @page + 1)),
-              class: "audit-pagination__button"
-            ) %>
-          <% else %>
-            <span class="audit-pagination__button is-disabled">
-              Siguiente →
-            </span>
-          <% end %>
-        </nav>
-      </footer>
-    <% end %>
-  </section>
+  <% if @show_closed_table %>
+    <%= render(
+      "audit_notifications/alerts_table",
+      title: "Finalizadas",
+      records: @closed_records,
+      total_count: @closed_total_count,
+      page: @closed_page,
+      total_pages: @closed_total_pages,
+      page_param: :page_finalizadas
+    ) %>
+  <% end %>
 </div>
 
 <script>
