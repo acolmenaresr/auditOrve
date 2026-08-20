@@ -1,10 +1,6 @@
 <div class="dashboard alert-detail">
   <header class="dashboard__header alert-detail__header">
     <div>
-      <p class="dashboard__eyebrow">
-        Alerta
-        <%= @notification["clave"] %>
-      </p>
       <h1>
         <%= alert_type_label(@notification["tipoAlerta"]) %>
       </h1>
@@ -128,7 +124,11 @@
               params[:comment],
               required: true,
               rows: 4,
-              placeholder: "Describe el seguimiento o cómo se atendió la alerta."
+              placeholder: "Describe el seguimiento o cómo se atendió la alerta.",
+              data: {
+                action: "input->alert-resolution#syncSubmitState",
+                "alert-resolution-target": "comment"
+              }
             ) %>
           </div>
 
@@ -160,7 +160,10 @@
               rows: 3,
               placeholder: "Explica por qué este movimiento queda exento.",
               disabled: true,
-              data: { "alert-resolution-target": "exceptionReason" }
+              data: {
+                action: "input->alert-resolution#syncSubmitState",
+                "alert-resolution-target": "exceptionReason"
+              }
             ) %>
           </div>
 
@@ -186,6 +189,7 @@
             <%= submit_tag(
               "Guardar comentario",
               class: "button button--primary",
+              disabled: params[:comment].to_s.strip.blank?,
               data: { "alert-resolution-target": "submit" }
             ) %>
           </div>

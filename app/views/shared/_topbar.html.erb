@@ -1,6 +1,5 @@
 <header
   class="app-topbar"
-  data-controller="user-menu"
 >
   <div class="app-topbar__left">
     <%= link_to(root_path, class: "app-topbar__brand", aria: { label: "AuditORVE" }) do %>
@@ -31,7 +30,12 @@
 
 
   <div class="app-topbar__right">
-    <div class="app-user-menu">
+    <%= render "shared/alerts_inbox" %>
+
+    <div
+      class="app-user-menu"
+      data-controller="user-menu"
+    >
 
       <%# =====================================================
           TRIGGER

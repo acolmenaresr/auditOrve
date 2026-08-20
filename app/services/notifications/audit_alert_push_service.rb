@@ -16,7 +16,7 @@ module Notifications
       @high = high.to_i
       @medium = medium.to_i
       @low = low.to_i
-      @path = path.presence || "/dashboard"
+      @path = path.presence || "/alertas"
     end
 
     def call
@@ -168,8 +168,18 @@ module Notifications
         high: @high,
         medium: @medium,
         low: @low,
-        path: @path
-      }
+        path: @path,
+        tag: "auditorve-alert-summary"
+      }.tap do |payload|
+        payload[:link] = summary_link if summary_link.present?
+      end
+    end
+
+    def summary_link
+      origin = ENV["AUDITORVE_PUBLIC_URL"].to_s.strip.presence
+      return if origin.blank?
+
+      "#{origin.chomp('/')}#{@path}"
     end
 
     # =========================================================
